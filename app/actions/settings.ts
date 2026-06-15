@@ -138,6 +138,7 @@ function parseSectionUpdates(
         content_alignment: (["left", "center", "right"].includes(String(formData.get("content_alignment")))
           ? String(formData.get("content_alignment"))
           : existing.content_alignment) as import("@/lib/types/settings").ContentAlignment,
+        layout_label: String(formData.get("layout_label") ?? existing.layout_label).slice(0, 64),
       };
     case "links":
       return {

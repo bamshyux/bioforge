@@ -71,6 +71,7 @@ export const DEFAULT_SETTINGS: Omit<
   enter_gate_subtitle: "",
   enter_gate_button: "Click to enter",
   enter_gate_show_avatar: true,
+  layout_label: "",
 };
 
 export const CONTENT_ALIGNMENT_OPTIONS: { value: ContentAlignment; label: string }[] = [
@@ -280,6 +281,7 @@ export function mergeSettings(
     enter_gate_subtitle: row?.enter_gate_subtitle ?? DEFAULT_SETTINGS.enter_gate_subtitle,
     enter_gate_button: row?.enter_gate_button ?? DEFAULT_SETTINGS.enter_gate_button,
     enter_gate_show_avatar: row?.enter_gate_show_avatar ?? DEFAULT_SETTINGS.enter_gate_show_avatar,
+    layout_label: row?.layout_label ?? DEFAULT_SETTINGS.layout_label,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };

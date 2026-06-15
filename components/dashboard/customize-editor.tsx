@@ -3,7 +3,12 @@
 import { useActionState, useEffect, useState } from "react";
 import { updateSettingsAction } from "@/app/actions/settings";
 import { FONT_OPTIONS, LINK_ANIMATION_OPTIONS, CONTENT_ALIGNMENT_OPTIONS } from "@/lib/settings";
-import type { ContentAlignment, LinkAnimation, ProfileSettings, SettingsFormState } from "@/lib/types/settings";
+import {
+  getLayoutLabelHint,
+  getLayoutLabelPlaceholder,
+  layoutSupportsCustomLabel,
+} from "@/lib/layout-labels";
+import type { ContentAlignment, LinkAnimation, ProfileLayout, ProfileSettings, SettingsFormState } from "@/lib/types/settings";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
   buttonPrimaryClassName,
@@ -87,6 +92,24 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
             </div>
             <input type="hidden" name="content_alignment" value={contentAlignment} />
           </div>
+
+          {layoutSupportsCustomLabel(settings.layout) && (
+            <div>
+              <label htmlFor="layout_label" className={labelClassName}>Layout label</label>
+              <input
+                id="layout_label"
+                name="layout_label"
+                type="text"
+                defaultValue={settings.layout_label}
+                placeholder={getLayoutLabelPlaceholder(settings.layout as ProfileLayout)}
+                maxLength={64}
+                className={inputClassName}
+              />
+              <p className="mt-1.5 text-xs text-neutral-600">
+                {getLayoutLabelHint(settings.layout as ProfileLayout)}
+              </p>
+            </div>
+          )}
 
           <div className="grid gap-5 sm:grid-cols-3">
             <SliderField name="border_radius" label="Corner radius" min={0} max={48} defaultValue={settings.border_radius} unit="px" />

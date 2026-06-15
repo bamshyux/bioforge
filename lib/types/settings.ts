@@ -154,6 +154,7 @@ export type ProfileSettings = {
   enter_gate_subtitle: string;
   enter_gate_button: string;
   enter_gate_show_avatar: boolean;
+  layout_label: string;
   created_at: string;
   updated_at: string;
 };

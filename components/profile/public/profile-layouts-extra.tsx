@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeRow } from "@/components/badges/badge-ui";
+import { resolveLayoutLabel } from "@/lib/layout-labels";
 import { TypingBio } from "./profile-effects";
 import {
   ProfileAvatar,
@@ -20,6 +21,7 @@ function VaporwaveLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
     <div className="bf-layout-vaporwave w-full overflow-hidden" style={buildCardStyle(settings)}>
@@ -29,7 +31,7 @@ function VaporwaveLayout(props: LayoutProps) {
           background: `linear-gradient(180deg, ${settings.accent_color}22 0%, transparent 55%), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 40px)`,
         }}
       >
-        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#ff71ce]">Ａｅｓｔｈｅｔｉｃ</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#ff71ce]">{label}</p>
         <div className="-skew-x-6 mt-3 bf-profile-name-row">
           <h1 className="text-4xl font-black italic tracking-tight text-white sm:text-5xl">{displayName}</h1>
           <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
@@ -101,26 +103,29 @@ function TicketLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
-    <div className="mx-auto w-full max-w-md overflow-hidden" style={buildCardStyle(settings)}>
-      <div className="flex">
-        <div className="flex flex-1 flex-col p-6">
-          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Admit One</p>
-          <h1 className="mt-2 text-2xl font-bold text-white">{displayName}</h1>
-          <ProfileHandle profile={profile} className="mt-1" />
-          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
-          <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="mb-0 mt-4" />
-        </div>
-        <div className="relative w-16 shrink-0 border-l border-dashed border-white/20 bg-[#0f0f0f]">
-          <div className="absolute -left-2 top-6 h-4 w-4 rounded-full bg-[#090909]" />
-          <div className="absolute -left-2 bottom-6 h-4 w-4 rounded-full bg-[#090909]" />
-          <div className="flex h-full rotate-180 items-center justify-center [writing-mode:vertical-rl]">
-            <span className="text-[9px] font-mono tracking-widest text-neutral-600">#{profile.uid ?? "0000"}</span>
+    <div className="mx-auto w-full max-w-lg overflow-hidden" style={buildCardStyle(settings)}>
+      <div className="flex items-stretch border-b border-dashed border-white/15">
+        <div className="min-w-0 flex-1 px-5 py-4">
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-neutral-500">{label}</p>
+          <div className="bf-profile-name-row mt-1">
+            <h1 className="text-xl font-bold text-white sm:text-2xl">{displayName}</h1>
+            <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
           </div>
+          <ProfileHandle profile={profile} className="mt-0.5" />
+          <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="mb-0 mt-2" />
+        </div>
+        <div className="relative flex w-11 shrink-0 items-center justify-center border-l border-dashed border-white/20 bg-black/25 px-1">
+          <div className="absolute -left-2 top-3 h-4 w-4 rounded-full bg-[#090909]" />
+          <div className="absolute -left-2 bottom-3 h-4 w-4 rounded-full bg-[#090909]" />
+          <span className="text-[8px] font-mono tracking-widest text-neutral-600 [writing-mode:vertical-rl] rotate-180">
+            #{profile.uid ?? "0000"}
+          </span>
         </div>
       </div>
-      <div className="border-t border-dashed border-white/15 px-6 py-5">
+      <div className="px-5 py-4">
         <ProfileMainContent {...props} hideBio />
       </div>
     </div>
@@ -131,6 +136,8 @@ function VinylLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
+  const coverRadius = Math.max(settings.border_radius, 8);
   const coverStyle = profile.banner_url
     ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center" }
     : { background: `linear-gradient(135deg, ${settings.gradient_colors.join(", ")})` };
@@ -138,7 +145,10 @@ function VinylLayout(props: LayoutProps) {
   return (
     <div className="w-full p-6" style={buildCardStyle(settings)}>
       <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="relative mx-auto aspect-square w-full max-w-[220px] shrink-0 sm:mx-0" style={coverStyle}>
+        <div
+          className="relative mx-auto aspect-square w-full max-w-[220px] shrink-0 overflow-hidden sm:mx-0"
+          style={{ ...coverStyle, borderRadius: coverRadius }}
+        >
           <div className="absolute inset-0 bg-black/20" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="h-16 w-16 rounded-full border-4 border-black/30 bg-black/40 backdrop-blur-sm" />
@@ -148,7 +158,7 @@ function VinylLayout(props: LayoutProps) {
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-500">Side A</p>
+          <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-500">{label}</p>
           <div className="bf-profile-name-row mt-1">
             <Username name={displayName} settings={settings} profile={profile} />
             <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
@@ -205,6 +215,7 @@ function TwitchLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
     <div className="w-full overflow-hidden" style={buildCardStyle(settings)}>
@@ -213,7 +224,7 @@ function TwitchLayout(props: LayoutProps) {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#bf94ff]">Live</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#bf94ff]">{label}</span>
       </div>
       <div className="flex gap-4 p-5 bf-profile-avatar-row">
         <ProfileAvatar profile={profile} displayName={displayName} accentColor="#9146ff" className="h-16 w-16 shrink-0" />
@@ -237,28 +248,43 @@ function IdcardLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
+  const cardRadius = Math.max(settings.border_radius, 10);
 
   return (
     <div
-      className="mx-auto w-full max-w-lg overflow-hidden border border-white/10"
-      style={{ ...buildCardStyle(settings), borderRadius: Math.max(settings.border_radius, 8) }}
+      className="mx-auto w-full max-w-md overflow-hidden border border-white/10"
+      style={{ ...buildCardStyle(settings), borderRadius: cardRadius }}
     >
-      <div className="flex gap-4 p-5">
-        <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-24 w-20 shrink-0" rounded="rounded-md" />
-        <div className="min-w-0 flex-1 font-mono text-xs">
-          <p className="text-[9px] uppercase tracking-widest text-neutral-500">Official ID</p>
-          <h1 className="mt-1 text-lg font-bold text-white">{displayName}</h1>
-          <ProfileHandle profile={profile} className="font-sans" />
+      <div className="border-b border-white/10 bg-white/[0.03] px-5 py-2.5 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-neutral-400">{label}</p>
+      </div>
+      <div className="flex flex-col items-center gap-4 p-5 sm:flex-row sm:items-start">
+        <ProfileAvatar
+          profile={profile}
+          displayName={displayName}
+          accentColor={settings.accent_color}
+          className="h-24 w-24 shrink-0 sm:h-28 sm:w-28"
+          rounded="rounded-lg"
+        />
+        <div className="min-w-0 flex-1 text-center sm:text-left">
+          <h1 className="text-xl font-bold text-white">{displayName}</h1>
+          <ProfileHandle profile={profile} />
           <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
-          <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="mb-0 mt-2 font-sans" />
+          <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="mb-0 mt-2 justify-center sm:justify-start" />
         </div>
       </div>
-      <div className="flex h-8 items-end gap-px bg-[#0a0a0a] px-5 pb-2">
-        {Array.from({ length: 32 }).map((_, i) => (
-          <div key={i} className="w-px bg-white/30" style={{ height: `${8 + (i % 5) * 4}px` }} />
+      {profile.bio && (
+        <div className="border-t border-white/10 px-5 py-3 text-center text-sm text-neutral-300 sm:text-left">
+          <TypingBio text={profile.bio} enabled={settings.typing_bio} />
+        </div>
+      )}
+      <div className="flex h-7 items-end gap-px bg-black/40 px-5 pb-1.5" aria-hidden>
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div key={i} className="w-px bg-white/30" style={{ height: `${6 + (i % 5) * 3}px` }} />
         ))}
       </div>
-      <div className="px-5 py-5">
+      <div className="px-5 py-4">
         <ProfileMainContent {...props} hideBio />
       </div>
     </div>
@@ -269,6 +295,7 @@ function BlueprintLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
     <div
@@ -280,7 +307,9 @@ function BlueprintLayout(props: LayoutProps) {
         backgroundSize: "20px 20px",
       }}
     >
-      <p className="text-[9px] uppercase tracking-[0.3em] text-[#4a9eff]">Rev. {profile.uid ?? "001"} · cried.bio</p>
+      <p className="text-[9px] uppercase tracking-[0.3em] text-[#4a9eff]">
+        Rev. {profile.uid ?? "001"} · {label}
+      </p>
       <div className="mt-4 flex flex-wrap items-start gap-4 bf-profile-avatar-row">
         <ProfileAvatar profile={profile} displayName={displayName} accentColor="#4a9eff" className="h-16 w-16 shrink-0" />
         <div>
@@ -301,10 +330,18 @@ function ComicLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const outerRadius = Math.max(settings.border_radius, 12);
+  const innerRadius = Math.max(outerRadius - 6, 4);
 
   return (
-    <div className="w-full border-4 border-white bg-[#fef08a] p-1 text-black" style={{ borderRadius: settings.border_radius }}>
-      <div className="border-2 border-black bg-white p-5">
+    <div
+      className="w-full overflow-hidden bg-[#fef08a] p-1.5 text-black"
+      style={{ borderRadius: outerRadius }}
+    >
+      <div
+        className="overflow-hidden border-2 border-black bg-white p-5"
+        style={{ borderRadius: innerRadius }}
+      >
         <div className="flex flex-wrap items-start gap-4 bf-profile-avatar-row">
           <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-20 w-20 shrink-0 ring-2 ring-black" />
           <div>
@@ -314,7 +351,7 @@ function ComicLayout(props: LayoutProps) {
           </div>
         </div>
         {profile.bio && (
-          <div className="relative mt-5 rounded-2xl border-2 border-black bg-white px-4 py-3 after:absolute after:-bottom-2 after:left-8 after:h-4 after:w-4 after:rotate-45 after:border-b-2 after:border-r-2 after:border-black after:bg-white">
+          <div className="relative mt-5 overflow-hidden rounded-2xl border-2 border-black bg-white px-4 py-3 after:absolute after:-bottom-2 after:left-8 after:h-4 after:w-4 after:rotate-45 after:border-b-2 after:border-r-2 after:border-black after:bg-white">
             <p className="text-sm font-medium text-black">
               <TypingBio text={profile.bio} enabled={settings.typing_bio} />
             </p>
@@ -333,17 +370,18 @@ function CyberpunkLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
     <div className="bf-layout-cyberpunk relative w-full overflow-hidden p-6" style={buildCardStyle(settings)}>
       <div className="pointer-events-none absolute inset-0 opacity-[0.04] bf-cyber-scanlines" />
       <div className="relative">
-        <div className="flex items-start gap-1">
-          <div className="h-8 w-1 shrink-0" style={{ background: settings.accent_color }} />
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-[0.4em] text-neutral-500">// netrunner</p>
+        <div className="flex items-stretch gap-2.5">
+          <div className="w-1 shrink-0 rounded-sm" style={{ background: settings.accent_color }} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-mono uppercase tracking-[0.4em] text-neutral-500">// {label}</p>
             <h1
-              className={`mt-1 text-3xl font-black uppercase tracking-tight ${getUsernameEffectClass(settings.username_effect)}`}
+              className={`mt-0.5 text-3xl font-black uppercase tracking-tight ${getUsernameEffectClass(settings.username_effect)}`}
               style={{ color: settings.accent_color, textShadow: `0 0 20px ${settings.accent_color}80` }}
             >
               {displayName}
@@ -363,11 +401,12 @@ function LuxuryLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
     <div className="w-full px-8 py-10 text-center" style={buildCardStyle(settings)}>
       <div className="mx-auto mb-6 h-px w-16" style={{ background: `linear-gradient(90deg, transparent, ${settings.accent_color}, transparent)` }} />
-      <p className="text-[10px] font-medium uppercase tracking-[0.45em] text-neutral-500">Curated Profile</p>
+      <p className="text-[10px] font-medium uppercase tracking-[0.45em] text-neutral-500">{label}</p>
       <div className="bf-profile-avatar-row mt-6 flex justify-center">
         <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-20 w-20" />
       </div>
@@ -414,17 +453,22 @@ function ZineLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const label = resolveLayoutLabel(settings);
 
   return (
-    <div className="relative w-full rotate-[0.5deg] px-6 py-8" style={{ ...buildCardStyle(settings), background: "#141414" }}>
-      <div className="absolute -right-2 top-8 h-12 w-6 rotate-12 bg-white/10 opacity-60" />
-      <p className="text-xs font-bold uppercase tracking-widest text-[#fafafa]">Issue #{profile.uid ?? "01"}</p>
-      <h1 className="mt-2 text-4xl font-black uppercase leading-none text-white mix-blend-difference">{displayName}</h1>
-      <ProfileHandle profile={profile} className="mt-2" />
-      <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
-      <div className="mt-4 inline-block -rotate-1 border-2 border-white px-3 py-1 text-xs font-bold uppercase text-white">Featured</div>
-      <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-      <ProfileMainContent {...props} />
+    <div className="w-full overflow-hidden" style={buildCardStyle(settings)}>
+      <div className="border-b-2 border-white/20 px-6 py-5">
+        <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+          {label} #{profile.uid ?? "01"}
+        </p>
+        <h1 className="mt-2 text-3xl font-black uppercase leading-tight text-white sm:text-4xl">{displayName}</h1>
+        <ProfileHandle profile={profile} className="mt-2" />
+        <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
+      </div>
+      <div className="px-6 py-6">
+        <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
+        <ProfileMainContent {...props} />
+      </div>
     </div>
   );
 }
@@ -436,10 +480,15 @@ function OrbitLayout(props: LayoutProps) {
 
   return (
     <div className="w-full px-6 py-12 text-center" style={buildCardStyle(settings)}>
-      <div className="bf-profile-avatar-row relative mx-auto mb-8 flex h-44 w-44 items-center justify-center">
-        <div className="absolute inset-0 rounded-full border border-dashed border-white/10 bf-orbit-spin" />
-        <div className="absolute inset-4 rounded-full border border-white/5" style={{ borderColor: `${settings.accent_color}40` }} />
-        <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="relative h-24 w-24" />
+      <div className="relative mx-auto mb-8 h-36 w-36">
+        <div className="pointer-events-none absolute inset-0 rounded-full border border-dashed border-white/20 bf-orbit-spin" />
+        <div
+          className="pointer-events-none absolute inset-3 rounded-full border-2"
+          style={{ borderColor: `${settings.accent_color}50` }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-20 w-20" />
+        </div>
       </div>
       <div className="bf-profile-name-row">
         <Username name={displayName} settings={settings} profile={profile} />
@@ -487,21 +536,35 @@ function MosaicLayout(props: LayoutProps) {
   const { profile, settings, badges, viewCount } = props;
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
-  const colors = settings.gradient_colors.length >= 4 ? settings.gradient_colors : [...settings.gradient_colors, settings.accent_color, "#1a1a1a"];
+  const palette = settings.gradient_colors.length >= 4
+    ? settings.gradient_colors
+    : [...settings.gradient_colors, settings.accent_color, "#1a1a1a", "#262626", "#333333"];
+  const colors = Array.from({ length: 12 }, (_, i) => palette[i % palette.length]);
 
   return (
     <div className="w-full overflow-hidden" style={buildCardStyle(settings)}>
-      <div className="relative">
-        <div className="grid grid-cols-6 grid-rows-2 gap-0.5 p-0.5">
-          {colors.slice(0, 12).map((color, i) => (
-            <div key={i} className="aspect-square" style={{ background: color, opacity: i === 5 ? 0 : 1 }} />
-          ))}
-        </div>
-        <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center bf-profile-avatar-row">
-          <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-20 w-20 ring-4 ring-[#141414]" />
-        </div>
+      <div className="grid grid-cols-6 grid-rows-2 gap-0.5 p-0.5">
+        {colors.map((color, i) => {
+          if (i === 5) {
+            return (
+              <div key={i} className="relative aspect-square overflow-hidden rounded-sm bg-[#141414]">
+                <div className="flex h-full w-full items-center justify-center p-1.5">
+                  <ProfileAvatar
+                    profile={profile}
+                    displayName={displayName}
+                    accentColor={settings.accent_color}
+                    className="h-full w-full max-h-full max-w-full rounded-sm"
+                  />
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="aspect-square rounded-sm" style={{ background: color }} />
+          );
+        })}
       </div>
-      <div className="relative px-6 py-6 pt-14">
+      <div className="px-6 py-6">
         <div className="bf-profile-name-row">
           <Username name={displayName} settings={settings} profile={profile} />
           <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
@@ -567,19 +630,25 @@ function SpotifyLayout(props: LayoutProps) {
   const displayName = getDisplayName(profile);
   const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
   const heroStyle = profile.banner_url
-    ? { backgroundImage: `linear-gradient(to bottom, transparent 0%, #141414 100%), url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center top" }
-    : { background: `linear-gradient(to bottom, ${settings.accent_color}55 0%, #141414 70%)` };
+    ? { backgroundImage: `url(${profile.banner_url})`, backgroundSize: "cover", backgroundPosition: "center top" }
+    : { background: `linear-gradient(135deg, ${settings.accent_color}88 0%, #121212 100%)` };
 
   return (
-    <div className="w-full overflow-hidden" style={buildCardStyle(settings)}>
-      <div className="relative px-6 pb-8 pt-16" style={heroStyle}>
-        <div className="bf-profile-avatar-row absolute bottom-4 left-6">
-          <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-36 w-36 shadow-2xl ring-4 ring-[#141414] sm:h-44 sm:w-44" />
-        </div>
+    <div className="w-full overflow-hidden bg-[#121212]" style={buildCardStyle(settings)}>
+      <div className="relative h-32 sm:h-36" style={heroStyle}>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/50 to-[#121212]" />
       </div>
-      <div className="px-6 pb-8 pt-4">
+      <div className="relative px-6 pb-8">
+        <div className="-mt-14 mb-4 flex items-end gap-4">
+          <ProfileAvatar
+            profile={profile}
+            displayName={displayName}
+            accentColor={settings.accent_color}
+            className="h-28 w-28 shrink-0 shadow-2xl ring-4 ring-[#121212] sm:h-32 sm:w-32"
+          />
+        </div>
         <div className="bf-profile-name-row">
-          <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl">{displayName}</h1>
+          <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">{displayName}</h1>
           <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mt-2 text-neutral-400" />
