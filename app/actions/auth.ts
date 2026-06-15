@@ -6,6 +6,7 @@ import { getProfileByUserId } from "@/lib/data/profiles";
 import { getSiteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
 export type AuthActionState = {
@@ -154,6 +155,8 @@ export async function signUpAction(
 
     return publicResult;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     const message =
       error instanceof Error ? error.message : "Unable to reach Supabase.";
 
@@ -195,6 +198,8 @@ export async function signInAction(
       await recordLoginEvent(data.user.id, true);
     }
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     const message =
       error instanceof Error ? error.message : "Unable to reach Supabase.";
 
