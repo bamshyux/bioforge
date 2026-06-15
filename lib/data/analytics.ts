@@ -128,21 +128,6 @@ export async function getTotalAnalytics(profileId: string) {
 }
 
 export async function getPublicViewCount(profileId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_public_profile_view_count", {
-    p_profile_id: profileId,
-  });
-
-  if (!error && data != null) {
-    return Number(data) || 0;
-  }
-
-  // Fallback if migration not applied yet (owner-only RLS read)
-  const { data: rows } = await supabase
-    .from("analytics_events")
-    .select("visitor_hash")
-    .eq("profile_id", profileId)
-    .eq("event_type", "profile_view");
-
-  return new Set((rows ?? []).map((row) => normalizeVisitorKey(row.visitor_hash))).size;
+  const { readPublicViewCount } = await import("@/lib/analytics/record-profile-view");
+  return readPublicViewCount(profileId);
 }

@@ -42,7 +42,8 @@ export type ProfileLayout =
   | "aurora"
   | "hologram"
   | "spotify"
-  | "spotlight";
+  | "spotlight"
+  | "custom";
 
 export type BackgroundType =
   | "solid"
@@ -160,6 +161,11 @@ export type ProfileSettings = {
   card_offset_x: number;
   card_offset_y: number;
   card_width: number;
+  discord_user_id: string;
+  discord_username: string;
+  discord_avatar: string;
+  show_discord_status: boolean;
+  custom_theme_id: string | null;
   created_at: string;
   updated_at: string;
 };

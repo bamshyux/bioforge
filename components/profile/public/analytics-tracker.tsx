@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   getSessionId,
   getVisitorId,
@@ -9,6 +10,8 @@ import {
 } from "@/lib/analytics/visitor";
 
 export function AnalyticsTracker({ profileId }: { profileId: string }) {
+  const router = useRouter();
+
   useEffect(() => {
     if (hasRecordedProfileView(profileId)) return;
 
@@ -26,11 +29,20 @@ export function AnalyticsTracker({ profileId }: { profileId: string }) {
     })
       .then(async (response) => {
         if (!response.ok) return;
-        const data = (await response.json().catch(() => null)) as { ok?: boolean } | null;
-        if (data?.ok) markProfileViewRecorded(profileId);
+        const data = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          recorded?: boolean;
+          deduplicated?: boolean;
+        } | null;
+        if (data?.recorded || data?.deduplicated) {
+          markProfileViewRecorded(profileId);
+        }
+        if (data?.recorded) {
+          router.refresh();
+        }
       })
       .catch(() => {});
-  }, [profileId]);
+  }, [profileId, router]);
 
   return null;
 }

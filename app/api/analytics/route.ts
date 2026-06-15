@@ -1,16 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
 import { resolveCountry } from "@/lib/analytics/geo";
+import { recordProfileView } from "@/lib/analytics/record-profile-view";
 import { buildProfileViewHash } from "@/lib/analytics/view-identity";
+import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
-type RecordProfileViewResult = {
-  ok?: boolean;
-  recorded?: boolean;
-  deduplicated?: boolean;
-  skipped?: boolean;
-  error?: string;
-};
 
 export async function POST(request: Request) {
   let body: {
@@ -40,24 +33,19 @@ export async function POST(request: Request) {
   const headersList = await headers();
   const country = await resolveCountry(headersList);
   const supabase = await createClient();
+  const { data: authData } = await supabase.auth.getClaims();
+  const viewerUserId = (authData?.claims?.sub as string | undefined) ?? null;
 
   if (eventType === "profile_view") {
     const trackingHash = buildProfileViewHash(headersList, visitorHash);
-
-    const { data, error } = await supabase.rpc("record_profile_view", {
-      p_profile_id: profileId,
-      p_visitor_hash: trackingHash,
-      p_country: country.slice(0, 64),
-    });
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const result = (data ?? {}) as RecordProfileViewResult;
+    const result = await recordProfileView(profileId, trackingHash, country, viewerUserId);
 
     if (result.error === "profile_not_found") {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error ?? "Failed to record view" }, { status: 500 });
     }
 
     if (result.recorded) {

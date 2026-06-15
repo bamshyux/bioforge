@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { updateCardLayoutAction } from "@/app/actions/settings";
 import { clampCardLayout, getCardLayoutStyle } from "@/lib/settings";
+import type { ProfileEmbed } from "@/lib/types/embed";
 import type { ProfileSettings } from "@/lib/types/settings";
+import { ProfileEditWidgetsPanel } from "./profile-edit-widgets-panel";
 
 export type CardLayoutState = {
   offsetX: number;
@@ -77,11 +79,15 @@ export function ProfileCardLayoutEditor({
   settings,
   isOwner,
   parallaxEnabled,
+  embeds = [],
+  username = "",
   children,
 }: {
   settings: ProfileSettings;
   isOwner: boolean;
   parallaxEnabled?: boolean;
+  embeds?: ProfileEmbed[];
+  username?: string;
   children: React.ReactNode;
 }) {
   const [editMode, setEditMode] = useState(false);
@@ -231,6 +237,9 @@ export function ProfileCardLayoutEditor({
           <p className="pointer-events-none max-w-sm text-center text-[10px] text-neutral-500">
             Drag the card to move · drag the right edge to resize width
           </p>
+        )}
+        {editMode && (
+          <ProfileEditWidgetsPanel settings={settings} embeds={embeds} username={username} />
         )}
       </div>
 

@@ -10,6 +10,7 @@ import type { Profile } from "@/lib/types/profile";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { BadgeRow } from "@/components/badges/badge-ui";
 import { preparePublicBadges, buildBadgeStyleOptions } from "@/lib/badges/display";
+import type { DiscordPresence } from "@/lib/discord/types";
 import type { ActivityEvent } from "@/lib/types/activity";
 import type { FeaturedBlock } from "@/lib/types/featured";
 import type { GuestbookEntry } from "@/lib/types/guestbook";
@@ -33,6 +34,7 @@ export type LayoutProps = {
   isFollowing: boolean;
   isLoggedIn: boolean;
   currentUserId?: string | null;
+  discordPresence?: DiscordPresence | null;
 };
 
 export function ProfileHandle({ profile, className = "" }: { profile: Profile; className?: string }) {

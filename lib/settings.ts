@@ -77,6 +77,11 @@ export const DEFAULT_SETTINGS: Omit<
   card_offset_x: 0,
   card_offset_y: 0,
   card_width: 100,
+  discord_user_id: "",
+  discord_username: "",
+  discord_avatar: "",
+  show_discord_status: false,
+  custom_theme_id: null,
 };
 
 export const CONTENT_ALIGNMENT_OPTIONS: { value: ContentAlignment; label: string }[] = [
@@ -133,6 +138,7 @@ export const LAYOUT_OPTIONS: {
   { value: "hologram", label: "Hologram", description: "Iridescent animated border frame", preview: "hologram" },
   { value: "spotify", label: "Spotify", description: "Artist page with large square avatar", preview: "spotify" },
   { value: "spotlight", label: "Spotlight", description: "Stage spotlight on dark background", preview: "spotlight" },
+  { value: "custom", label: "Custom Theme", description: "Build your own layout with scoped CSS", preview: "custom" },
 ];
 
 export const FONT_OPTIONS = [
@@ -292,6 +298,14 @@ export function mergeSettings(
     card_offset_x: row?.card_offset_x ?? DEFAULT_SETTINGS.card_offset_x,
     card_offset_y: row?.card_offset_y ?? DEFAULT_SETTINGS.card_offset_y,
     card_width: row?.card_width ?? DEFAULT_SETTINGS.card_width,
+    discord_user_id:
+      (row as { widgets_discord_user_id?: string })?.widgets_discord_user_id ??
+      row?.discord_user_id ??
+      DEFAULT_SETTINGS.discord_user_id,
+    discord_username: row?.discord_username ?? DEFAULT_SETTINGS.discord_username,
+    discord_avatar: row?.discord_avatar ?? DEFAULT_SETTINGS.discord_avatar,
+    show_discord_status: row?.show_discord_status ?? DEFAULT_SETTINGS.show_discord_status,
+    custom_theme_id: row?.custom_theme_id ?? null,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };

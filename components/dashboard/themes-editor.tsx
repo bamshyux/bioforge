@@ -1,24 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { updateSettingsAction } from "@/app/actions/settings";
 import {
-  FONT_OPTIONS,
-  LINK_ANIMATION_OPTIONS,
   LAYOUT_OPTIONS,
 } from "@/lib/settings";
+import type { CustomTheme } from "@/lib/types/custom-theme";
 import type { ProfileLayout, ProfileSettings, SettingsFormState } from "@/lib/types/settings";
 import {
   buttonPrimaryClassName,
   cardClassName,
-  ColorField,
   FormFeedback,
   inputClassName,
   labelClassName,
   PageHeader,
-  SelectField,
-  SliderField,
-  ToggleField,
 } from "@/components/dashboard/form-fields";
 import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
 import { useUnsavedChanges } from "@/components/dashboard/unsaved-changes";
@@ -450,6 +446,19 @@ function LayoutPreview({ layout }: { layout: ProfileLayout }) {
           <div className="mt-1 h-1 w-8 rounded bg-neutral-800" />
         </div>
       );
+    case "custom":
+      return (
+        <div className={`${base} relative overflow-hidden p-2`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--bf-accent,#fafafa)]/10 to-transparent" />
+          <div className="relative font-mono text-[8px] leading-tight text-neutral-500">
+            <span className="text-[var(--bf-accent,#fafafa)]">.profile-card</span>
+            {" { }"}
+            <br />
+            <span className="text-[var(--bf-accent,#fafafa)]">.username</span>
+            {" { }"}
+          </div>
+        </div>
+      );
     default:
       return (
         <div className={`${base} p-2`}>
@@ -460,16 +469,26 @@ function LayoutPreview({ layout }: { layout: ProfileLayout }) {
   }
 }
 
-export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
+export function ThemesEditor({
+  settings,
+  themes,
+}: {
+  settings: ProfileSettings;
+  themes: CustomTheme[];
+}) {
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
   const [selected, setSelected] = useState<ProfileLayout>(settings.layout);
+  const [customThemeId, setCustomThemeId] = useState(
+    settings.custom_theme_id ?? themes[0]?.id ?? "",
+  );
   useSettingsRefresh(state);
   const { markDirty, setLastDirtyForm } = useUnsavedChanges();
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     setSelected(settings.layout);
-  }, [settings.updated_at, settings.layout]);
+    setCustomThemeId(settings.custom_theme_id ?? themes[0]?.id ?? "");
+  }, [settings.updated_at, settings.layout, settings.custom_theme_id, themes]);
 
   return (
     <>
@@ -478,6 +497,9 @@ export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
         <form ref={formRef} action={formAction} data-dashboard-primary-form className="space-y-6">
           <input type="hidden" name="_section" value="themes" />
           <input type="hidden" name="layout" value={selected} />
+          {selected === "custom" && customThemeId ? (
+            <input type="hidden" name="custom_theme_id" value={customThemeId} />
+          ) : null}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {LAYOUT_OPTIONS.map((layout) => {
@@ -505,6 +527,39 @@ export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
             })}
           </div>
 
+          {selected === "custom" && (
+            <div className="rounded-xl border border-[var(--bf-accent)]/20 bg-[var(--bf-accent)]/[0.04] p-4">
+              <p className="mb-3 text-sm font-medium text-white">Custom theme</p>
+              {themes.length > 0 ? (
+                <div className="mb-3">
+                  <label htmlFor="custom_theme_pick" className={labelClassName}>Active theme</label>
+                  <select
+                    id="custom_theme_pick"
+                    value={customThemeId}
+                    onChange={(e) => {
+                      setCustomThemeId(e.target.value);
+                      if (formRef.current) setLastDirtyForm(formRef.current);
+                      markDirty();
+                    }}
+                    className={inputClassName}
+                  >
+                    {themes.map((theme) => (
+                      <option key={theme.id} value={theme.id}>{theme.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <p className="mb-3 text-xs text-neutral-500">Create a theme in the builder first.</p>
+              )}
+              <Link
+                href="/dashboard/custom-theme"
+                className={`${buttonPrimaryClassName} inline-flex`}
+              >
+                Open theme builder
+              </Link>
+            </div>
+          )}
+
           <FormFeedback error={state.error} success={state.success} />
           <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
             {isPending ? "Saving..." : "Save layout"}
@@ -515,6 +570,12 @@ export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
   );
 }
 
-export function ThemesPageShell({ settings }: { settings: ProfileSettings }) {
-  return <ThemesEditor settings={settings} />;
+export function ThemesPageShell({
+  settings,
+  themes,
+}: {
+  settings: ProfileSettings;
+  themes: CustomTheme[];
+}) {
+  return <ThemesEditor settings={settings} themes={themes} />;
 }

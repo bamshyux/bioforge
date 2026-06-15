@@ -17,7 +17,7 @@ export function ProfileEmbedsSection({
   const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
 
   return (
-    <div className="bf-profile-block mb-5 space-y-3">
+    <div className="profile-embeds bf-profile-block mb-5 space-y-3">
       {visible.map((embed) => {
         const src = getEmbedIframeSrc(embed.embed_type, embed.embed_id) ??
           (embed.embed_type === "roblox"
@@ -31,7 +31,7 @@ export function ProfileEmbedsSection({
               href={embed.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-xl border border-white/[0.08] bg-[#0f0f0f] p-4 transition-colors hover:border-[var(--bf-accent)]/30"
+              className="profile-embed block rounded-xl border border-white/[0.08] bg-[#0f0f0f] p-4 transition-colors hover:border-[var(--bf-accent)]/30"
             >
               <p className="text-sm font-medium text-white">{embed.title}</p>
               <p className="mt-1 text-xs text-neutral-500">Play on Roblox →</p>
@@ -51,7 +51,7 @@ export function ProfileEmbedsSection({
         return (
           <div
             key={embed.id}
-            className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0f0f0f]"
+            className="profile-embed overflow-hidden rounded-xl border border-white/[0.08] bg-[#0f0f0f]"
             style={{ boxShadow: `0 0 0 1px ${settings.accent_color}10` }}
           >
             <div className="relative aspect-video w-full">

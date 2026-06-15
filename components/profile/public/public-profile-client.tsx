@@ -19,6 +19,7 @@ import { ParticleCanvas } from "./particle-canvas";
 import { ProfileBackground } from "./profile-background";
 import { CursorEffectCanvas, TypingBio } from "./profile-effects";
 import { ProfileEnterGate } from "./profile-enter-gate";
+import type { DiscordPresence } from "@/lib/discord/types";
 import type { ActivityEvent } from "@/lib/types/activity";
 import type { FeaturedBlock } from "@/lib/types/featured";
 import type { GuestbookEntry } from "@/lib/types/guestbook";
@@ -38,6 +39,8 @@ import {
   getUsernameEffectClass,
   type LayoutProps,
 } from "./layout-primitives";
+import { CustomThemeLayout } from "./custom-theme-layout";
+import { ProfileThemeScope } from "./profile-theme-scope";
 import { EXTENDED_LAYOUTS } from "./profile-layouts-extra";
 
 function ClassicLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
@@ -795,6 +798,7 @@ const LAYOUTS = {
   retro: RetroLayout,
   poster: PosterLayout,
   glass: GlassLayout,
+  custom: CustomThemeLayout,
   ...EXTENDED_LAYOUTS,
 };
 
@@ -814,6 +818,8 @@ export function PublicProfileClient({
   isFollowing,
   isLoggedIn,
   currentUserId,
+  discordPresence = null,
+  scopedCustomCss = null,
 }: {
   profile: Profile;
   links: ProfileLink[];
@@ -830,6 +836,8 @@ export function PublicProfileClient({
   isFollowing: boolean;
   isLoggedIn: boolean;
   currentUserId?: string | null;
+  discordPresence?: DiscordPresence | null;
+  scopedCustomCss?: string | null;
 }) {
   const [entered, setEntered] = useState(false);
   const playMusicRef = useRef<(() => void) | null>(null);
@@ -846,7 +854,9 @@ export function PublicProfileClient({
   const showParticles =
     (settings.background_type === "particles" || settings.particle_effect) &&
     settings.particle_effect;
-  const Layout = LAYOUTS[settings.layout] ?? ClassicLayout;
+  const Layout = settings.layout === "custom"
+    ? CustomThemeLayout
+    : (LAYOUTS[settings.layout] ?? ClassicLayout);
   const isOwner = currentUserId === profile.id;
   const layoutProps: LayoutProps = {
     profile,
@@ -864,6 +874,7 @@ export function PublicProfileClient({
     isFollowing,
     isLoggedIn,
     currentUserId,
+    discordPresence,
   };
 
   return (
@@ -896,9 +907,17 @@ export function PublicProfileClient({
             }`}
           >
             <div className="mx-auto w-full max-w-2xl">
-              <ProfileCardLayoutEditor settings={settings} isOwner={isOwner} parallaxEnabled={settings.profile_parallax}>
+              <ProfileCardLayoutEditor
+                settings={settings}
+                isOwner={isOwner}
+                parallaxEnabled={settings.profile_parallax}
+                embeds={embeds}
+                username={profile.username ?? ""}
+              >
                 <div className={getProfileAlignClass(settings.content_alignment)}>
-                  <Layout {...layoutProps} />
+                  <ProfileThemeScope scopedCss={settings.layout === "custom" ? scopedCustomCss : null}>
+                    <Layout {...layoutProps} />
+                  </ProfileThemeScope>
                 </div>
               </ProfileCardLayoutEditor>
             </div>

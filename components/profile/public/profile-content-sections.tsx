@@ -1,3 +1,4 @@
+import type { DiscordPresence } from "@/lib/discord/types";
 import type { ActivityEvent } from "@/lib/types/activity";
 import type { FeaturedBlock } from "@/lib/types/featured";
 import type { GuestbookEntry } from "@/lib/types/guestbook";
@@ -6,6 +7,7 @@ import type { ProfileLink } from "@/lib/types/link";
 import type { Profile } from "@/lib/types/profile";
 import type { ProfileSettings } from "@/lib/types/settings";
 import type { SocialProfile } from "@/lib/types/social";
+import { DiscordStatusCard } from "./discord-status-card";
 import { ProfileActivitySection } from "./profile-activity";
 import { ProfileEmbedsSection } from "./profile-embeds";
 import { ProfileFeaturedSection } from "./profile-featured";
@@ -29,6 +31,7 @@ export function ProfileContentSections({
   isLoggedIn,
   currentUserId,
   hideBio = false,
+  discordPresence = null,
 }: {
   profile: Profile;
   links: ProfileLink[];
@@ -44,10 +47,14 @@ export function ProfileContentSections({
   isLoggedIn: boolean;
   currentUserId?: string | null;
   hideBio?: boolean;
+  discordPresence?: DiscordPresence | null;
 }) {
   return (
     <>
       <ProfileStatusLine settings={settings} />
+      {discordPresence && settings.show_discord_status && (
+        <DiscordStatusCard presence={discordPresence} settings={settings} />
+      )}
       {profile.username && (
         <ProfileSocialBar
           profileId={profile.id}
@@ -62,7 +69,7 @@ export function ProfileContentSections({
       )}
       <ProfileFriendsSection friends={friends} visibility={settings.friends_visibility} />
       {!hideBio && profile.bio && (
-        <div className="bf-profile-block bf-profile-bio-block mb-5 max-w-2xl text-neutral-300">
+        <div className="bf-profile-block bf-profile-bio-block profile-bio mb-5 max-w-2xl text-neutral-300">
           <TypingBio text={profile.bio} enabled={settings.typing_bio} />
         </div>
       )}

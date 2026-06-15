@@ -42,6 +42,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/customize", label: "Customize", Icon: IconCustomize },
       { href: "/dashboard/background", label: "Background", Icon: IconBackground },
       { href: "/dashboard/themes", label: "Layouts", Icon: IconLayout },
+      { href: "/dashboard/custom-theme", label: "Custom Theme", Icon: IconEffects },
       { href: "/dashboard/effects", label: "Effects", Icon: IconEffects },
     ],
   },
@@ -51,6 +52,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard/links", label: "Links", Icon: IconLinks },
       { href: "/dashboard/embeds", label: "Embeds", Icon: IconLayout },
+      { href: "/dashboard/widgets", label: "Widgets", Icon: IconEffects },
       { href: "/dashboard/featured", label: "Featured", Icon: IconBadges },
       { href: "/dashboard/music", label: "Music", Icon: IconMusic },
       { href: "/dashboard/guestbook", label: "Guestbook", Icon: IconProfile },

@@ -12,7 +12,7 @@ export function ProfileStatusLine({ settings }: { settings: ProfileSettings }) {
   if (!text) return null;
 
   return (
-    <p className="bf-profile-inline-row mb-4 flex items-center gap-2 text-sm text-neutral-400">
+    <p className="profile-status bf-profile-inline-row mb-4 flex items-center gap-2 text-sm text-neutral-400">
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}

@@ -1,3 +1,4 @@
+import type { DiscordPresence } from "@/lib/discord/types";
 import type { ActivityEvent } from "@/lib/types/activity";
 import type { FeaturedBlock } from "@/lib/types/featured";
 import type { GuestbookEntry } from "@/lib/types/guestbook";
@@ -25,6 +26,8 @@ export function PublicProfileView({
   isFollowing,
   isLoggedIn,
   currentUserId,
+  discordPresence = null,
+  scopedCustomCss = null,
 }: {
   profile: Profile;
   links: ProfileLink[];
@@ -41,6 +44,8 @@ export function PublicProfileView({
   isFollowing: boolean;
   isLoggedIn: boolean;
   currentUserId?: string | null;
+  discordPresence?: DiscordPresence | null;
+  scopedCustomCss?: string | null;
 }) {
   return (
     <PublicProfileClient
@@ -59,6 +64,8 @@ export function PublicProfileView({
       isFollowing={isFollowing}
       isLoggedIn={isLoggedIn}
       currentUserId={currentUserId}
+      discordPresence={discordPresence}
+      scopedCustomCss={scopedCustomCss}
     />
   );
 }

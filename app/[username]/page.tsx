@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import { syncMilestoneBadges } from "@/app/actions/badges";
+import { getActiveCustomTheme } from "@/lib/data/custom-themes";
+import { getDiscordPresenceForSettings } from "@/lib/data/discord-presence";
+import { scopeProfileCss } from "@/lib/themes/scope-css";
 import { getPublicViewCount } from "@/lib/data/analytics";
 import { getProfileVisibility, shouldHideViewCounts } from "@/lib/data/account-settings";
 import { getActivityFeed } from "@/lib/data/activity";
@@ -85,6 +88,16 @@ export default async function UsernamePage({ params }: PageProps) {
     settings.show_view_count = false;
   }
 
+  const discordPresence = await getDiscordPresenceForSettings(settings);
+
+  let scopedCustomCss: string | null = null;
+  if (settings.layout === "custom" && settings.custom_theme_id) {
+    const theme = await getActiveCustomTheme(profile.id, settings.custom_theme_id);
+    if (theme?.css) {
+      scopedCustomCss = scopeProfileCss(theme.css).css || null;
+    }
+  }
+
   return (
     <PublicProfileView
       profile={profile}
@@ -102,6 +115,8 @@ export default async function UsernamePage({ params }: PageProps) {
       isFollowing={following}
       isLoggedIn={!!currentUserId}
       currentUserId={currentUserId}
+      discordPresence={discordPresence}
+      scopedCustomCss={scopedCustomCss}
     />
   );
 }

@@ -6,6 +6,7 @@ export type Profile = {
   bio: string;
   avatar_url: string | null;
   banner_url: string | null;
+  view_count?: number;
   premium_tier?: "free" | "premium";
   premium_expires_at?: string | null;
   created_at: string;

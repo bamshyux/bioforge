@@ -30,7 +30,7 @@ export function ProfileLinkButton({
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackLinkClick(profileId, link.id)}
-      className={`group flex items-center justify-between border px-4 py-3 ${animClass} ${hoverClass} ${
+      className={`profile-link group flex items-center justify-between border px-4 py-3 ${animClass} ${hoverClass} ${
         featured ? "border-[var(--bf-accent,#fafafa)]/30 bg-[var(--bf-accent,#fafafa)]/[0.06]" : ""
       }`}
       style={{
@@ -70,7 +70,7 @@ export function ProfileLinks({
   if (links.length === 0) return null;
 
   return (
-    <div className="bf-profile-block w-full space-y-2">
+    <div className="profile-links bf-profile-block w-full space-y-2">
       {links.map((link) => (
         <ProfileLinkButton
           key={link.id}

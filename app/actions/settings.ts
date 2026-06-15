@@ -39,6 +39,7 @@ async function revalidateProfile(userId: string) {
   revalidatePath("/dashboard/music");
   revalidatePath("/dashboard/effects");
   revalidatePath("/dashboard/themes");
+  revalidatePath("/dashboard/custom-theme");
   revalidatePath("/dashboard/links");
   if (profile?.username) revalidatePath(`/${profile.username}`);
 }
@@ -161,10 +162,14 @@ function parseSectionUpdates(
         vignette: parseBool(formData.get("vignette")),
         noise_texture: parseBool(formData.get("noise_texture")),
       };
-    case "themes":
+    case "themes": {
+      const layout = String(formData.get("layout") ?? existing.layout) as ProfileLayout;
+      const customThemeId = String(formData.get("custom_theme_id") ?? "").trim();
       return {
-        layout: String(formData.get("layout") ?? existing.layout) as ProfileLayout,
+        layout,
+        ...(layout === "custom" && customThemeId ? { custom_theme_id: customThemeId } : {}),
       };
+    }
     case "music":
       return {
         music_title: String(formData.get("music_title") ?? existing.music_title).trim(),
