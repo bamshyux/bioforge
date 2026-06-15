@@ -176,12 +176,14 @@ export function TypingBio({ text, enabled }: { text: string; enabled: boolean })
     };
   }, [text, enabled]);
 
-  if (!enabled) return <p className="leading-relaxed">{text}</p>;
+  if (!enabled) return <p className="bf-profile-bio leading-relaxed">{text}</p>;
 
   return (
-    <p className="leading-relaxed">
-      {displayed}
-      <span className="bf-cursor-blink ml-0.5 inline-block w-0.5 text-current opacity-80">|</span>
+    <p className="bf-profile-bio bf-profile-bio--typing leading-relaxed">
+      <span className="bf-profile-bio-text">
+        {displayed}
+        <span className="bf-cursor-blink ml-0.5 inline-block w-0.5 text-current opacity-80">|</span>
+      </span>
     </p>
   );
 }

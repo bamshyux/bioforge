@@ -322,7 +322,9 @@ export async function uploadBackgroundAction(
     return { error: "Please select a file." };
   }
 
-  if (file.size > MAX_BACKGROUND_UPLOAD_BYTES) return { error: backgroundUploadSizeError() };
+  if (file.size > MAX_BACKGROUND_UPLOAD_BYTES) {
+    return { error: backgroundUploadSizeError(file.size) };
+  }
 
   await ensureSettingsRow(userId);
 

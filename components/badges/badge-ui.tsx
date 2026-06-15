@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { BadgeMedallion } from "@/components/badges/badge-medallion";
 import { rarityClass } from "@/components/icons/badge-icons";
 import type { BadgeStyleOptions } from "@/lib/badges/display";
-import { COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/seal-utils";
+import { COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/badge-visuals";
 import { getRarityVisual } from "@/lib/badges/rarity-visuals";
 import type { Badge, BadgeInventoryItem, ProfileBadge } from "@/lib/types/badge";
 

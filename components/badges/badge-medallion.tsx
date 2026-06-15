@@ -1,6 +1,6 @@
 "use client";
 
-import { SealBadgeIcon } from "@/components/badges/seal-badge-icon";
+import { ProfileBadgeIcon } from "@/components/badges/profile-badge-icon";
 import type { BadgeRarity } from "@/lib/types/badge";
 
 export type MedallionBadge = {
@@ -47,7 +47,7 @@ export function BadgeMedallion({
         transform: `scale(${scale})`,
       }}
     >
-      <SealBadgeIcon
+      <ProfileBadgeIcon
         slug={badge.slug}
         color={badge.color}
         size={size}

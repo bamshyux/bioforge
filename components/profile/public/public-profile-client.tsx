@@ -644,7 +644,7 @@ function ShowcaseLayout({ profile, links, settings, badges, viewCount, embeds, f
       </div>
       <ProfileHandle profile={profile} className="mt-1" />
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="justify-center" />
-      <div className="bf-profile-block mx-auto mt-2 max-w-md text-left">
+      <div className="bf-profile-block mx-auto mt-2 max-w-md">
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -765,7 +765,7 @@ function GlassLayout({ profile, links, settings, badges, viewCount, embeds, feat
         </div>
         <ProfileHandle profile={profile} className="mt-1" />
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="justify-center" />
-        <div className="bf-profile-block mt-2 w-full max-w-md text-left">
+        <div className="bf-profile-block mt-2 w-full max-w-md">
           <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
         </div>
       </div>

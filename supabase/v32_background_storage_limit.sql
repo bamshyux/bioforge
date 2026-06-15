@@ -1,4 +1,4 @@
--- cried.bio v30: Backgrounds bucket upload limit (50 MB — Supabase Free max)
+-- cried.bio v32: Ensure backgrounds bucket stays at 50 MB (Supabase Free limit)
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (

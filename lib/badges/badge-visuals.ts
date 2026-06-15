@@ -1,25 +1,4 @@
-/** Scalloped seal shape + color helpers for Discord-style badges */
-
-export function buildScallopPath(
-  cx: number,
-  cy: number,
-  outerR: number,
-  innerR: number,
-  teeth = 12,
-): string {
-  const segments = teeth * 2;
-  const parts: string[] = [];
-  for (let i = 0; i < segments; i++) {
-    const angle = (i / segments) * Math.PI * 2 - Math.PI / 2;
-    const r = i % 2 === 0 ? outerR : innerR;
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
-    parts.push(`${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`);
-  }
-  return `${parts.join(" ")} Z`;
-}
-
-export const SEAL_SHAPE = buildScallopPath(24, 24, 22.2, 19.4, 12);
+/** Color + glow helpers for profile badge icons */
 
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const normalized = hex.replace("#", "").trim();
@@ -59,12 +38,12 @@ export function buildBadgeGlowFilter(
   const hovered = options?.hovered ?? false;
   const featured = options?.featured ?? false;
   const rgb = options?.monochrome ? "228, 228, 231" : rgbString(color);
-  const base = featured ? 0.28 : hovered ? 0.22 : 0.16;
-  const outer = featured ? 0.14 : hovered ? 0.11 : 0.08;
+  const base = featured ? 0.24 : hovered ? 0.19 : 0.13;
+  const outer = featured ? 0.11 : hovered ? 0.08 : 0.05;
 
   return [
-    `drop-shadow(0 0 ${Math.max(2, size * 0.1)}px rgba(${rgb}, ${base}))`,
-    `drop-shadow(0 0 ${Math.max(4, size * 0.2)}px rgba(${rgb}, ${outer}))`,
+    `drop-shadow(0 0 ${Math.max(1, size * 0.08)}px rgba(${rgb}, ${base}))`,
+    `drop-shadow(0 0 ${Math.max(3, size * 0.16)}px rgba(${rgb}, ${outer}))`,
   ].join(" ");
 }
 

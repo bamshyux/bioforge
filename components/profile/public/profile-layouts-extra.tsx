@@ -424,7 +424,7 @@ function LuxuryLayout(props: LayoutProps) {
       <ProfileHandle profile={profile} className="mt-2" />
       <div className="mx-auto mb-6 mt-6 h-px w-24 bg-white/10" />
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="justify-center" />
-      <div className="bf-profile-block mx-auto mt-2 max-w-md text-left">
+      <div className="bf-profile-block mx-auto mt-2 max-w-md">
         <ProfileMainContent {...props} />
       </div>
     </div>
@@ -503,7 +503,7 @@ function OrbitLayout(props: LayoutProps) {
       </div>
       <ProfileHandle profile={profile} className="mt-1" />
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="justify-center" />
-      <div className="bf-profile-block mx-auto mt-2 max-w-md text-left">
+      <div className="bf-profile-block mx-auto mt-2 max-w-md">
         <ProfileMainContent {...props} />
       </div>
     </div>
@@ -692,7 +692,7 @@ function SpotlightLayout(props: LayoutProps) {
         </div>
         <ProfileHandle profile={profile} className="mt-1" />
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="justify-center" />
-        <div className="bf-profile-block mx-auto mt-4 max-w-md text-left">
+        <div className="bf-profile-block mx-auto mt-4 max-w-md">
           <ProfileMainContent {...props} />
         </div>
       </div>
