@@ -69,6 +69,9 @@ export const DEFAULT_SETTINGS: Omit<
   links_monochrome: false,
   links_style: "buttons",
   links_icon_size: 24,
+  links_icon_glow: false,
+  links_icon_shadow: false,
+  links_icon_pulse: false,
   profile_parallax: false,
   content_alignment: "left",
   enter_gate_enabled: true,
@@ -316,6 +319,9 @@ export function mergeSettings(
     links_monochrome: row?.links_monochrome ?? DEFAULT_SETTINGS.links_monochrome,
     links_style: (row?.links_style ?? DEFAULT_SETTINGS.links_style) as import("@/lib/types/settings").LinksStyle,
     links_icon_size: clampLinksIconSize(row?.links_icon_size ?? DEFAULT_SETTINGS.links_icon_size),
+    links_icon_glow: row?.links_icon_glow ?? DEFAULT_SETTINGS.links_icon_glow,
+    links_icon_shadow: row?.links_icon_shadow ?? DEFAULT_SETTINGS.links_icon_shadow,
+    links_icon_pulse: row?.links_icon_pulse ?? DEFAULT_SETTINGS.links_icon_pulse,
     profile_parallax: row?.profile_parallax ?? DEFAULT_SETTINGS.profile_parallax,
     content_alignment: (row?.content_alignment ?? DEFAULT_SETTINGS.content_alignment) as ContentAlignment,
     enter_gate_enabled: true,
@@ -425,15 +431,7 @@ export function clampCardLayout(values: {
   };
 }
 
-export function getLinkAnimationClass(animation: LinkAnimation) {
-  switch (animation) {
-    case "pulse": return "bf-animate-pulse";
-    case "bounce": return "bf-animate-bounce";
-    case "glow": return "bf-animate-glow";
-    case "slide": return "bf-animate-slide";
-    default: return "";
-  }
-}
+export { getLinkAnimationClass } from "@/lib/link-animation";
 
 export function getUsernameEffectClass(effect: UsernameEffect) {
   switch (effect) {

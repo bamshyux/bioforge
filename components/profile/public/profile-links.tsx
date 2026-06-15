@@ -1,7 +1,8 @@
 "use client";
 
-import { formatLinkHostname, normalizeLinkUrl, getLinksIconBoxSize } from "@/lib/links";
-import { getLinkAnimationClass } from "@/lib/settings";
+import { formatLinkHostname, getLinksIconBoxSize } from "@/lib/links";
+import { buildLinkIconProps } from "@/lib/link-icon-effects";
+import { buildLinkAnimationProps } from "@/lib/link-animation";
 import type { ProfileLink } from "@/lib/types/link";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { LinkIcon } from "@/components/icons/social-icons";
@@ -18,12 +19,7 @@ export function ProfileLinkButton({
   profileId: string;
   featured?: boolean;
 }) {
-  const animation = link.animation ?? settings.link_animation ?? "none";
-  const animClass = getLinkAnimationClass(animation);
-  const hoverClass = settings.hover_animations
-    ? "transition-all duration-200 hover:scale-[1.015] hover:brightness-110"
-    : "";
-
+  const { animClass, hoverClass, animStyle } = buildLinkAnimationProps(link, settings);
   const iconSize = settings.links_icon_size;
 
   return (
@@ -40,15 +36,11 @@ export function ProfileLinkButton({
         backgroundColor: featured ? undefined : (link.background_color ?? "rgba(255,255,255,0.03)"),
         borderColor: featured ? undefined : `${settings.accent_color}15`,
         borderRadius: settings.border_radius,
+        ...animStyle,
       }}
     >
       <span className="flex items-center gap-3 text-sm font-medium">
-        <LinkIcon
-          platform={link.icon}
-          size={iconSize}
-          monochrome={settings.links_monochrome}
-          monoColor={settings.text_color}
-        />
+        <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
         {link.title}
       </span>
       <span className="text-xs opacity-0 transition-opacity group-hover:opacity-50">
@@ -102,25 +94,24 @@ export function SocialIconRow({
 
   return (
     <div className="bf-profile-icon-row mb-4 flex flex-wrap gap-2">
-      {links.slice(0, 8).map((link) => (
-        <a
-          key={link.id}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackLinkClick(profileId, link.id)}
-          title={link.title}
-          className="flex items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06]"
-          style={{ width: boxSize, height: boxSize }}
-        >
-          <LinkIcon
-            platform={link.icon}
-            size={iconSize}
-            monochrome={settings.links_monochrome}
-            monoColor={settings.text_color}
-          />
-        </a>
-      ))}
+      {links.map((link) => {
+        const { animClass, animStyle } = buildLinkAnimationProps(link, settings);
+
+        return (
+          <a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackLinkClick(profileId, link.id)}
+            title={link.title}
+            className={`profile-link flex items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06] ${animClass}`}
+            style={{ width: boxSize, height: boxSize, ...animStyle }}
+          >
+            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -137,30 +128,31 @@ export function SocialIconOnlyRow({
   if (links.length === 0) return null;
 
   const iconSize = settings.links_icon_size;
-  const hoverClass = settings.hover_animations
-    ? "transition-all duration-200 hover:scale-110"
-    : "transition-opacity hover:opacity-100";
 
   return (
     <div className="bf-profile-icon-row mb-4 flex flex-wrap gap-3">
-      {links.slice(0, 8).map((link) => (
-        <a
-          key={link.id}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackLinkClick(profileId, link.id)}
-          aria-label={link.title}
-          className={`flex items-center justify-center opacity-80 ${hoverClass}`}
-        >
-          <LinkIcon
-            platform={link.icon}
-            size={iconSize}
-            monochrome={settings.links_monochrome}
-            monoColor={settings.text_color}
-          />
-        </a>
-      ))}
+      {links.map((link) => {
+        const { animClass, hasAnim, animStyle } = buildLinkAnimationProps(link, settings);
+        const hoverClass =
+          settings.hover_animations && !hasAnim
+            ? "transition-all duration-200 hover:scale-110"
+            : "transition-opacity hover:opacity-100";
+
+        return (
+          <a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackLinkClick(profileId, link.id)}
+            aria-label={link.title}
+            className={`flex items-center justify-center opacity-80 ${hoverClass} ${animClass}`}
+            style={animStyle}
+          >
+            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
+          </a>
+        );
+      })}
     </div>
   );
 }

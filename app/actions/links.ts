@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { normalizeLinkUrl, isCustomLinkIcon } from "@/lib/links";
+import { normalizeLinkUrl, isCustomLinkIcon, normalizeLinkIconKey } from "@/lib/links";
 import { rejectIfModerated } from "@/lib/moderation/validate";
 import { getPlatform } from "@/lib/social-platforms";
 import type { LinkFormState } from "@/lib/types/link";
@@ -76,7 +76,7 @@ function parseLinkIcon(raw: string) {
     if (icon.length > 2048) return "link";
     return icon;
   }
-  return icon.slice(0, 64);
+  return normalizeLinkIconKey(icon).slice(0, 64);
 }
 
 export async function createLinkAction(

@@ -37,13 +37,32 @@ export function buildBadgeGlowFilter(
 
   const hovered = options?.hovered ?? false;
   const featured = options?.featured ?? false;
-  const rgb = options?.monochrome ? "228, 228, 231" : rgbString(color);
-  const base = featured ? 0.24 : hovered ? 0.19 : 0.13;
-  const outer = featured ? 0.11 : hovered ? 0.08 : 0.05;
+  const monochrome = options?.monochrome ?? false;
+
+  if (monochrome) {
+    const strength = featured ? 0.55 : hovered ? 0.48 : 0.38;
+    const outer = strength * 0.55;
+    const innerBlur = Math.max(3, size * 0.2);
+    const outerBlur = Math.max(8, size * 0.42);
+    const farBlur = Math.max(14, size * 0.62);
+    return [
+      `drop-shadow(0 0 ${innerBlur}px rgba(255,255,255,${strength}))`,
+      `drop-shadow(0 0 ${outerBlur}px rgba(255,255,255,${outer}))`,
+      `drop-shadow(0 0 ${farBlur}px rgba(255,255,255,${outer * 0.65}))`,
+    ].join(" ");
+  }
+
+  const rgb = rgbString(color);
+  const base = featured ? 0.72 : hovered ? 0.62 : 0.52;
+  const outer = featured ? 0.42 : hovered ? 0.34 : 0.28;
+  const innerBlur = Math.max(3, size * 0.22);
+  const outerBlur = Math.max(8, size * 0.48);
+  const farBlur = Math.max(16, size * 0.72);
 
   return [
-    `drop-shadow(0 0 ${Math.max(1, size * 0.08)}px rgba(${rgb}, ${base}))`,
-    `drop-shadow(0 0 ${Math.max(3, size * 0.16)}px rgba(${rgb}, ${outer}))`,
+    `drop-shadow(0 0 ${innerBlur}px rgba(${rgb}, ${base}))`,
+    `drop-shadow(0 0 ${outerBlur}px rgba(${rgb}, ${outer}))`,
+    `drop-shadow(0 0 ${farBlur}px rgba(${rgb}, ${outer * 0.6}))`,
   ].join(" ");
 }
 

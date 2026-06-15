@@ -180,6 +180,9 @@ function parseSectionUpdates(
         links_icon_size: clampLinksIconSize(
           parseIntField(formData.get("links_icon_size"), existing.links_icon_size),
         ),
+        links_icon_glow: parseBool(formData.get("links_icon_glow")),
+        links_icon_shadow: parseBool(formData.get("links_icon_shadow")),
+        links_icon_pulse: parseBool(formData.get("links_icon_pulse")),
       };
     case "background":
       return {

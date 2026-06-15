@@ -158,6 +158,9 @@ export type ProfileSettings = {
   links_monochrome: boolean;
   links_style: LinksStyle;
   links_icon_size: number;
+  links_icon_glow: boolean;
+  links_icon_shadow: boolean;
+  links_icon_pulse: boolean;
   profile_parallax: boolean;
   content_alignment: ContentAlignment;
   enter_gate_enabled: boolean;

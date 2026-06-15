@@ -26,12 +26,12 @@ export const DEFAULT_CUSTOM_THEME_CSS = `.profile-card {
   line-height: 1.6;
 }
 
-.profile-link {
+.profile-link:not([class*="bf-link-anim--"]) {
   border-radius: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.profile-link:hover {
+.profile-link:not([class*="bf-link-anim--"]):hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }`;

@@ -15,6 +15,11 @@ export function isCustomLinkIcon(icon: string) {
   return icon.startsWith("http://") || icon.startsWith("https://");
 }
 
+export function normalizeLinkIconKey(icon: string) {
+  if (isCustomLinkIcon(icon)) return icon;
+  return icon.toLowerCase().trim();
+}
+
 export function normalizeLinkUrl(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return "";

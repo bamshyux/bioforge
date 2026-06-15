@@ -80,6 +80,84 @@ body {
 .bf-animate-bounce { animation: bf-bounce 1.8s ease-in-out infinite; }
 .bf-animate-glow { animation: bf-glow 2s ease-in-out infinite; }
 .bf-animate-slide { animation: bf-slide 2s ease-in-out infinite; }
+
+/* Per-link button animations (Links tab → Animation) */
+@keyframes bf-link-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 40%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 25%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 26px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 75%, transparent),
+      0 0 52px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 40%, transparent);
+  }
+}
+
+@keyframes bf-link-icon-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 50%, transparent));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px color-mix(in srgb, var(--bf-link-glow, var(--bf-accent, #fafafa)) 90%, transparent));
+  }
+}
+
+@keyframes bf-link-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@keyframes bf-link-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes bf-link-slide {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
+.profile-link.bf-link-anim--glow,
+.bf-profile-icon-row > a.bf-link-anim--glow.profile-link {
+  animation: bf-link-glow 2s ease-in-out infinite;
+}
+
+.bf-profile-icon-row > a.bf-link-anim--glow:not(.profile-link) {
+  animation: bf-link-icon-glow 2s ease-in-out infinite;
+}
+
+.profile-link.bf-link-anim--pulse,
+.bf-profile-icon-row > a.bf-link-anim--pulse {
+  animation: bf-link-pulse 2.2s ease-in-out infinite;
+}
+
+.profile-link.bf-link-anim--bounce,
+.bf-profile-icon-row > a.bf-link-anim--bounce {
+  animation: bf-link-bounce 1.8s ease-in-out infinite;
+}
+
+.profile-link.bf-link-anim--slide,
+.bf-profile-icon-row > a.bf-link-anim--slide {
+  animation: bf-link-slide 2s ease-in-out infinite;
+}
+
+.profile-link.bf-link-anim--pulse,
+.profile-link.bf-link-anim--bounce,
+.profile-link.bf-link-anim--slide,
+.profile-link.bf-link-anim--glow,
+.bf-profile-icon-row > a[class*="bf-link-anim--"] {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.bf-profile-theme-root .profile-link.bf-link-anim--pulse:hover,
+.bf-profile-theme-root .profile-link.bf-link-anim--bounce:hover,
+.bf-profile-theme-root .profile-link.bf-link-anim--slide:hover,
+.bf-profile-theme-root .profile-link.bf-link-anim--glow:hover {
+  transform: none !important;
+}
+
 .bf-page-entrance { animation: bf-page-entrance 0.5s ease-out forwards; }
 
 @keyframes bf-enter-gate-pulse {
@@ -101,6 +179,15 @@ body {
 
 .bf-enter-gate-btn--glow {
   animation: bf-enter-gate-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes bf-link-icon-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.92; }
+}
+
+.bf-link-icon-pulse {
+  animation: bf-link-icon-pulse 2.4s ease-in-out infinite;
 }
 
 .bf-enter-gate {

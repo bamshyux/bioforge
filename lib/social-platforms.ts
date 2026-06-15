@@ -201,9 +201,11 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
 ];
 
 export function getPlatform(id: string) {
-  return SOCIAL_PLATFORMS.find((p) => p.id === id);
+  const key = id.toLowerCase().trim();
+  return SOCIAL_PLATFORMS.find((p) => p.id === key);
 }
 
 export function isPlatformIcon(icon: string) {
-  return SOCIAL_PLATFORMS.some((p) => p.id === icon) || icon === "link" || icon === "custom";
+  const key = icon.toLowerCase().trim();
+  return SOCIAL_PLATFORMS.some((p) => p.id === key) || key === "link" || key === "custom";
 }

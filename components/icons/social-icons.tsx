@@ -1,6 +1,11 @@
 import type { SocialPlatformId } from "@/lib/social-platforms";
 import { SOCIAL_PLATFORMS } from "@/lib/social-platforms";
-import { isCustomLinkIcon } from "@/lib/links";
+import { isCustomLinkIcon, normalizeLinkIconKey } from "@/lib/links";
+import {
+  getLinkIconEffectClassName,
+  getLinkIconEffectFilterStyle,
+} from "@/lib/link-icon-effects";
+import { getPlatformBrandColor } from "@/lib/platform-colors";
 import {
   SiDiscord,
   SiFacebook,
@@ -19,6 +24,8 @@ import {
 } from "react-icons/si";
 import { LuLink } from "react-icons/lu";
 import type { IconType } from "react-icons";
+
+export { getPlatformBrandColor, PLATFORM_BRAND_COLORS } from "@/lib/platform-colors";
 
 const PLATFORM_ICONS: Record<string, IconType> = {
   youtube: SiYoutube,
@@ -39,50 +46,45 @@ const PLATFORM_ICONS: Record<string, IconType> = {
   custom: LuLink,
 };
 
-/** Official / brand colors for social platforms */
-export const PLATFORM_BRAND_COLORS: Record<string, string> = {
-  youtube: "#FF0000",
-  discord: "#5865F2",
-  twitch: "#9146FF",
-  tiktok: "#EE1D52",
-  instagram: "#E4405F",
-  twitter: "#FFFFFF",
-  github: "#F0F6FC",
-  spotify: "#1DB954",
-  steam: "#66C0F4",
-  roblox: "#E2231A",
-  kick: "#53FC18",
-  telegram: "#26A5E4",
-  facebook: "#1877F2",
-  reddit: "#FF4500",
-  link: "#A3A3A3",
-  custom: "#A3A3A3",
+type LinkIconProps = {
+  platform: string;
+  size?: number;
+  monochrome?: boolean;
+  monoColor?: string;
+  glow?: boolean;
+  shadow?: boolean;
+  pulse?: boolean;
+  glowColor?: string;
 };
-
-export function getPlatformBrandColor(platform: string): string {
-  return PLATFORM_BRAND_COLORS[platform] ?? PLATFORM_BRAND_COLORS.link;
-}
 
 export function LinkIcon({
   platform,
   size = 20,
   monochrome = false,
   monoColor,
-}: {
-  platform: string;
-  size?: number;
-  /** When true, uses monoColor instead of brand color */
-  monochrome?: boolean;
-  monoColor?: string;
-}) {
-  if (isCustomLinkIcon(platform)) {
+  glow = false,
+  shadow = false,
+  pulse = false,
+  glowColor,
+}: LinkIconProps) {
+  const platformKey = normalizeLinkIconKey(platform);
+  const effectStyle = getLinkIconEffectFilterStyle({
+    glow,
+    shadow,
+    pulse,
+    glowColor: glowColor ?? getPlatformBrandColor(platformKey),
+    size,
+  });
+  const effectClass = getLinkIconEffectClassName(pulse);
+
+  if (isCustomLinkIcon(platformKey)) {
     return (
       <span
-        className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md"
-        style={{ width: size, height: size }}
+        className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md ${effectClass}`}
+        style={{ width: size, height: size, ...effectStyle }}
       >
         <img
-          src={platform}
+          src={platformKey}
           alt=""
           className="h-full w-full object-cover"
           style={
@@ -95,11 +97,14 @@ export function LinkIcon({
     );
   }
 
-  const Icon = PLATFORM_ICONS[platform] ?? LuLink;
-  const color = monochrome && monoColor ? monoColor : getPlatformBrandColor(platform);
+  const Icon = PLATFORM_ICONS[platformKey] ?? LuLink;
+  const color = monochrome && monoColor ? monoColor : getPlatformBrandColor(platformKey);
 
   return (
-    <span className="inline-flex shrink-0 items-center justify-center" style={{ color }}>
+    <span
+      className={`inline-flex shrink-0 items-center justify-center ${effectClass}`}
+      style={{ color, ...effectStyle }}
+    >
       <Icon size={size} aria-hidden />
     </span>
   );

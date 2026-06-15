@@ -11,6 +11,8 @@ import {
 } from "@/app/actions/links";
 import { updateSettingsAction } from "@/app/actions/settings";
 import { LinkIcon, PlatformIconGrid } from "@/components/icons/social-icons";
+import { buildLinkIconProps } from "@/lib/link-icon-effects";
+import { getLinkAnimationClass } from "@/lib/link-animation";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
   buttonPrimaryClassName,
@@ -36,6 +38,39 @@ const settingsInitial: SettingsFormState = {};
 
 const fileInputClassName =
   "block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]";
+
+function LinkAnimationPreview({
+  animation,
+  icon,
+  title,
+  glowColor,
+}: {
+  animation: LinkAnimation;
+  icon: string;
+  title: string;
+  glowColor: string;
+}) {
+  if (animation === "none") return null;
+
+  const animClass = getLinkAnimationClass(animation);
+  const animStyle =
+    animation === "glow"
+      ? ({ "--bf-link-glow": glowColor } as Record<string, string>)
+      : undefined;
+
+  return (
+    <div className="rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-4">
+      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-500">Animation preview</p>
+      <div
+        className={`profile-link inline-flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white ${animClass}`}
+        style={animStyle}
+      >
+        <LinkIcon platform={icon} size={18} />
+        {title || "Your link"}
+      </div>
+    </div>
+  );
+}
 
 function CustomLinkIconField({
   icon,
@@ -156,6 +191,7 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
   const [state, formAction, isPending] = useActionState(createLinkAction, initial);
   const [animation, setAnimation] = useState("none");
   const [icon, setIcon] = useState("link");
+  const [title, setTitle] = useState("");
   const [iconUploading, setIconUploading] = useState(false);
   const router = useRouter();
 
@@ -172,7 +208,7 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
       <CustomLinkIconField icon={icon} onIconChange={setIcon} onUploadingChange={setIconUploading} />
       <div>
         <label htmlFor="custom-title" className={labelClassName}>Title</label>
-        <input id="custom-title" name="title" type="text" required placeholder="My Website" className={inputClassName} />
+        <input id="custom-title" name="title" type="text" required placeholder="My Website" className={inputClassName} value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
         <label htmlFor="custom-url" className={labelClassName}>URL</label>
@@ -188,6 +224,12 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
           options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
         />
       </div>
+      <LinkAnimationPreview
+        animation={animation as LinkAnimation}
+        icon={icon}
+        title={title}
+        glowColor="#ffffff"
+      />
       <input type="hidden" name="background_color" value="rgba(255,255,255,0.05)" />
       <FormFeedback error={state.error} success={state.success} />
       <div className="flex gap-3">
@@ -262,6 +304,12 @@ function LinkRow({
             options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
           />
         </div>
+        <LinkAnimationPreview
+          animation={animation as LinkAnimation}
+          icon={icon}
+          title={link.title}
+          glowColor={link.color ?? "#ffffff"}
+        />
         <input type="hidden" name="background_color" value={link.background_color ?? "rgba(255,255,255,0.05)"} />
         {state.error && <p className="text-sm text-red-400">{state.error}</p>}
         <div className="flex gap-2">
@@ -364,6 +412,40 @@ export function LinksEditor({ links: initialLinks, settings }: { links: ProfileL
           <p className="-mt-2 text-xs text-neutral-600">
             Applies to all link styles on your public profile. Icon boxes scale with the icon.
           </p>
+
+          <div className="rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-500">Icon effects</p>
+            <p className="mb-3 text-xs text-neutral-600">
+              Style how icons look on your profile. Brand icons keep their official artwork — these only add visual effects.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ToggleField
+                name="links_icon_glow"
+                label="Icon glow"
+                description="Soft color-matched glow around each icon"
+                defaultChecked={settings.links_icon_glow}
+              />
+              <ToggleField
+                name="links_icon_shadow"
+                label="Icon shadow"
+                description="Subtle drop shadow for depth"
+                defaultChecked={settings.links_icon_shadow}
+              />
+              <ToggleField
+                name="links_icon_pulse"
+                label="Icon pulse"
+                description="Gentle breathing animation on icons"
+                defaultChecked={settings.links_icon_pulse}
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-4 rounded-lg border border-white/[0.06] bg-[#0f0f0f] p-4">
+              <LinkIcon {...buildLinkIconProps("roblox", settings, settings.links_icon_size)} />
+              <LinkIcon {...buildLinkIconProps("discord", settings, settings.links_icon_size)} />
+              <LinkIcon {...buildLinkIconProps("youtube", settings, settings.links_icon_size)} />
+              <span className="text-xs text-neutral-600">Preview reflects saved settings</span>
+            </div>
+          </div>
+
           <ToggleField
             name="links_monochrome"
             label="Monochrome links"
