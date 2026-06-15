@@ -95,8 +95,8 @@ export async function POST(request: Request) {
   }
 
   if (eventType === "profile_view") {
-    const { syncViewMilestoneBadges } = await import("@/lib/badges/sync-milestones");
-    await syncViewMilestoneBadges(profileId);
+    const { syncAllMilestoneBadges } = await import("@/lib/badges/sync-milestones");
+    await syncAllMilestoneBadges(profileId);
   }
 
   return NextResponse.json({ ok: true });
