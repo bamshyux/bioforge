@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { normalizeLinkUrl } from "@/lib/links";
+import { normalizeLinkUrl, isCustomLinkIcon } from "@/lib/links";
 import { rejectIfModerated } from "@/lib/moderation/validate";
 import { getPlatform } from "@/lib/social-platforms";
 import type { LinkFormState } from "@/lib/types/link";
@@ -70,6 +70,15 @@ function validateLinkInput(title: string, url: string) {
   return null;
 }
 
+function parseLinkIcon(raw: string) {
+  const icon = raw.trim() || "link";
+  if (isCustomLinkIcon(icon)) {
+    if (icon.length > 2048) return "link";
+    return icon;
+  }
+  return icon.slice(0, 64);
+}
+
 export async function createLinkAction(
   _prevState: LinkFormState,
   formData: FormData,
@@ -81,7 +90,7 @@ export async function createLinkAction(
 
   const title = String(formData.get("title") ?? "");
   const url = String(formData.get("url") ?? "");
-  const icon = String(formData.get("icon") ?? "link").trim() || "link";
+  const icon = parseLinkIcon(String(formData.get("icon") ?? "link"));
   const color = String(formData.get("color") ?? "#ffffff").trim() || "#ffffff";
   const backgroundColor =
     String(formData.get("background_color") ?? "rgba(255,255,255,0.05)").trim() ||
@@ -201,7 +210,7 @@ export async function updateLinkAction(
 
   const title = String(formData.get("title") ?? "");
   const url = String(formData.get("url") ?? "");
-  const icon = String(formData.get("icon") ?? "link").trim() || "link";
+  const icon = parseLinkIcon(String(formData.get("icon") ?? "link"));
   const color = String(formData.get("color") ?? "#ffffff").trim() || "#ffffff";
   const backgroundColor =
     String(formData.get("background_color") ?? "rgba(255,255,255,0.05)").trim() ||

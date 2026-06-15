@@ -12,6 +12,7 @@ import type {
   UsernameEffect,
 } from "@/lib/types/settings";
 import { BRAND } from "@/lib/design/tokens";
+import { clampLinksIconSize } from "@/lib/links";
 
 export const DEFAULT_SETTINGS: Omit<
   ProfileSettings,
@@ -67,6 +68,7 @@ export const DEFAULT_SETTINGS: Omit<
   badge_color: "#ffffff",
   links_monochrome: false,
   links_style: "buttons",
+  links_icon_size: 24,
   profile_parallax: false,
   content_alignment: "left",
   enter_gate_enabled: true,
@@ -313,6 +315,7 @@ export function mergeSettings(
     badge_color: row?.badge_color ?? DEFAULT_SETTINGS.badge_color,
     links_monochrome: row?.links_monochrome ?? DEFAULT_SETTINGS.links_monochrome,
     links_style: (row?.links_style ?? DEFAULT_SETTINGS.links_style) as import("@/lib/types/settings").LinksStyle,
+    links_icon_size: clampLinksIconSize(row?.links_icon_size ?? DEFAULT_SETTINGS.links_icon_size),
     profile_parallax: row?.profile_parallax ?? DEFAULT_SETTINGS.profile_parallax,
     content_alignment: (row?.content_alignment ?? DEFAULT_SETTINGS.content_alignment) as ContentAlignment,
     enter_gate_enabled: true,

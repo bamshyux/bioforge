@@ -1,5 +1,6 @@
 import type { SocialPlatformId } from "@/lib/social-platforms";
 import { SOCIAL_PLATFORMS } from "@/lib/social-platforms";
+import { isCustomLinkIcon } from "@/lib/links";
 import {
   SiDiscord,
   SiFacebook,
@@ -74,6 +75,26 @@ export function LinkIcon({
   monochrome?: boolean;
   monoColor?: string;
 }) {
+  if (isCustomLinkIcon(platform)) {
+    return (
+      <span
+        className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={platform}
+          alt=""
+          className="h-full w-full object-cover"
+          style={
+            monochrome
+              ? { filter: "grayscale(1) brightness(1.15)", opacity: 0.95 }
+              : undefined
+          }
+        />
+      </span>
+    );
+  }
+
   const Icon = PLATFORM_ICONS[platform] ?? LuLink;
   const color = monochrome && monoColor ? monoColor : getPlatformBrandColor(platform);
 

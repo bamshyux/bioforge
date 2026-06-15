@@ -20,9 +20,12 @@ import {
   inputClassName,
   labelClassName,
   PageHeader,
+  SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import { LINK_ANIMATION_OPTIONS } from "@/lib/settings";
+import { isCustomLinkIcon, LINKS_ICON_SIZE_MAX, LINKS_ICON_SIZE_MIN } from "@/lib/links";
+import { uploadLinkIconToStorage } from "@/lib/uploads/link-icon-client";
 import { getPlatform, type SocialPlatformId } from "@/lib/social-platforms";
 import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
 import type { LinkFormState, ProfileLink } from "@/lib/types/link";
@@ -30,6 +33,75 @@ import type { LinkAnimation, ProfileSettings, SettingsFormState } from "@/lib/ty
 
 const initial: LinkFormState = {};
 const settingsInitial: SettingsFormState = {};
+
+const fileInputClassName =
+  "block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]";
+
+function CustomLinkIconField({
+  icon,
+  onIconChange,
+  onUploadingChange,
+}: {
+  icon: string;
+  onIconChange: (icon: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
+}) {
+  const [uploadPending, setUploadPending] = useState(false);
+  const [uploadError, setUploadError] = useState<string>();
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  useEffect(() => {
+    onUploadingChange?.(uploadPending);
+  }, [uploadPending, onUploadingChange]);
+
+  const handleUpload = async (file: File | undefined) => {
+    if (!file) return;
+
+    setUploadPending(true);
+    setUploadError(undefined);
+
+    try {
+      const url = await uploadLinkIconToStorage(file);
+      onIconChange(url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setUploadPending(false);
+      setFileInputKey((key) => key + 1);
+    }
+  };
+
+  return (
+    <div>
+      <label className={labelClassName}>Icon</label>
+      <div className="flex items-center gap-4 rounded-lg border border-white/[0.06] bg-[#0f0f0f] p-4">
+        <LinkIcon platform={icon} size={32} />
+        <div className="min-w-0 flex-1 space-y-2">
+          <input
+            key={fileInputKey}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={uploadPending}
+            onChange={(e) => handleUpload(e.target.files?.[0])}
+            className={fileInputClassName}
+          />
+          <p className="text-xs text-neutral-600">JPEG, PNG, WebP, or GIF — max 2 MB. Leave empty for the default link icon.</p>
+          {isCustomLinkIcon(icon) ? (
+            <button
+              type="button"
+              onClick={() => onIconChange("link")}
+              className="text-xs font-medium text-neutral-500 transition-colors hover:text-white"
+            >
+              Remove custom icon
+            </button>
+          ) : null}
+          {uploadError ? <p className="text-xs text-red-400">{uploadError}</p> : null}
+          {uploadPending ? <p className="text-xs text-neutral-500">Uploading icon...</p> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function AddSocialForm({ onDone }: { onDone: () => void }) {
   const [state, formAction, isPending] = useActionState(createSocialLinkAction, initial);
@@ -83,6 +155,8 @@ function AddSocialForm({ onDone }: { onDone: () => void }) {
 function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
   const [state, formAction, isPending] = useActionState(createLinkAction, initial);
   const [animation, setAnimation] = useState("none");
+  const [icon, setIcon] = useState("link");
+  const [iconUploading, setIconUploading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -94,7 +168,8 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form action={formAction} className="space-y-4">
-      <input type="hidden" name="icon" value="link" />
+      <input type="hidden" name="icon" value={icon} />
+      <CustomLinkIconField icon={icon} onIconChange={setIcon} onUploadingChange={setIconUploading} />
       <div>
         <label htmlFor="custom-title" className={labelClassName}>Title</label>
         <input id="custom-title" name="title" type="text" required placeholder="My Website" className={inputClassName} />
@@ -116,7 +191,7 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
       <input type="hidden" name="background_color" value="rgba(255,255,255,0.05)" />
       <FormFeedback error={state.error} success={state.success} />
       <div className="flex gap-3">
-        <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
+        <button type="submit" disabled={isPending || iconUploading} className={buttonPrimaryClassName}>
           {isPending ? "Adding..." : "Add custom link"}
         </button>
         <button type="button" onClick={onDone} className={buttonSecondaryClassName}>Cancel</button>
@@ -145,6 +220,8 @@ function LinkRow({
   const [isEditing, setIsEditing] = useState(false);
   const [state, formAction, isSaving] = useActionState(updateLinkAction.bind(null, link.id), initial);
   const [animation, setAnimation] = useState(link.animation ?? "none");
+  const [icon, setIcon] = useState(link.icon);
+  const [iconUploading, setIconUploading] = useState(false);
 
   useEffect(() => {
     if (state.success) {
@@ -163,7 +240,8 @@ function LinkRow({
   if (isEditing) {
     return (
       <form action={formAction} className="space-y-4 rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-4">
-        <input type="hidden" name="icon" value={link.icon} />
+        <input type="hidden" name="icon" value={icon} />
+        <CustomLinkIconField icon={icon} onIconChange={setIcon} onUploadingChange={setIconUploading} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClassName}>Title</label>
@@ -187,14 +265,16 @@ function LinkRow({
         <input type="hidden" name="background_color" value={link.background_color ?? "rgba(255,255,255,0.05)"} />
         {state.error && <p className="text-sm text-red-400">{state.error}</p>}
         <div className="flex gap-2">
-          <button type="submit" disabled={isSaving} className={buttonPrimaryClassName}>Save</button>
+          <button type="submit" disabled={isSaving || iconUploading} className={buttonPrimaryClassName}>Save</button>
           <button type="button" onClick={() => setIsEditing(false)} className={buttonSecondaryClassName}>Cancel</button>
         </div>
       </form>
     );
   }
 
-  const platformName = getPlatform(link.icon)?.name ?? link.title;
+  const platformName = isCustomLinkIcon(link.icon)
+    ? "Custom icon"
+    : getPlatform(link.icon)?.name ?? link.title;
 
   return (
     <div
@@ -211,7 +291,7 @@ function LinkRow({
         <p className="truncate text-xs text-neutral-500">{platformName} · {link.url}</p>
       </div>
       <div className="flex gap-1">
-        <button type="button" onClick={() => setIsEditing(true)} className="rounded-lg border border-white/[0.06] px-3 py-1 text-xs text-neutral-400 hover:text-white">Edit</button>
+        <button type="button" onClick={() => { setIcon(link.icon); setIsEditing(true); }} className="rounded-lg border border-white/[0.06] px-3 py-1 text-xs text-neutral-400 hover:text-white">Edit</button>
         <button type="button" disabled={isPending} onClick={handleDelete} className="rounded-lg border border-red-500/20 px-3 py-1 text-xs text-red-400 hover:bg-red-500/10">Delete</button>
       </div>
     </div>
@@ -273,6 +353,17 @@ export function LinksEditor({ links: initialLinks, settings }: { links: ProfileL
               Full buttons show titles; icon boxes wrap icons in a subtle tile; icons only show bare platform icons with no label.
             </p>
           </div>
+          <SliderField
+            name="links_icon_size"
+            label="Icon size"
+            min={LINKS_ICON_SIZE_MIN}
+            max={LINKS_ICON_SIZE_MAX}
+            defaultValue={settings.links_icon_size}
+            unit="px"
+          />
+          <p className="-mt-2 text-xs text-neutral-600">
+            Applies to all link styles on your public profile. Icon boxes scale with the icon.
+          </p>
           <ToggleField
             name="links_monochrome"
             label="Monochrome links"

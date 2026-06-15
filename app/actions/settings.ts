@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { clampCardLayout, mergeSettings } from "@/lib/settings";
+import { clampLinksIconSize } from "@/lib/links";
 import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 import { formatSchemaError } from "@/lib/db/schema";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
@@ -176,6 +177,9 @@ function parseSectionUpdates(
       return {
         links_monochrome: parseBool(formData.get("links_monochrome")),
         links_style: String(formData.get("links_style") ?? existing.links_style) as import("@/lib/types/settings").LinksStyle,
+        links_icon_size: clampLinksIconSize(
+          parseIntField(formData.get("links_icon_size"), existing.links_icon_size),
+        ),
       };
     case "background":
       return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatLinkHostname, normalizeLinkUrl } from "@/lib/links";
+import { formatLinkHostname, normalizeLinkUrl, getLinksIconBoxSize } from "@/lib/links";
 import { getLinkAnimationClass } from "@/lib/settings";
 import type { ProfileLink } from "@/lib/types/link";
 import type { ProfileSettings } from "@/lib/types/settings";
@@ -24,6 +24,8 @@ export function ProfileLinkButton({
     ? "transition-all duration-200 hover:scale-[1.015] hover:brightness-110"
     : "";
 
+  const iconSize = settings.links_icon_size;
+
   return (
     <a
       href={link.url}
@@ -43,7 +45,7 @@ export function ProfileLinkButton({
       <span className="flex items-center gap-3 text-sm font-medium">
         <LinkIcon
           platform={link.icon}
-          size={18}
+          size={iconSize}
           monochrome={settings.links_monochrome}
           monoColor={settings.text_color}
         />
@@ -95,6 +97,9 @@ export function SocialIconRow({
 }) {
   if (links.length === 0) return null;
 
+  const iconSize = settings.links_icon_size;
+  const boxSize = getLinksIconBoxSize(iconSize);
+
   return (
     <div className="bf-profile-icon-row mb-4 flex flex-wrap gap-2">
       {links.slice(0, 8).map((link) => (
@@ -105,11 +110,12 @@ export function SocialIconRow({
           rel="noopener noreferrer"
           onClick={() => trackLinkClick(profileId, link.id)}
           title={link.title}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06]"
+          className="flex items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06]"
+          style={{ width: boxSize, height: boxSize }}
         >
           <LinkIcon
             platform={link.icon}
-            size={16}
+            size={iconSize}
             monochrome={settings.links_monochrome}
             monoColor={settings.text_color}
           />
@@ -130,6 +136,7 @@ export function SocialIconOnlyRow({
 }) {
   if (links.length === 0) return null;
 
+  const iconSize = settings.links_icon_size;
   const hoverClass = settings.hover_animations
     ? "transition-all duration-200 hover:scale-110"
     : "transition-opacity hover:opacity-100";
@@ -148,7 +155,7 @@ export function SocialIconOnlyRow({
         >
           <LinkIcon
             platform={link.icon}
-            size={18}
+            size={iconSize}
             monochrome={settings.links_monochrome}
             monoColor={settings.text_color}
           />
