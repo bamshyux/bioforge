@@ -3,13 +3,13 @@ import type { DiscordPresenceStatus } from "@/lib/discord/types";
 export function getDiscordStatusColor(status: DiscordPresenceStatus) {
   switch (status) {
     case "online":
-      return "#43b581";
+      return "#23a559";
     case "idle":
-      return "#faa61a";
+      return "#f0b232";
     case "dnd":
-      return "#f04747";
+      return "#f23f43";
     default:
-      return "#747f8d";
+      return "#80848e";
   }
 }
 

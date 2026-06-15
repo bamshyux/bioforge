@@ -5,6 +5,9 @@ export type DiscordActivity = {
   details?: string;
   state?: string;
   type?: number;
+  applicationId?: string;
+  largeImageUrl?: string | null;
+  smallImageUrl?: string | null;
 };
 
 export type DiscordSpotify = {

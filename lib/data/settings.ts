@@ -27,8 +27,10 @@ export async function getSettingsByProfileId(
   const widgetEnabled = await getDiscordStatusWidgetEnabled(profileId);
   if (widgetEnabled != null) {
     settings.show_discord_status = widgetEnabled;
-  } else if (settings.discord_user_id.trim()) {
-    settings.show_discord_status = true;
+  }
+
+  if (!settings.discord_user_id.trim()) {
+    settings.show_discord_status = false;
   }
 
   return settings;

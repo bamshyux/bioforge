@@ -79,7 +79,7 @@ export async function GET(request: Request) {
     widgets_discord_user_id: discordUser.id,
     discord_username: discordUser.global_name || discordUser.username,
     discord_avatar: discordUser.avatar ?? "",
-    show_discord_status: true,
+    show_discord_status: false,
   });
 
   const { error } = await supabase
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
     return redirectWithMessage("save_failed");
   }
 
-  await setDiscordStatusWidgetEnabled(userId, true);
+  await setDiscordStatusWidgetEnabled(userId, false);
 
   return redirectWithMessage("connected");
 }

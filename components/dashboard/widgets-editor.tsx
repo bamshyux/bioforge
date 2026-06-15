@@ -177,8 +177,8 @@ export function WidgetsEditor({
               key={`discord-status-${settings.updated_at}-${settings.show_discord_status}`}
               name="show_discord_status"
               label="Show Discord status on profile"
-              description="Display your live Discord presence (online, activity, Spotify) on your public biolink"
-              defaultChecked={settings.show_discord_status}
+              description="Requires a connected Discord account. Turn this on to display your live presence on your public biolink."
+              defaultChecked={settings.show_discord_status && connected}
               onCheckedChange={handleToggle}
             />
             <p className="mt-3 text-xs text-neutral-600">

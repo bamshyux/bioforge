@@ -34,5 +34,6 @@ export function mergeDiscordPresence(
 }
 
 export function shouldShowDiscordStatus(settings: ProfileSettings): boolean {
-  return settings.show_discord_status && Boolean(settings.discord_user_id.trim());
+  if (!settings.discord_user_id.trim()) return false;
+  return settings.show_discord_status === true;
 }
