@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { removeMusicAction, updateSettingsAction, uploadMusicAction } from "@/app/actions/settings";
+import { removeMusicAction, saveMusicAction, updateSettingsAction } from "@/app/actions/settings";
 import type { ProfileSettings, SettingsFormState } from "@/lib/types/settings";
+import { uploadMusicToStorage } from "@/lib/uploads/music-client";
 import {
   buttonPrimaryClassName,
-  buttonSecondaryClassName,
   cardClassName,
   ColorField,
   FormFeedback,
@@ -20,6 +20,9 @@ import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh"
 
 const initial: SettingsFormState = {};
 
+const fileInputClassName =
+  "block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#00e5cc] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]";
+
 export function MusicEditor({
   settings,
   musicTitleSupported = true,
@@ -28,19 +31,57 @@ export function MusicEditor({
   musicTitleSupported?: boolean;
 }) {
   const router = useRouter();
+  const [isRemoving, startRemove] = useTransition();
   const [musicUseAccent, setMusicUseAccent] = useState(!settings.music_player_color?.trim());
-  const [uploadState, uploadAction, uploadPending] = useActionState(uploadMusicAction, initial);
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
+  const [uploadError, setUploadError] = useState<string>();
+  const [uploadSuccess, setUploadSuccess] = useState<string>();
+  const [uploadPending, setUploadPending] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0);
   useSettingsRefresh(state);
-  useSettingsRefresh(uploadState);
 
   useEffect(() => {
     setMusicUseAccent(!settings.music_player_color?.trim());
   }, [settings.updated_at, settings.music_player_color]);
 
-  const handleRemove = async () => {
-    await removeMusicAction();
-    router.refresh();
+  const handleMusicUpload = async (file: File | undefined) => {
+    if (!file) return;
+
+    setUploadPending(true);
+    setUploadError(undefined);
+    setUploadSuccess(undefined);
+
+    try {
+      const url = await uploadMusicToStorage(file);
+      const result = await saveMusicAction(url);
+
+      if (result.error) {
+        setUploadError(result.error);
+        return;
+      }
+
+      setUploadSuccess(result.success);
+      router.refresh();
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setUploadPending(false);
+      setFileInputKey((key) => key + 1);
+    }
+  };
+
+  const handleRemove = () => {
+    startRemove(async () => {
+      const result = await removeMusicAction();
+      if (!result.error) {
+        setUploadError(undefined);
+        setUploadSuccess(result.success);
+        setFileInputKey((key) => key + 1);
+        router.refresh();
+      } else {
+        setUploadError(result.error);
+      }
+    });
   };
 
   return (
@@ -49,31 +90,42 @@ export function MusicEditor({
 
       <div className="space-y-6">
         <div className={cardClassName}>
-          <form action={uploadAction} className="space-y-4">
-            <label htmlFor="music" className={labelClassName}>Upload audio (max 20 MB)</label>
-            <input
-              id="music"
-              name="music"
-              type="file"
-              accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm"
-              className="block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#00e5cc] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]"
-            />
-            <FormFeedback error={uploadState.error} success={uploadState.success} />
-            <button type="submit" disabled={uploadPending} className={buttonSecondaryClassName}>
-              {uploadPending ? "Uploading..." : "Upload music"}
-            </button>
-          </form>
+          <h2 className="mb-4 text-sm font-medium text-white">Upload music</h2>
 
           {settings.music_url && (
-            <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
+            <div className="mb-4 space-y-2 border-b border-white/[0.06] pb-4">
               <p className="text-xs text-neutral-500">Current track</p>
               <audio src={settings.music_url} controls className="w-full accent-[#00e5cc]" />
               <RemoveMediaButton
                 label="Remove music"
+                disabled={isRemoving || uploadPending}
                 onClick={handleRemove}
               />
             </div>
           )}
+
+          <div className="space-y-3">
+            <label htmlFor="music" className={labelClassName}>
+              Audio file (max 20 MB)
+            </label>
+            <input
+              key={fileInputKey}
+              id="music"
+              type="file"
+              accept="audio/*,.mp3,.wav,.ogg,.webm"
+              disabled={uploadPending}
+              onChange={(event) => {
+                void handleMusicUpload(event.target.files?.[0]);
+              }}
+              className={fileInputClassName}
+            />
+            <p className="text-xs text-neutral-600">
+              {uploadPending
+                ? "Uploading music..."
+                : "Choose a file to upload or replace your current track."}
+            </p>
+            <FormFeedback error={uploadError} success={uploadSuccess} />
+          </div>
         </div>
 
         <div className={cardClassName}>

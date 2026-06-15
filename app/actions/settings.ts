@@ -271,6 +271,21 @@ export async function saveBackgroundMediaAction(
   };
 }
 
+export async function saveMusicAction(musicUrl: string): Promise<SettingsFormState> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  if (!musicUrl.trim()) return { error: "Invalid music URL." };
+
+  await ensureSettingsRow(userId);
+
+  const { error } = await patchProfileSettings(userId, { music_url: musicUrl });
+  if (error) return { error };
+
+  await revalidateProfile(userId);
+  return { success: "Music uploaded." };
+}
+
 export async function uploadBackgroundAction(
   _prev: SettingsFormState,
   formData: FormData,

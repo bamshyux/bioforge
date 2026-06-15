@@ -21,6 +21,7 @@ import {
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
+import { useUnsavedChanges } from "@/components/dashboard/unsaved-changes";
 
 const initial: SettingsFormState = {};
 
@@ -165,6 +166,7 @@ export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
   const [selected, setSelected] = useState<ProfileLayout>(settings.layout);
   useSettingsRefresh(state);
+  const { markDirty } = useUnsavedChanges();
 
   useEffect(() => {
     setSelected(settings.layout);
@@ -185,7 +187,10 @@ export function ThemesEditor({ settings }: { settings: ProfileSettings }) {
                 <button
                   key={layout.value}
                   type="button"
-                  onClick={() => setSelected(layout.value)}
+                  onClick={() => {
+                    setSelected(layout.value);
+                    markDirty();
+                  }}
                   className={`rounded-xl border p-4 text-left transition-all ${
                     isActive
                       ? "border-[#00e5cc]/50 bg-[#00e5cc]/[0.06] ring-1 ring-[#00e5cc]/30"

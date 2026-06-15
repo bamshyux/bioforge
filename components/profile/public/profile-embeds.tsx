@@ -17,7 +17,7 @@ export function ProfileEmbedsSection({
   const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
 
   return (
-    <div className="mb-5 space-y-3">
+    <div className="bf-profile-block mb-5 space-y-3">
       {visible.map((embed) => {
         const src = getEmbedIframeSrc(embed.embed_type, embed.embed_id) ??
           (embed.embed_type === "roblox"

@@ -16,6 +16,7 @@ import {
   labelClassName,
   RemoveMediaButton,
 } from "@/components/dashboard/form-fields";
+import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
 import { SITE_HOST } from "@/lib/site";
 
 const initialState: ProfileFormState = {};
@@ -36,6 +37,10 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
   const [bannerUploading, setBannerUploading] = useState(false);
   const [avatarFeedback, setAvatarFeedback] = useState<ProfileFormState>({});
   const [bannerFeedback, setBannerFeedback] = useState<ProfileFormState>({});
+
+  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(avatarFeedback);
+  useClearUnsavedOnSuccess(bannerFeedback);
 
   useEffect(() => {
     return () => {

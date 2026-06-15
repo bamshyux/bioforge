@@ -70,7 +70,7 @@ export function ProfileLinks({
   if (links.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="bf-profile-block w-full space-y-2">
       {links.map((link) => (
         <ProfileLinkButton
           key={link.id}

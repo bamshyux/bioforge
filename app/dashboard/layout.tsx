@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { syncFounderBadges, syncSignupBadgesAction } from "@/app/actions/badges";
 import { BioForgeLogo } from "@/components/brand/logo";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { getProfileByUserId } from "@/lib/data/profiles";
 import { createClient } from "@/lib/supabase/server";
@@ -38,10 +39,12 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-8 lg:flex-row lg:px-8">
-        <DashboardSidebar username={profile?.username} />
-        <main className="min-w-0 flex-1">{children}</main>
-      </div>
+      <DashboardShell>
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-8 lg:flex-row lg:px-8">
+          <DashboardSidebar username={profile?.username} />
+          <main className="min-w-0 flex-1">{children}</main>
+        </div>
+      </DashboardShell>
     </div>
   );
 }

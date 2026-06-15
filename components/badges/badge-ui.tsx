@@ -159,7 +159,7 @@ export function BadgeRow({
   if (badges.length === 0) return null;
 
   return (
-    <div className="relative flex flex-wrap items-center gap-1.5 overflow-visible">
+    <div className="bf-profile-row relative flex flex-wrap items-center gap-1.5 overflow-visible">
       {badges.map((badge) => (
         <BadgeChip key={badge.profile_badge_id} badge={badge} compact={compact} styleOptions={styleOptions} />
       ))}

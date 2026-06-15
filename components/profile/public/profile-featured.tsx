@@ -14,7 +14,7 @@ export function ProfileFeaturedSection({
   if (enabled.length === 0) return null;
 
   return (
-    <div className="mb-5">
+    <div className="bf-profile-block mb-5">
       <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Featured</p>
       <div className="grid gap-3 sm:grid-cols-2">
         {enabled.map((block) => (

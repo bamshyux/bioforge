@@ -20,6 +20,7 @@ import {
   SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
+import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
 import { BADGE_CATEGORIES, type Badge, type BadgeFormState, type BadgeInventoryItem } from "@/lib/types/badge";
 import type { ProfileBadge } from "@/lib/types/badge";
 import type { ProfileSettings } from "@/lib/types/settings";
@@ -112,6 +113,7 @@ export function BadgesEditor({
 }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(updateBadgeDisplaySettingsAction, initial);
+  useClearUnsavedOnSuccess(state);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("all");
 

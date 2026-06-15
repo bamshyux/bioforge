@@ -17,6 +17,7 @@ import {
   labelClassName,
   PageHeader,
 } from "@/components/dashboard/form-fields";
+import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
 import { FEATURED_BLOCK_OPTIONS, type FeaturedBlock, type FeaturedFormState } from "@/lib/types/featured";
 
 const initial: FeaturedFormState = {};
@@ -24,6 +25,7 @@ const initial: FeaturedFormState = {};
 export function FeaturedEditor({ blocks }: { blocks: FeaturedBlock[] }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(createFeaturedBlockAction, initial);
+  useClearUnsavedOnSuccess(state);
   const [, startTransition] = useTransition();
 
   return (

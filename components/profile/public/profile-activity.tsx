@@ -14,7 +14,7 @@ export function ProfileActivitySection({
       <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Recent activity</p>
       <ul className="space-y-2">
         {events.map((event) => (
-          <li key={event.id} className="flex items-start gap-2 text-xs text-neutral-400">
+          <li key={event.id} className="bf-profile-row flex items-start gap-2 text-xs text-neutral-400">
             <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--bf-accent)]" />
             <span>
               <span className="text-neutral-300">{event.title}</span>

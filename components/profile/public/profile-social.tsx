@@ -95,7 +95,7 @@ export function ProfileFriendsSection({
   return (
     <div className="mb-5">
       <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Friends</p>
-      <div className="flex flex-wrap gap-2">
+      <div className="bf-profile-row flex flex-wrap gap-2">
         {friends.map((friend) => (
           <Link
             key={friend.id}

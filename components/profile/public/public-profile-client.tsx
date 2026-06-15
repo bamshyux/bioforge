@@ -325,7 +325,7 @@ function PortfolioLayout({ profile, links, settings, badges, viewCount, embeds, 
         <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-28 w-28" />
       </div>
       <div className="p-6">
-        <div className="relative z-10 mb-1 flex flex-wrap items-center gap-2 overflow-visible">
+        <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
           <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
         </div>
@@ -345,7 +345,7 @@ function MinimalLayout({ profile, links, settings, badges, viewCount, embeds, fe
 
   return (
     <div className="w-full py-6">
-      <div className="relative z-10 mb-2 flex flex-wrap items-center gap-2 overflow-visible">
+      <div className="relative z-10 mb-2 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
         <Username name={displayName} settings={settings} profile={profile} />
         <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
       </div>
@@ -425,7 +425,7 @@ function SplitLayout({ profile, links, settings, badges, viewCount, embeds, feat
         </div>
       </div>
       <div className="split-layout__content flex flex-col justify-center p-6">
-        <div className="relative z-10 mb-1 flex flex-wrap items-center gap-2 overflow-visible">
+        <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
           <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
         </div>

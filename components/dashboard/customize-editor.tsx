@@ -17,12 +17,14 @@ import {
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
+import { useUnsavedChanges } from "@/components/dashboard/unsaved-changes";
 
 const initial: SettingsFormState = {};
 
 export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
   useSettingsRefresh(state);
+  const { markDirty } = useUnsavedChanges();
 
   const [fontFamily, setFontFamily] = useState(settings.font_family);
   const [linkAnimation, setLinkAnimation] = useState(settings.link_animation);
@@ -68,7 +70,10 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setContentAlignment(option.value)}
+                    onClick={() => {
+                      setContentAlignment(option.value);
+                      markDirty();
+                    }}
                     className={`rounded-lg border px-3 py-2.5 text-sm transition-colors ${
                       active
                         ? "border-[var(--bf-accent)]/40 bg-[var(--bf-accent)]/10 text-white"

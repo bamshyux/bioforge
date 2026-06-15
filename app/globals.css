@@ -310,6 +310,21 @@ body {
   color: color-mix(in srgb, var(--bf-accent) 55%, rgba(255, 255, 255, 0.4));
 }
 
+@keyframes bf-unsaved-notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bf-unsaved-notice > div {
+  animation: bf-unsaved-notice-in 0.28s ease-out;
+}
+
 .bf-profile-align {
   width: 100%;
 }
@@ -340,6 +355,11 @@ body {
   justify-content: flex-end;
 }
 
+.bf-profile-align--center .bf-profile-block,
+.bf-profile-align--right .bf-profile-block {
+  width: 100%;
+}
+
 .bf-profile-align--center .bf-profile-block {
   margin-left: auto;
   margin-right: auto;
@@ -363,10 +383,12 @@ body {
 }
 
 .bf-profile-row,
-.bf-profile-inline-row,
 .bf-profile-icon-row,
 .bf-profile-avatar-row {
   display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .bf-profile-inline-row {

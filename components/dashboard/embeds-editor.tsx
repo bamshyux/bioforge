@@ -16,6 +16,7 @@ import {
   labelClassName,
   PageHeader,
 } from "@/components/dashboard/form-fields";
+import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
 import { EMBED_TYPE_OPTIONS, type EmbedFormState, type ProfileEmbed } from "@/lib/types/embed";
 
 const initial: EmbedFormState = {};
@@ -25,6 +26,7 @@ export function EmbedsEditor({ embeds: initialEmbeds }: { embeds: ProfileEmbed[]
   const [embeds, setEmbeds] = useState(initialEmbeds);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [state, formAction, isPending] = useActionState(createEmbedAction, initial);
+  useClearUnsavedOnSuccess(state);
   const [isPendingAction, startTransition] = useTransition();
   const [formKey, setFormKey] = useState(0);
 
