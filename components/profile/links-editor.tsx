@@ -12,8 +12,6 @@ import {
 import { updateSettingsAction } from "@/app/actions/settings";
 import { LinkIcon, PlatformIconGrid } from "@/components/icons/social-icons";
 import { buildLinkIconProps } from "@/lib/link-icon-effects";
-import { getLinkAnimationClass } from "@/lib/link-animation";
-import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
@@ -31,46 +29,13 @@ import { uploadLinkIconToStorage } from "@/lib/uploads/link-icon-client";
 import { getPlatform, type SocialPlatformId } from "@/lib/social-platforms";
 import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
 import type { LinkFormState, ProfileLink } from "@/lib/types/link";
-import type { LinkAnimation, ProfileSettings, SettingsFormState } from "@/lib/types/settings";
+import type { ProfileSettings, SettingsFormState } from "@/lib/types/settings";
 
 const initial: LinkFormState = {};
 const settingsInitial: SettingsFormState = {};
 
 const fileInputClassName =
   "block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]";
-
-function LinkAnimationPreview({
-  animation,
-  icon,
-  title,
-  glowColor,
-}: {
-  animation: LinkAnimation;
-  icon: string;
-  title: string;
-  glowColor: string;
-}) {
-  if (animation === "none") return null;
-
-  const animClass = getLinkAnimationClass(animation);
-  const animStyle =
-    animation === "glow"
-      ? ({ "--bf-link-glow": glowColor } as Record<string, string>)
-      : undefined;
-
-  return (
-    <div className="rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-4">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-500">Animation preview</p>
-      <div
-        className={`profile-link inline-flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white ${animClass}`}
-        style={animStyle}
-      >
-        <LinkIcon platform={icon} size={18} />
-        {title || "Your link"}
-      </div>
-    </div>
-  );
-}
 
 function CustomLinkIconField({
   icon,
@@ -189,9 +154,7 @@ function AddSocialForm({ onDone }: { onDone: () => void }) {
 
 function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
   const [state, formAction, isPending] = useActionState(createLinkAction, initial);
-  const [animation, setAnimation] = useState("none");
   const [icon, setIcon] = useState("link");
-  const [title, setTitle] = useState("");
   const [iconUploading, setIconUploading] = useState(false);
   const router = useRouter();
 
@@ -208,28 +171,13 @@ function AddCustomLinkForm({ onDone }: { onDone: () => void }) {
       <CustomLinkIconField icon={icon} onIconChange={setIcon} onUploadingChange={setIconUploading} />
       <div>
         <label htmlFor="custom-title" className={labelClassName}>Title</label>
-        <input id="custom-title" name="title" type="text" required placeholder="My Website" className={inputClassName} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input id="custom-title" name="title" type="text" required placeholder="My Website" className={inputClassName} />
       </div>
       <div>
         <label htmlFor="custom-url" className={labelClassName}>URL</label>
         <input id="custom-url" name="url" type="url" required placeholder="https://example.com" className={inputClassName} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ColorField name="color" label="Text color" defaultValue="#ffffff" />
-        <ControlledSelect
-          name="animation"
-          label="Animation"
-          value={animation}
-          onChange={(v) => setAnimation(v as LinkAnimation)}
-          options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-        />
-      </div>
-      <LinkAnimationPreview
-        animation={animation as LinkAnimation}
-        icon={icon}
-        title={title}
-        glowColor="#ffffff"
-      />
+      <ColorField name="color" label="Text color" defaultValue="#ffffff" />
       <input type="hidden" name="background_color" value="rgba(255,255,255,0.05)" />
       <FormFeedback error={state.error} success={state.success} />
       <div className="flex gap-3">
@@ -261,7 +209,6 @@ function LinkRow({
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [state, formAction, isSaving] = useActionState(updateLinkAction.bind(null, link.id), initial);
-  const [animation, setAnimation] = useState(link.animation ?? "none");
   const [icon, setIcon] = useState(link.icon);
   const [iconUploading, setIconUploading] = useState(false);
 
@@ -294,22 +241,7 @@ function LinkRow({
             <input name="url" type="url" required defaultValue={link.url} className={inputClassName} />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ColorField name="color" label="Text color" defaultValue={link.color ?? "#ffffff"} />
-          <ControlledSelect
-            name="animation"
-            label="Animation"
-            value={animation}
-            onChange={(v) => setAnimation(v as LinkAnimation)}
-            options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-          />
-        </div>
-        <LinkAnimationPreview
-          animation={animation as LinkAnimation}
-          icon={icon}
-          title={link.title}
-          glowColor={link.color ?? "#ffffff"}
-        />
+        <ColorField name="color" label="Text color" defaultValue={link.color ?? "#ffffff"} />
         <input type="hidden" name="background_color" value={link.background_color ?? "rgba(255,255,255,0.05)"} />
         {state.error && <p className="text-sm text-red-400">{state.error}</p>}
         <div className="flex gap-2">
@@ -413,6 +345,18 @@ export function LinksEditor({ links: initialLinks, settings }: { links: ProfileL
             Applies to all link styles on your public profile. Icon boxes scale with the icon.
           </p>
 
+          <div>
+            <label htmlFor="link_animation" className={labelClassName}>Link animation</label>
+            <select id="link_animation" name="link_animation" className={inputClassName} defaultValue={settings.link_animation}>
+              {LINK_ANIMATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <p className="mt-1.5 text-xs text-neutral-500">
+              Applies to all links on your public profile. Use Icon effects above for icon-specific styling.
+            </p>
+          </div>
+
           <div className="rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-4">
             <p className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-500">Icon effects</p>
             <p className="mb-3 text-xs text-neutral-600">
@@ -422,7 +366,7 @@ export function LinksEditor({ links: initialLinks, settings }: { links: ProfileL
               <ToggleField
                 name="links_icon_glow"
                 label="Icon glow"
-                description="Soft color-matched glow around each icon"
+                description="Illuminated glow on each link icon"
                 defaultChecked={settings.links_icon_glow}
               />
               <ToggleField

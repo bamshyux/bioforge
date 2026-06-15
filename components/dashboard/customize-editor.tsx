@@ -15,13 +15,13 @@ import {
   SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { FONT_OPTIONS, LINK_ANIMATION_OPTIONS, CONTENT_ALIGNMENT_OPTIONS } from "@/lib/settings";
+import { FONT_OPTIONS, CONTENT_ALIGNMENT_OPTIONS } from "@/lib/settings";
 import {
   getLayoutLabelHint,
   getLayoutLabelPlaceholder,
   layoutSupportsCustomLabel,
 } from "@/lib/layout-labels";
-import type { ContentAlignment, LinkAnimation, ProfileLayout, ProfileSettings } from "@/lib/types/settings";
+import type { ContentAlignment, ProfileLayout, ProfileSettings } from "@/lib/types/settings";
 
 type CustomizeFormState = {
   accent_color: string;
@@ -41,7 +41,6 @@ type CustomizeFormState = {
   profile_status: string;
   profile_status_use_accent: boolean;
   profile_status_color: string;
-  link_animation: LinkAnimation;
 };
 
 function readCustomizeForm(settings: ProfileSettings): CustomizeFormState {
@@ -63,7 +62,6 @@ function readCustomizeForm(settings: ProfileSettings): CustomizeFormState {
     profile_status: settings.profile_status,
     profile_status_use_accent: !settings.profile_status_color?.trim(),
     profile_status_color: settings.profile_status_color || settings.accent_color,
-    link_animation: settings.link_animation,
   };
 }
 
@@ -257,13 +255,6 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
               />
             )}
           </div>
-
-          <ControlledSelect
-            label="Default link animation"
-            value={form.link_animation}
-            onChange={(link_animation) => patchForm({ link_animation: link_animation as LinkAnimation })}
-            options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-          />
 
           <SaveConfirmation success={state.success} error={state.error} />
           <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>

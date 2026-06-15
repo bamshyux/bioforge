@@ -2,10 +2,10 @@ import type { ProfileLink } from "@/lib/types/link";
 import type { LinkAnimation, ProfileSettings } from "@/lib/types/settings";
 
 export function resolveLinkAnimation(
-  link: ProfileLink,
+  _link: ProfileLink,
   settings: ProfileSettings,
 ): LinkAnimation {
-  return (link.animation ?? settings.link_animation ?? "none") as LinkAnimation;
+  return settings.link_animation ?? "none";
 }
 
 export function getLinkAnimationClass(animation: LinkAnimation) {

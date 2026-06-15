@@ -1,8 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { BadgeGlyph } from "@/components/badges/badge-glyphs";
 import { VerifiedBadgeIcon } from "@/components/badges/verified-badge-icon";
-import { buildBadgeGlowFilter } from "@/lib/badges/badge-visuals";
+import { SelfGlow } from "@/components/ui/self-glow";
+import { getBadgeSelfGlowStrength } from "@/lib/self-glow";
 
 const VERIFIED_COLOR = "#3b82f6";
 
@@ -30,29 +32,14 @@ export function ProfileBadgeIcon({
   const isVerified = slug === "verified" && !iconUrl && !monochrome;
   const fillColor = monochrome ? "#e4e4e7" : color;
   const glowColor = isVerified ? VERIFIED_COLOR : fillColor;
+  const glowStrength = getBadgeSelfGlowStrength({ hovered, featured });
 
-  const filter = buildBadgeGlowFilter(glowColor, size, {
-    enabled: glowEnabled,
-    hovered,
-    featured,
-    monochrome,
-  });
-
-  const filterStyle = filter === "none" ? undefined : filter;
+  let icon: ReactNode;
 
   if (isVerified) {
-    return (
-      <span
-        className={`bf-profile-badge-icon inline-flex ${className}`.trim()}
-        style={{ filter: filterStyle, lineHeight: 0 }}
-      >
-        <VerifiedBadgeIcon size={size} />
-      </span>
-    );
-  }
-
-  if (iconUrl && !monochrome) {
-    return (
+    icon = <VerifiedBadgeIcon size={size} />;
+  } else if (iconUrl && !monochrome) {
+    icon = (
       <img
         src={iconUrl}
         alt=""
@@ -60,23 +47,34 @@ export function ProfileBadgeIcon({
         height={size}
         draggable={false}
         className={`bf-profile-badge-icon block object-contain ${className}`.trim()}
-        style={{ filter: filterStyle }}
         aria-hidden
       />
+    );
+  } else {
+    icon = (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        className={`bf-profile-badge-icon block ${className}`.trim()}
+        aria-hidden
+      >
+        <BadgeGlyph slug={slug} color={fillColor} />
+      </svg>
     );
   }
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={`bf-profile-badge-icon block ${className}`.trim()}
-      style={{ filter: filterStyle }}
-      aria-hidden
+    <SelfGlow
+      enabled={glowEnabled}
+      color={glowColor}
+      size={size}
+      strength={glowStrength}
+      rounded="full"
+      className={className}
     >
-      <BadgeGlyph slug={slug} color={fillColor} />
-    </svg>
+      {icon}
+    </SelfGlow>
   );
 }

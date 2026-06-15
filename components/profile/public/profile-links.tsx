@@ -1,8 +1,8 @@
 "use client";
 
 import { formatLinkHostname, getLinksIconBoxSize } from "@/lib/links";
+import { buildLinkAnimationProps, resolveLinkAnimation } from "@/lib/link-animation";
 import { buildLinkIconProps } from "@/lib/link-icon-effects";
-import { buildLinkAnimationProps } from "@/lib/link-animation";
 import type { ProfileLink } from "@/lib/types/link";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { LinkIcon } from "@/components/icons/social-icons";
@@ -95,7 +95,9 @@ export function SocialIconRow({
   return (
     <div className="bf-profile-icon-row mb-4 flex flex-wrap gap-2">
       {links.map((link) => {
+        const animation = resolveLinkAnimation(link, settings);
         const { animClass, animStyle } = buildLinkAnimationProps(link, settings);
+        const iconAnimClass = animation === "glow" ? "" : animClass;
 
         return (
           <a
@@ -105,10 +107,10 @@ export function SocialIconRow({
             rel="noopener noreferrer"
             onClick={() => trackLinkClick(profileId, link.id)}
             title={link.title}
-            className={`profile-link flex items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06] ${animClass}`}
-            style={{ width: boxSize, height: boxSize, ...animStyle }}
+            className={`profile-link flex items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-[var(--bf-accent,#fafafa)]/30 hover:bg-[var(--bf-accent,#fafafa)]/[0.06] ${iconAnimClass}`}
+            style={{ width: boxSize, height: boxSize, ...(animation === "glow" ? {} : animStyle) }}
           >
-            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
+            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize, animation)} />
           </a>
         );
       })}
@@ -132,7 +134,9 @@ export function SocialIconOnlyRow({
   return (
     <div className="bf-profile-icon-row mb-4 flex flex-wrap gap-3">
       {links.map((link) => {
+        const animation = resolveLinkAnimation(link, settings);
         const { animClass, hasAnim, animStyle } = buildLinkAnimationProps(link, settings);
+        const iconAnimClass = animation === "glow" ? "" : animClass;
         const hoverClass =
           settings.hover_animations && !hasAnim
             ? "transition-all duration-200 hover:scale-110"
@@ -146,10 +150,10 @@ export function SocialIconOnlyRow({
             rel="noopener noreferrer"
             onClick={() => trackLinkClick(profileId, link.id)}
             aria-label={link.title}
-            className={`flex items-center justify-center opacity-80 ${hoverClass} ${animClass}`}
-            style={animStyle}
+            className={`flex items-center justify-center opacity-80 ${hoverClass} ${iconAnimClass}`}
+            style={animation === "glow" ? undefined : animStyle}
           >
-            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
+            <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize, animation)} />
           </a>
         );
       })}

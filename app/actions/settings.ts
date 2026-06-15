@@ -159,7 +159,6 @@ function parseSectionUpdates(
         border_radius: parseIntField(formData.get("border_radius"), existing.border_radius),
         profile_opacity: parseIntField(formData.get("profile_opacity"), existing.profile_opacity),
         profile_blur: parseIntField(formData.get("profile_blur"), existing.profile_blur),
-        link_animation: String(formData.get("link_animation") ?? existing.link_animation) as LinkAnimation,
         profile_status: String(formData.get("profile_status") ?? existing.profile_status),
         profile_status_color: parseBool(formData.get("profile_status_use_accent"))
           ? ""
@@ -183,6 +182,7 @@ function parseSectionUpdates(
         links_icon_glow: parseBool(formData.get("links_icon_glow")),
         links_icon_shadow: parseBool(formData.get("links_icon_shadow")),
         links_icon_pulse: parseBool(formData.get("links_icon_pulse")),
+        link_animation: String(formData.get("link_animation") ?? existing.link_animation) as LinkAnimation,
       };
     case "background":
       return {

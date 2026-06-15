@@ -1,6 +1,6 @@
 import { getPlatformBrandColor } from "@/lib/platform-colors";
 import { isCustomLinkIcon, normalizeLinkIconKey } from "@/lib/links";
-import type { ProfileSettings } from "@/lib/types/settings";
+import type { LinkAnimation, ProfileSettings } from "@/lib/types/settings";
 
 export type LinkIconEffectProps = {
   glow: boolean;
@@ -32,42 +32,35 @@ export function getLinkIconEffectClassName(pulse: boolean) {
 }
 
 export function getLinkIconEffectFilterStyle({
-  glow,
   shadow,
-  glowColor,
   size = 20,
-}: LinkIconEffectProps & { size?: number }) {
-  const filters: string[] = [];
+}: Pick<LinkIconEffectProps, "shadow"> & { size?: number }) {
+  if (!shadow) return undefined;
 
-  if (shadow) {
-    filters.push("drop-shadow(0 2px 6px rgba(0,0,0,0.45))");
-  }
-
-  if (glow) {
-    const spread = Math.max(4, Math.round(size * 0.35));
-    filters.push(`drop-shadow(0 0 ${spread}px ${glowColor}aa)`);
-    filters.push(`drop-shadow(0 0 ${spread * 2}px ${glowColor}55)`);
-  }
-
-  return filters.length > 0 ? { filter: filters.join(" ") } : undefined;
+  return {
+    filter: `drop-shadow(0 2px ${Math.max(4, Math.round(size * 0.22))}px rgba(0,0,0,0.45))`,
+  };
 }
 
 export function buildLinkIconProps(
   platform: string,
   settings: ProfileSettings,
   size?: number,
+  linkAnimation?: LinkAnimation,
 ) {
   const iconSize = size ?? settings.links_icon_size;
   const effects = getLinkIconEffectsFromSettings(settings, platform);
+  const glowFromAnimation = linkAnimation === "glow";
 
   return {
     platform,
     size: iconSize,
     monochrome: settings.links_monochrome,
     monoColor: settings.text_color,
-    glow: effects.glow,
+    glow: effects.glow || glowFromAnimation,
     shadow: effects.shadow,
     pulse: effects.pulse,
     glowColor: effects.glowColor,
+    glowAnimated: glowFromAnimation,
   };
 }

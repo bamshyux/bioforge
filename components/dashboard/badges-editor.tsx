@@ -172,7 +172,7 @@ export function BadgesEditor({
               <ToggleField
                 name="badges_glow"
                 label="Badge glow"
-                description="Subtle color-matched glow around each badge seal"
+                description="Illuminated glow on each badge icon"
                 defaultChecked={settings.badges_glow ?? true}
               />
               <SliderField
