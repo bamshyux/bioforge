@@ -216,13 +216,15 @@ export async function updateSettingsAction(
 
   await revalidateProfile(userId);
 
-  const messages: Record<SettingsSection, string> = {
+  const messages: Partial<Record<SettingsSection, string>> = {
     customize: "Customization saved.",
     links: "Link settings saved.",
     background: "Background saved.",
     themes: "Theme saved.",
     music: "Music settings saved.",
     effects: "Effects saved.",
+    guestbook: "Guestbook settings saved.",
+    social: "Social settings saved.",
   };
 
   return { success: messages[section] ?? "Settings saved." };

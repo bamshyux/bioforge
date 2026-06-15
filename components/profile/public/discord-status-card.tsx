@@ -4,6 +4,7 @@ import { configFromProfileSettings } from "@/lib/discord/card-config";
 import { getDiscordStatusColor, getDiscordStatusLabel } from "@/lib/discord/status-colors";
 import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
 import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
+import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
 function ActivityBlock({
