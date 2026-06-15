@@ -383,6 +383,11 @@ body {
 
 .bf-profile-align {
   width: 100%;
+  min-width: 0;
+}
+
+[data-card-editor-root] {
+  min-width: 0;
 }
 
 .bf-profile-align--left {
@@ -498,6 +503,61 @@ body {
 .bf-profile-align--center .bf-profile-name-row {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Side-by-side avatar + identity rows: stack vertically so handle/meta stay on card center axis */
+.bf-profile-align--center .bf-profile-avatar-row:has(.bf-profile-name-row) {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bf-profile-align--center .bf-profile-avatar-row:has(.bf-profile-name-row) > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding-bottom: 0 !important;
+}
+
+.bf-profile-align--center .bf-profile-avatar-row:has(.bf-profile-name-row) .bf-profile-name-row {
+  justify-content: center;
+}
+
+.bf-profile-align--center .bf-profile-handle {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+}
+
+.bf-profile-align--right .bf-profile-avatar-row:has(.bf-profile-name-row) {
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: right;
+}
+
+.bf-profile-align--right .bf-profile-avatar-row:has(.bf-profile-name-row) > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding-bottom: 0 !important;
+}
+
+.bf-profile-align--right .bf-profile-avatar-row:has(.bf-profile-name-row) .bf-profile-name-row {
+  justify-content: flex-end;
+}
+
+.bf-profile-align--right .bf-profile-handle {
+  width: 100%;
+  max-width: 100%;
+  text-align: right;
 }
 
 .bf-profile-align--right .bf-profile-name-row {

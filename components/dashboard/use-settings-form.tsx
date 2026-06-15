@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { updateSettingsAction } from "@/app/actions/settings";
+import { updateSocialSettingsAction } from "@/app/actions/social";
 import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
 import type { ProfileSettings, SettingsFormState, SettingsSection } from "@/lib/types/settings";
 
@@ -101,6 +97,84 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
   );
 
   return { form, setForm, patchForm, submit, state, isPending };
+}
+
+type SocialFormValues = {
+  friends_visibility: string;
+  show_follow_counts: boolean;
+  show_activity: boolean;
+};
+
+function useFormActionSection<T extends SettingsFormValues>(
+  action: (prev: SettingsFormState, formData: FormData) => Promise<SettingsFormState>,
+  successMessage?: string,
+) {
+  const router = useRouter();
+  const [state, formAction, isPending] = useActionState(action, initial);
+  useClearUnsavedOnSuccess(state);
+
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [state.success, router]);
+
+  const submit = useCallback(
+    (values: T) => {
+      const fd = new FormData();
+      appendToFormData(fd, values);
+      formAction(fd);
+    },
+    [formAction],
+  );
+
+  const displaySuccess =
+    state.success === "Settings saved." && successMessage ? successMessage : state.success;
+
+  return { state: { ...state, success: displaySuccess }, submit, isPending };
+}
+
+export function useSocialDashboardSection(
+  settings: ProfileSettings,
+  readForm: (settings: ProfileSettings) => SocialFormValues,
+  successMessage = "Social settings saved.",
+) {
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+
+  const skipSyncRef = useRef(false);
+  const lastSyncedAt = useRef(settings.updated_at);
+  const [form, setForm] = useState(() => readForm(settings));
+
+  const { state, submit: rawSubmit, isPending } = useFormActionSection<SocialFormValues>(
+    updateSocialSettingsAction,
+    successMessage,
+  );
+
+  useEffect(() => {
+    if (skipSyncRef.current) {
+      skipSyncRef.current = false;
+      lastSyncedAt.current = settings.updated_at;
+      return;
+    }
+    if (settings.updated_at === lastSyncedAt.current) return;
+    lastSyncedAt.current = settings.updated_at;
+    setForm(readForm(settingsRef.current));
+  }, [settings.updated_at, readForm]);
+
+  const patchForm = useCallback((partial: Partial<SocialFormValues>) => {
+    setForm((prev) => ({ ...prev, ...partial }));
+  }, []);
+
+  const submit = useCallback(
+    (values: SocialFormValues) => {
+      skipSyncRef.current = true;
+      rawSubmit(values);
+    },
+    [rawSubmit],
+  );
+
+  return { form, patchForm, submit, state, isPending };
 }
 
 export function SaveConfirmation({

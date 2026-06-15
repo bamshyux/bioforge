@@ -39,7 +39,7 @@ export type LayoutProps = {
 
 export function ProfileHandle({ profile, className = "" }: { profile: Profile; className?: string }) {
   return (
-    <p className={`text-sm text-neutral-500 ${className}`.trim()}>
+    <p className={`bf-profile-handle text-sm text-neutral-500 ${className}`.trim()}>
       @{profile.username}
     </p>
   );

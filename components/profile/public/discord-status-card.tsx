@@ -4,6 +4,7 @@ import { configFromProfileSettings } from "@/lib/discord/card-config";
 import { getDiscordStatusColor, getDiscordStatusLabel } from "@/lib/discord/status-colors";
 import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
 import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
+import { DISCORD_LANYARD_INVITE_URL } from "@/lib/discord/messages";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
@@ -128,7 +129,7 @@ function LanyardHint({
     <p className={`border-t px-3 py-2 text-[11px] leading-relaxed ${hintBorderClass} ${secondaryClass}`}>
       Join{" "}
       <a
-        href="https://discord.gg/lanyard"
+        href={DISCORD_LANYARD_INVITE_URL}
         target="_blank"
         rel="noreferrer"
         className="hover:underline"
@@ -136,7 +137,7 @@ function LanyardHint({
       >
         discord.gg/lanyard
       </a>{" "}
-      for live activity.
+      with the same account for live activity. No commands needed.
     </p>
   );
 }

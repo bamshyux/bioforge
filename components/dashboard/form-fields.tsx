@@ -80,32 +80,42 @@ export function SliderField({
   min,
   max,
   defaultValue,
+  value,
+  onChange,
   unit = "",
 }: {
   name: string;
   label: string;
   min: number;
   max: number;
-  defaultValue: number;
+  defaultValue?: number;
+  value?: number;
+  onChange?: (value: number) => void;
   unit?: string;
 }) {
-  const [value, setValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState(defaultValue ?? min);
+  const isControlled = value !== undefined;
+  const resolvedValue = isControlled ? value : internalValue;
 
   return (
     <div className="bf-range-wrap">
       <label htmlFor={name} className={labelClassName}>
-        {label}: <span className="text-[var(--bf-accent)]">{value}{unit}</span>
+        {label}: <span className="text-[var(--bf-accent)]">{resolvedValue}{unit}</span>
       </label>
       <input
         id={name}
-        name={name}
+        name={isControlled ? undefined : name}
         type="range"
         min={min}
         max={max}
-        value={value}
-        onChange={(e) => setValue(Number(e.target.value))}
+        value={resolvedValue}
+        onChange={(e) => {
+          const next = Number(e.target.value);
+          if (!isControlled) setInternalValue(next);
+          onChange?.(next);
+        }}
         className={rangeClassName}
-        style={rangeFillStyle(value, min, max)}
+        style={rangeFillStyle(resolvedValue, min, max)}
       />
     </div>
   );
@@ -115,21 +125,29 @@ export function ColorField({
   name,
   label,
   defaultValue,
+  value,
+  onChange,
 }: {
   name: string;
   label: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
-  const hex = defaultValue.startsWith("#") ? defaultValue : "#fafafa";
+  const fallback = defaultValue ?? value ?? "#fafafa";
+  const hex = (value ?? fallback).startsWith("#") ? (value ?? fallback) : "#fafafa";
+  const isControlled = value !== undefined;
 
   return (
     <div>
       <label htmlFor={name} className={labelClassName}>{label}</label>
       <input
         id={name}
-        name={name}
+        name={isControlled ? undefined : name}
         type="color"
-        defaultValue={hex}
+        value={isControlled ? hex : undefined}
+        defaultValue={isControlled ? undefined : hex}
+        onChange={isControlled ? (e) => onChange?.(e.target.value) : undefined}
         className="h-10 w-full cursor-pointer rounded-lg border border-white/[0.06] bg-[#090909]"
       />
     </div>
@@ -140,17 +158,30 @@ export function SelectField({
   name,
   label,
   defaultValue,
+  value,
+  onChange,
   options,
 }: {
   name: string;
   label: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
+  const isControlled = value !== undefined;
+
   return (
     <div>
       <label htmlFor={name} className={labelClassName}>{label}</label>
-      <select id={name} name={name} defaultValue={defaultValue} className={inputClassName}>
+      <select
+        id={name}
+        name={isControlled ? undefined : name}
+        value={isControlled ? value : undefined}
+        defaultValue={isControlled ? undefined : defaultValue}
+        onChange={isControlled ? (e) => onChange?.(e.target.value) : undefined}
+        className={inputClassName}
+      >
         {options.map((o) => (
           <option key={o.value} value={o.value} className="bg-[#141414]">{o.label}</option>
         ))}

@@ -1,22 +1,27 @@
 "use client";
 
-import { useActionState } from "react";
 import { useRouter } from "next/navigation";
+import { respondFriendRequestAction } from "@/app/actions/social";
 import {
-  respondFriendRequestAction,
-  updateSocialSettingsAction,
-} from "@/app/actions/social";
+  SaveConfirmation,
+  useSocialDashboardSection,
+} from "@/components/dashboard/use-settings-form";
+import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
   buttonPrimaryClassName,
   cardClassName,
-  FormFeedback,
   PageHeader,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
-import type { ProfileSettings, SettingsFormState } from "@/lib/types/settings";
+import type { ProfileSettings } from "@/lib/types/settings";
 
-const initial: SettingsFormState = {};
+function readSocialForm(settings: ProfileSettings) {
+  return {
+    friends_visibility: settings.friends_visibility,
+    show_follow_counts: settings.show_follow_counts,
+    show_activity: settings.show_activity,
+  };
+}
 
 export function SocialEditor({
   settings,
@@ -30,8 +35,16 @@ export function SocialEditor({
   followingCount: number;
 }) {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(updateSocialSettingsAction, initial);
-  useSettingsRefresh(state);
+  const { form, patchForm, submit, state, isPending } = useSocialDashboardSection(
+    settings,
+    readSocialForm,
+    "Social settings saved.",
+  );
+
+  const handleSave = (event: React.FormEvent) => {
+    event.preventDefault();
+    submit(form);
+  };
 
   return (
     <>
@@ -48,28 +61,32 @@ export function SocialEditor({
       </div>
 
       <div className={`${cardClassName} mb-6`}>
-        <form action={formAction} data-dashboard-primary-form className="space-y-4">
+        <form onSubmit={handleSave} data-dashboard-primary-form className="space-y-4">
           <ToggleField
             name="show_follow_counts"
             label="Show followers & following"
             description="Display follower and following counts on your public profile"
-            defaultChecked={settings.show_follow_counts}
+            checked={form.show_follow_counts}
+            onCheckedChange={(show_follow_counts) => patchForm({ show_follow_counts })}
           />
           <ToggleField
             name="show_activity"
             label="Show recent activity"
             description="Display your recent profile activity feed on your public profile"
-            defaultChecked={settings.show_activity}
+            checked={form.show_activity}
+            onCheckedChange={(show_activity) => patchForm({ show_activity })}
           />
-          <div>
-            <label htmlFor="friends_visibility" className="mb-1.5 block text-[13px] font-medium text-neutral-400">Friends list visibility</label>
-            <select id="friends_visibility" name="friends_visibility" defaultValue={settings.friends_visibility} className="bf-input w-full">
-              <option value="public">Public</option>
-              <option value="friends">Friends only</option>
-              <option value="private">Private</option>
-            </select>
-          </div>
-          <FormFeedback error={state.error} success={state.success} />
+          <ControlledSelect
+            label="Friends list visibility"
+            value={form.friends_visibility}
+            onChange={(friends_visibility) => patchForm({ friends_visibility })}
+            options={[
+              { value: "public", label: "Public" },
+              { value: "friends", label: "Friends only" },
+              { value: "private", label: "Private" },
+            ]}
+          />
+          <SaveConfirmation success={state.success} error={state.error} />
           <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
             {isPending ? "Saving..." : "Save social settings"}
           </button>

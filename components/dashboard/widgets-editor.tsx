@@ -24,6 +24,7 @@ import { configFromProfileSettings } from "@/lib/discord/card-config";
 import { isDiscordConnected } from "@/lib/discord/connection";
 import { buildFallbackDiscordPresence } from "@/lib/discord/fallback-presence";
 import { getDiscordAvatarUrl } from "@/lib/discord/config";
+import { DISCORD_LANYARD_INVITE_URL, DISCORD_LANYARD_LIVE_STATUS_HINT } from "@/lib/discord/messages";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
@@ -44,9 +45,11 @@ const DISCORD_MESSAGES: Record<string, { type: "success" | "error"; text: string
 export function WidgetsEditor({
   settings,
   oauthConfigured,
+  onLanyard = false,
 }: {
   settings: ProfileSettings;
   oauthConfigured: boolean;
+  onLanyard?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -137,6 +140,20 @@ export function WidgetsEditor({
           </div>
         </div>
 
+        {connected && !onLanyard ? (
+          <div className="mb-4 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+            {DISCORD_LANYARD_LIVE_STATUS_HINT}{" "}
+            <a
+              href={DISCORD_LANYARD_INVITE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-amber-50 underline underline-offset-2 hover:text-white"
+            >
+              Join Lanyard
+            </a>
+          </div>
+        ) : null}
+
         {connected ? (
           <div className="mb-4 flex items-center gap-3 rounded-lg border border-white/[0.06] bg-[#0f0f0f] p-4">
             {avatarUrl && (
@@ -214,11 +231,8 @@ export function WidgetsEditor({
               <a href="https://lanyard.rest" target="_blank" rel="noreferrer" className="text-[var(--bf-accent)] hover:underline">
                 Lanyard
               </a>
-              . Join the{" "}
-              <a href="https://discord.gg/lanyard" target="_blank" rel="noreferrer" className="text-[var(--bf-accent)] hover:underline">
-                Lanyard Discord server
-              </a>{" "}
-              with the same account — no commands needed. You can mute the server after joining.
+              .{" "}
+              {DISCORD_LANYARD_LIVE_STATUS_HINT}
             </p>
 
             <div className="mt-6 border-t border-white/[0.06] pt-4">

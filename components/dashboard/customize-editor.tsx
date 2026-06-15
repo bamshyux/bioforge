@@ -1,66 +1,109 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { updateSettingsAction } from "@/app/actions/settings";
-import { FONT_OPTIONS, LINK_ANIMATION_OPTIONS, CONTENT_ALIGNMENT_OPTIONS } from "@/lib/settings";
-import {
-  getLayoutLabelHint,
-  getLayoutLabelPlaceholder,
-  layoutSupportsCustomLabel,
-} from "@/lib/layout-labels";
-import type { ContentAlignment, LinkAnimation, ProfileLayout, ProfileSettings, SettingsFormState } from "@/lib/types/settings";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
+import {
+  SaveConfirmation,
+  useDashboardSettingsSection,
+} from "@/components/dashboard/use-settings-form";
 import {
   buttonPrimaryClassName,
   cardClassName,
   ColorField,
-  FormFeedback,
   inputClassName,
   labelClassName,
   PageHeader,
   SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
-import { useUnsavedChanges } from "@/components/dashboard/unsaved-changes";
+import { FONT_OPTIONS, LINK_ANIMATION_OPTIONS, CONTENT_ALIGNMENT_OPTIONS } from "@/lib/settings";
+import {
+  getLayoutLabelHint,
+  getLayoutLabelPlaceholder,
+  layoutSupportsCustomLabel,
+} from "@/lib/layout-labels";
+import type { ContentAlignment, LinkAnimation, ProfileLayout, ProfileSettings } from "@/lib/types/settings";
 
-const initial: SettingsFormState = {};
+type CustomizeFormState = {
+  accent_color: string;
+  text_color: string;
+  font_family: string;
+  content_alignment: ContentAlignment;
+  layout_label: string;
+  border_radius: number;
+  profile_opacity: number;
+  profile_blur: number;
+  glassmorphism: boolean;
+  neon_glow: boolean;
+  hide_card_border: boolean;
+  show_view_count: boolean;
+  show_join_date: boolean;
+  profile_parallax: boolean;
+  profile_status: string;
+  profile_status_use_accent: boolean;
+  profile_status_color: string;
+  link_animation: LinkAnimation;
+};
+
+function readCustomizeForm(settings: ProfileSettings): CustomizeFormState {
+  return {
+    accent_color: settings.accent_color,
+    text_color: settings.text_color,
+    font_family: settings.font_family,
+    content_alignment: settings.content_alignment,
+    layout_label: settings.layout_label,
+    border_radius: settings.border_radius,
+    profile_opacity: settings.profile_opacity,
+    profile_blur: settings.profile_blur,
+    glassmorphism: settings.glassmorphism,
+    neon_glow: settings.neon_glow,
+    hide_card_border: settings.hide_card_border,
+    show_view_count: settings.show_view_count,
+    show_join_date: settings.show_join_date,
+    profile_parallax: settings.profile_parallax,
+    profile_status: settings.profile_status,
+    profile_status_use_accent: !settings.profile_status_color?.trim(),
+    profile_status_color: settings.profile_status_color || settings.accent_color,
+    link_animation: settings.link_animation,
+  };
+}
 
 export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
-  const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
-  useSettingsRefresh(state);
-  const { markDirty, setLastDirtyForm } = useUnsavedChanges();
-  const formRef = useRef<HTMLFormElement>(null);
+  const { form, patchForm, submit, state, isPending } = useDashboardSettingsSection(
+    "customize",
+    settings,
+    readCustomizeForm,
+    "Customization saved.",
+  );
 
-  const [fontFamily, setFontFamily] = useState(settings.font_family);
-  const [linkAnimation, setLinkAnimation] = useState(settings.link_animation);
-  const [contentAlignment, setContentAlignment] = useState<ContentAlignment>(settings.content_alignment);
-  const [statusUseAccent, setStatusUseAccent] = useState(!settings.profile_status_color?.trim());
-
-  useEffect(() => {
-    setFontFamily(settings.font_family);
-    setLinkAnimation(settings.link_animation);
-    setContentAlignment(settings.content_alignment);
-    setStatusUseAccent(!settings.profile_status_color?.trim());
-  }, [settings.updated_at]);
+  const handleSave = (event: React.FormEvent) => {
+    event.preventDefault();
+    submit(form);
+  };
 
   return (
     <>
       <PageHeader title="Customize" description="Colors, typography, card styling, and profile display options." />
       <div className={cardClassName}>
-        <form ref={formRef} action={formAction} data-dashboard-primary-form className="space-y-6">
-          <input type="hidden" name="_section" value="customize" />
-
+        <form onSubmit={handleSave} data-dashboard-primary-form className="space-y-6">
           <div className="grid gap-5 sm:grid-cols-2">
-            <ColorField name="accent_color" label="Accent color" defaultValue={settings.accent_color} />
-            <ColorField name="text_color" label="Text color" defaultValue={settings.text_color} />
+            <ColorField
+              name="accent_color"
+              label="Accent color"
+              value={form.accent_color}
+              onChange={(accent_color) => patchForm({ accent_color })}
+            />
+            <ColorField
+              name="text_color"
+              label="Text color"
+              value={form.text_color}
+              onChange={(text_color) => patchForm({ text_color })}
+            />
           </div>
 
           <ControlledSelect
-            name="font_family"
             label="Font"
-            value={fontFamily}
-            onChange={(v) => setFontFamily(v)}
+            value={form.font_family}
+            onChange={(font_family) => patchForm({ font_family })}
             options={FONT_OPTIONS.map((f) => ({ value: f.value, label: f.label }))}
           />
 
@@ -71,16 +114,12 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
             </p>
             <div className="grid grid-cols-3 gap-2">
               {CONTENT_ALIGNMENT_OPTIONS.map((option) => {
-                const active = contentAlignment === option.value;
+                const active = form.content_alignment === option.value;
                 return (
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => {
-                      setContentAlignment(option.value);
-                      if (formRef.current) setLastDirtyForm(formRef.current);
-                      markDirty();
-                    }}
+                    onClick={() => patchForm({ content_alignment: option.value })}
                     className={`rounded-lg border px-3 py-2.5 text-sm transition-colors ${
                       active
                         ? "border-[var(--bf-accent)]/40 bg-[var(--bf-accent)]/10 text-white"
@@ -92,17 +131,18 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
                 );
               })}
             </div>
-            <input type="hidden" name="content_alignment" value={contentAlignment} />
           </div>
 
           {layoutSupportsCustomLabel(settings.layout) && (
             <div>
-              <label htmlFor="layout_label" className={labelClassName}>Layout label</label>
+              <label htmlFor="layout_label" className={labelClassName}>
+                Layout label
+              </label>
               <input
                 id="layout_label"
-                name="layout_label"
                 type="text"
-                defaultValue={settings.layout_label}
+                value={form.layout_label}
+                onChange={(e) => patchForm({ layout_label: e.target.value })}
                 placeholder={getLayoutLabelPlaceholder(settings.layout as ProfileLayout)}
                 maxLength={64}
                 className={inputClassName}
@@ -114,63 +154,118 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
           )}
 
           <div className="grid gap-5 sm:grid-cols-3">
-            <SliderField name="border_radius" label="Corner radius" min={0} max={48} defaultValue={settings.border_radius} unit="px" />
-            <SliderField name="profile_opacity" label="Card opacity" min={0} max={100} defaultValue={settings.profile_opacity} unit="%" />
-            <SliderField name="profile_blur" label="Blur" min={0} max={40} defaultValue={settings.profile_blur} unit="px" />
+            <SliderField
+              name="border_radius"
+              label="Corner radius"
+              min={0}
+              max={48}
+              value={form.border_radius}
+              onChange={(border_radius) => patchForm({ border_radius })}
+              unit="px"
+            />
+            <SliderField
+              name="profile_opacity"
+              label="Card opacity"
+              min={0}
+              max={100}
+              value={form.profile_opacity}
+              onChange={(profile_opacity) => patchForm({ profile_opacity })}
+              unit="%"
+            />
+            <SliderField
+              name="profile_blur"
+              label="Blur"
+              min={0}
+              max={40}
+              value={form.profile_blur}
+              onChange={(profile_blur) => patchForm({ profile_blur })}
+              unit="px"
+            />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <ToggleField name="glassmorphism" label="Glassmorphism" defaultChecked={settings.glassmorphism} />
-            <ToggleField name="neon_glow" label="Accent glow" defaultChecked={settings.neon_glow} />
-            <ToggleField name="hide_card_border" label="Hide card border" description="Removes the card outline — useful at 0% opacity" defaultChecked={settings.hide_card_border} />
-            <ToggleField name="show_view_count" label="Show view count" defaultChecked={settings.show_view_count} />
-            <ToggleField name="show_join_date" label="Show join date" defaultChecked={settings.show_join_date} />
+            <ToggleField
+              name="glassmorphism"
+              label="Glassmorphism"
+              checked={form.glassmorphism}
+              onCheckedChange={(glassmorphism) => patchForm({ glassmorphism })}
+            />
+            <ToggleField
+              name="neon_glow"
+              label="Accent glow"
+              checked={form.neon_glow}
+              onCheckedChange={(neon_glow) => patchForm({ neon_glow })}
+            />
+            <ToggleField
+              name="hide_card_border"
+              label="Hide card border"
+              description="Removes the card outline — useful at 0% opacity"
+              checked={form.hide_card_border}
+              onCheckedChange={(hide_card_border) => patchForm({ hide_card_border })}
+            />
+            <ToggleField
+              name="show_view_count"
+              label="Show view count"
+              checked={form.show_view_count}
+              onCheckedChange={(show_view_count) => patchForm({ show_view_count })}
+            />
+            <ToggleField
+              name="show_join_date"
+              label="Show join date"
+              checked={form.show_join_date}
+              onCheckedChange={(show_join_date) => patchForm({ show_join_date })}
+            />
             <ToggleField
               name="profile_parallax"
               label="Parallax profile animation"
               description="Tilt your profile card when visitors hover over it"
-              defaultChecked={settings.profile_parallax}
+              checked={form.profile_parallax}
+              onCheckedChange={(profile_parallax) => patchForm({ profile_parallax })}
             />
           </div>
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="profile_status" className={labelClassName}>Status text</label>
+              <label htmlFor="profile_status" className={labelClassName}>
+                Status text
+              </label>
               <input
                 id="profile_status"
-                name="profile_status"
                 type="text"
-                defaultValue={settings.profile_status}
+                value={form.profile_status}
+                onChange={(e) => patchForm({ profile_status: e.target.value })}
                 placeholder="Living · Building · Streaming"
                 className={inputClassName}
               />
-              <p className="mt-1.5 text-xs text-neutral-600">Shown next to a colored dot below your username on your profile</p>
+              <p className="mt-1.5 text-xs text-neutral-600">
+                Shown next to a colored dot below your username on your profile
+              </p>
             </div>
             <ToggleField
               name="profile_status_use_accent"
               label="Use profile accent for status dot"
               description="When off, pick a custom color for your status indicator"
-              defaultChecked={statusUseAccent}
-              onCheckedChange={setStatusUseAccent}
+              checked={form.profile_status_use_accent}
+              onCheckedChange={(profile_status_use_accent) => patchForm({ profile_status_use_accent })}
             />
-            {!statusUseAccent && (
+            {!form.profile_status_use_accent && (
               <ColorField
                 name="profile_status_color"
                 label="Status dot color"
-                defaultValue={settings.profile_status_color || settings.accent_color}
+                value={form.profile_status_color}
+                onChange={(profile_status_color) => patchForm({ profile_status_color })}
               />
             )}
           </div>
 
           <ControlledSelect
-            name="link_animation"
             label="Default link animation"
-            value={linkAnimation}
-            onChange={(v) => setLinkAnimation(v as LinkAnimation)}
+            value={form.link_animation}
+            onChange={(link_animation) => patchForm({ link_animation: link_animation as LinkAnimation })}
             options={LINK_ANIMATION_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
           />
 
-          <FormFeedback error={state.error} success={state.success} />
+          <SaveConfirmation success={state.success} error={state.error} />
           <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
             {isPending ? "Saving..." : "Save customization"}
           </button>

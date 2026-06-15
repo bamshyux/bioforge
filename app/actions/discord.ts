@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { fetchLanyardDiscordUser } from "@/lib/discord/lanyard";
+import { DISCORD_LANYARD_SAVE_ERROR } from "@/lib/discord/messages";
 import { isDiscordLinked, isValidDiscordUserId, needsDiscordProfileRefresh } from "@/lib/discord/connection";
 import {
   removeDiscordStatusWidget,
@@ -110,10 +111,7 @@ export async function saveDiscordUserIdAction(discordUserId: string): Promise<{ 
 
   const lanyardUser = await fetchLanyardDiscordUser(trimmed);
   if (!lanyardUser?.username) {
-    return {
-      error:
-        "Could not resolve your Discord username. Connect with OAuth, or join discord.gg/lanyard with that account first.",
-    };
+    return { error: DISCORD_LANYARD_SAVE_ERROR };
   }
 
   const patch = await omitUnsupportedSettingsColumns({

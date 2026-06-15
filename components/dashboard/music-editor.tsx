@@ -1,9 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { removeMusicAction, saveMusicAction, updateSettingsAction } from "@/app/actions/settings";
-import type { ProfileSettings, SettingsFormState } from "@/lib/types/settings";
+import { removeMusicAction, saveMusicAction } from "@/app/actions/settings";
+import {
+  SaveConfirmation,
+  useDashboardSettingsSection,
+} from "@/components/dashboard/use-settings-form";
+import type { ProfileSettings } from "@/lib/types/settings";
 import { uploadMusicToStorage } from "@/lib/uploads/music-client";
 import {
   buttonPrimaryClassName,
@@ -16,12 +20,29 @@ import {
   SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { useSettingsRefresh } from "@/components/dashboard/use-settings-refresh";
-
-const initial: SettingsFormState = {};
 
 const fileInputClassName =
   "block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]";
+
+type MusicFormState = {
+  music_title: string;
+  music_volume: number;
+  music_use_accent: boolean;
+  music_player_color: string;
+  music_autoplay: boolean;
+  music_loop: boolean;
+};
+
+function readMusicForm(settings: ProfileSettings): MusicFormState {
+  return {
+    music_title: settings.music_title,
+    music_volume: settings.music_volume,
+    music_use_accent: !settings.music_player_color?.trim(),
+    music_player_color: settings.music_player_color || settings.accent_color,
+    music_autoplay: settings.music_autoplay,
+    music_loop: settings.music_loop,
+  };
+}
 
 export function MusicEditor({
   settings,
@@ -32,17 +53,20 @@ export function MusicEditor({
 }) {
   const router = useRouter();
   const [isRemoving, startRemove] = useTransition();
-  const [musicUseAccent, setMusicUseAccent] = useState(!settings.music_player_color?.trim());
-  const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
+  const { form, patchForm, submit, state, isPending } = useDashboardSettingsSection(
+    "music",
+    settings,
+    readMusicForm,
+    "Music settings saved.",
+  );
   const [uploadError, setUploadError] = useState<string>();
   const [uploadSuccess, setUploadSuccess] = useState<string>();
   const [uploadPending, setUploadPending] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
-  useSettingsRefresh(state);
 
   useEffect(() => {
-    setMusicUseAccent(!settings.music_player_color?.trim());
-  }, [settings.updated_at, settings.music_player_color]);
+    setUploadError(undefined);
+  }, [settings.music_url]);
 
   const handleMusicUpload = async (file: File | undefined) => {
     if (!file) return;
@@ -82,6 +106,11 @@ export function MusicEditor({
         setUploadError(result.error);
       }
     });
+  };
+
+  const handleSave = (event: React.FormEvent) => {
+    event.preventDefault();
+    submit(form);
   };
 
   return (
@@ -129,16 +158,17 @@ export function MusicEditor({
         </div>
 
         <div className={cardClassName}>
-          <form action={formAction} data-dashboard-primary-form className="space-y-5">
-            <input type="hidden" name="_section" value="music" />
+          <form onSubmit={handleSave} data-dashboard-primary-form className="space-y-5">
             <div>
-              <label htmlFor="music_title" className={labelClassName}>Song title</label>
+              <label htmlFor="music_title" className={labelClassName}>
+                Song title
+              </label>
               {musicTitleSupported ? (
                 <input
                   id="music_title"
-                  name="music_title"
                   type="text"
-                  defaultValue={settings.music_title}
+                  value={form.music_title}
+                  onChange={(e) => patchForm({ music_title: e.target.value })}
                   placeholder="Track name"
                   className="bf-input w-full"
                 />
@@ -159,26 +189,45 @@ export function MusicEditor({
                 </>
               )}
             </div>
-            <SliderField name="music_volume" label="Volume" min={0} max={100} defaultValue={settings.music_volume} unit="%" />
+            <SliderField
+              name="music_volume"
+              label="Volume"
+              min={0}
+              max={100}
+              value={form.music_volume}
+              onChange={(music_volume) => patchForm({ music_volume })}
+              unit="%"
+            />
             <ToggleField
               name="music_use_accent"
               label="Use profile accent color"
               description="When off, pick a custom color for the player button and volume slider"
-              defaultChecked={musicUseAccent}
-              onCheckedChange={setMusicUseAccent}
+              checked={form.music_use_accent}
+              onCheckedChange={(music_use_accent) => patchForm({ music_use_accent })}
             />
-            {!musicUseAccent && (
+            {!form.music_use_accent && (
               <ColorField
                 name="music_player_color"
                 label="Player accent color"
-                defaultValue={settings.music_player_color || settings.accent_color}
+                value={form.music_player_color}
+                onChange={(music_player_color) => patchForm({ music_player_color })}
               />
             )}
             <div className="grid gap-3 sm:grid-cols-2">
-              <ToggleField name="music_autoplay" label="Autoplay" defaultChecked={settings.music_autoplay} />
-              <ToggleField name="music_loop" label="Loop" defaultChecked={settings.music_loop} />
+              <ToggleField
+                name="music_autoplay"
+                label="Autoplay"
+                checked={form.music_autoplay}
+                onCheckedChange={(music_autoplay) => patchForm({ music_autoplay })}
+              />
+              <ToggleField
+                name="music_loop"
+                label="Loop"
+                checked={form.music_loop}
+                onCheckedChange={(music_loop) => patchForm({ music_loop })}
+              />
             </div>
-            <FormFeedback error={state.error} success={state.success} />
+            <SaveConfirmation success={state.success} error={state.error} />
             <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
               {isPending ? "Saving..." : "Save playback settings"}
             </button>
