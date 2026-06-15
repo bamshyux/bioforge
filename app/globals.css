@@ -228,6 +228,27 @@ body {
   animation: bf-link-icon-pulse 2.4s ease-in-out infinite;
 }
 
+.bf-link-icon-glow--animated {
+  animation: bf-link-icon-glow-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes bf-link-icon-glow-pulse {
+  0%, 100% {
+    filter:
+      brightness(1.08)
+      saturate(1.12)
+      drop-shadow(0 0 2px rgba(var(--bf-link-glow-rgb, 255, 255, 255), 0.78))
+      drop-shadow(0 0 5px rgba(var(--bf-link-glow-rgb, 255, 255, 255), 0.46));
+  }
+  50% {
+    filter:
+      brightness(1.16)
+      saturate(1.22)
+      drop-shadow(0 0 4px rgba(var(--bf-link-glow-rgb, 255, 255, 255), 0.96))
+      drop-shadow(0 0 9px rgba(var(--bf-link-glow-rgb, 255, 255, 255), 0.58));
+  }
+}
+
 .bf-enter-gate {
   animation: bf-enter-gate-in 0.35s ease-out forwards;
 }

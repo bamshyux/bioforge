@@ -3,11 +3,11 @@ import type { SocialPlatformId } from "@/lib/social-platforms";
 import { SOCIAL_PLATFORMS } from "@/lib/social-platforms";
 import { isCustomLinkIcon, normalizeLinkIconKey } from "@/lib/links";
 import {
+  buildLinkIconGlowVars,
   getLinkIconEffectClassName,
   getLinkIconEffectFilterStyle,
 } from "@/lib/link-icon-effects";
 import { getPlatformBrandColor } from "@/lib/platform-colors";
-import { SelfGlow } from "@/components/ui/self-glow";
 import {
   SiDiscord,
   SiFacebook,
@@ -73,59 +73,48 @@ export function LinkIcon({
 }: LinkIconProps) {
   const platformKey = normalizeLinkIconKey(platform);
   const resolvedGlowColor = glowColor ?? getPlatformBrandColor(platformKey);
-  const shadowStyle = getLinkIconEffectFilterStyle({ shadow, size });
-  const effectClass = getLinkIconEffectClassName(pulse);
+  const hasGlow = glow || glowAnimated;
+  const effectClass = getLinkIconEffectClassName(pulse, glowAnimated);
+  const filterStyle = getLinkIconEffectFilterStyle({
+    glow: hasGlow,
+    shadow,
+    glowColor: resolvedGlowColor,
+    size,
+    glowAnimated,
+  });
+  const glowVarStyle = glowAnimated ? buildLinkIconGlowVars(resolvedGlowColor) : undefined;
 
-  let icon: ReactNode;
+  const wrapperStyle = {
+    ...filterStyle,
+    ...glowVarStyle,
+    lineHeight: 0,
+  };
 
   if (isCustomLinkIcon(platformKey)) {
-    icon = (
-      <img
-        src={platformKey}
-        alt=""
-        className="h-full w-full object-cover"
-        style={
-          monochrome
-            ? { filter: "grayscale(1) brightness(1.15)", opacity: 0.95 }
-            : undefined
-        }
-      />
-    );
-  } else {
-    const Icon = PLATFORM_ICONS[platformKey] ?? LuLink;
-    const color = monochrome && monoColor ? monoColor : getPlatformBrandColor(platformKey);
-    icon = (
-      <span style={{ color, lineHeight: 0 }}>
-        <Icon size={size} aria-hidden />
+    return (
+      <span className={`inline-flex shrink-0 ${effectClass}`} style={wrapperStyle}>
+        <img
+          src={platformKey}
+          alt=""
+          width={size}
+          height={size}
+          className="block object-contain"
+          style={
+            monochrome
+              ? { filter: "grayscale(1) brightness(1.15)", opacity: 0.95 }
+              : undefined
+          }
+        />
       </span>
     );
   }
 
-  const rounded = isCustomLinkIcon(platformKey) ? "md" : "none";
-
-  const content = glow ? (
-    <SelfGlow
-      enabled
-      color={resolvedGlowColor}
-      size={size}
-      strength="normal"
-      rounded={rounded}
-      animated={glowAnimated}
-    >
-      {icon}
-    </SelfGlow>
-  ) : (
-    <span
-      className={`inline-flex shrink-0 items-center justify-center ${isCustomLinkIcon(platformKey) ? "overflow-hidden rounded-md" : ""}`}
-      style={{ width: size, height: size }}
-    >
-      {icon}
-    </span>
-  );
+  const Icon = PLATFORM_ICONS[platformKey] ?? LuLink;
+  const color = monochrome && monoColor ? monoColor : getPlatformBrandColor(platformKey);
 
   return (
-    <span className={`inline-flex shrink-0 items-center justify-center ${effectClass}`} style={shadowStyle}>
-      {content}
+    <span className={`inline-flex shrink-0 ${effectClass}`} style={{ ...wrapperStyle, color }}>
+      <Icon size={size} aria-hidden />
     </span>
   );
 }
