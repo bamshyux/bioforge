@@ -18,7 +18,7 @@ import type { ProfileSettings } from "@/lib/types/settings";
 import { BioForgeLogo } from "@/components/brand/logo";
 import { AnalyticsTracker } from "./analytics-tracker";
 import { BadgeRow } from "@/components/badges/badge-ui";
-import { preparePublicBadges, prepareUsernameBadges, buildBadgeStyleOptions } from "@/lib/badges/display";
+import { preparePublicBadges, buildBadgeStyleOptions } from "@/lib/badges/display";
 import { MusicPlayer } from "./music-player";
 import { ParticleCanvas } from "./particle-canvas";
 import { ProfileBackground } from "./profile-background";
@@ -199,27 +199,9 @@ function ProfileMainContent(props: Omit<LayoutProps, "badges" | "viewCount"> & {
 
 function getLayoutBadges(badges: ProfileBadge[], settings: ProfileSettings) {
   return {
-    publicBadges: preparePublicBadges(badges, settings),
-    usernameBadges: prepareUsernameBadges(badges, settings),
+    displayBadges: preparePublicBadges(badges, settings),
     styleOptions: buildBadgeStyleOptions(settings),
   };
-}
-
-function ProfileBadgeSection({
-  badges,
-  styleOptions,
-  className = "",
-}: {
-  badges: ProfileBadge[];
-  styleOptions?: import("@/lib/badges/display").BadgeStyleOptions;
-  className?: string;
-}) {
-  if (badges.length === 0) return null;
-  return (
-    <div className={`relative z-10 mb-4 overflow-visible bf-profile-row ${className}`.trim()}>
-      <BadgeRow badges={badges} styleOptions={styleOptions} />
-    </div>
-  );
 }
 
 function bannerTopRadius(borderRadius: number) {
@@ -231,7 +213,7 @@ function bannerTopRadius(borderRadius: number) {
 
 function ClassicLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full" style={buildCardStyle(settings)}>
@@ -248,14 +230,12 @@ function ClassicLayout({ profile, links, settings, badges, viewCount, embeds, fe
           <div className="pb-1">
             <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
               <Username name={displayName} settings={settings} profile={profile} />
-              <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+              <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
             </div>
             <ProfileHandle profile={profile} className="mb-3" />
           </div>
         </div>
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
-
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -264,7 +244,7 @@ function ClassicLayout({ profile, links, settings, badges, viewCount, embeds, fe
 
 function ModernLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full px-6 py-10" style={buildCardStyle(settings)}>
@@ -273,13 +253,10 @@ function ModernLayout({ profile, links, settings, badges, viewCount, embeds, fea
       </div>
       <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
         <Username name={displayName} settings={settings} profile={profile} />
-        <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+        <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
       </div>
       <ProfileHandle profile={profile} className="mb-4" />
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-      <div className="bf-profile-row mb-4 flex">
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
-      </div>
       <div className="bf-profile-block max-w-md">
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
@@ -289,7 +266,7 @@ function ModernLayout({ profile, links, settings, badges, viewCount, embeds, fea
 
 function GamingLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full" style={{ ...buildCardStyle(settings), borderRadius: Math.min(settings.border_radius, 6) }}>
@@ -301,11 +278,10 @@ function GamingLayout({ profile, links, settings, badges, viewCount, embeds, fea
         <div>
           <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
             <Username name={displayName} settings={settings} profile={profile} />
-            <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+            <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
           </div>
           <ProfileHandle profile={profile} className="mb-3" />
           <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-          <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         </div>
       </div>
       <div className="space-y-2 px-5 pb-5">
@@ -317,7 +293,7 @@ function GamingLayout({ profile, links, settings, badges, viewCount, embeds, fea
 
 function PortfolioLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="grid w-full md:grid-cols-[180px_1fr]" style={buildCardStyle(settings)}>
@@ -327,12 +303,10 @@ function PortfolioLayout({ profile, links, settings, badges, viewCount, embeds, 
       <div className="p-6">
         <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
-          <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mb-3" />
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
-
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -341,18 +315,16 @@ function PortfolioLayout({ profile, links, settings, badges, viewCount, embeds, 
 
 function MinimalLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full py-6">
       <div className="relative z-10 mb-2 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
         <Username name={displayName} settings={settings} profile={profile} />
-        <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+        <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
       </div>
       <ProfileHandle profile={profile} className="mb-3" />
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-      <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
-
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
     </div>
   );
@@ -360,7 +332,7 @@ function MinimalLayout({ profile, links, settings, badges, viewCount, embeds, fe
 
 function StackedLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full overflow-visible" style={buildCardStyle(settings)}>
@@ -377,14 +349,11 @@ function StackedLayout({ profile, links, settings, badges, viewCount, embeds, fe
         </div>
         <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
-          <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mb-4" />
         <div className="bf-profile-row flex">
           <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        </div>
-        <div className="bf-profile-row mt-2 flex">
-          <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         </div>
 
         <div className="bf-profile-block max-w-md">
@@ -397,7 +366,7 @@ function StackedLayout({ profile, links, settings, badges, viewCount, embeds, fe
 
 function SplitLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div
@@ -427,11 +396,10 @@ function SplitLayout({ profile, links, settings, badges, viewCount, embeds, feat
       <div className="split-layout__content flex flex-col justify-center p-6">
         <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
-          <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mb-3" />
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -461,7 +429,7 @@ function TerminalSection({
 
 function TerminalLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
   const title = profile.username ? `@${profile.username}` : "profile";
 
   return (
@@ -482,16 +450,12 @@ function TerminalLayout({ profile, links, settings, badges, viewCount, embeds, f
           <div className="min-w-0 flex-1">
             <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
               <h1 className="text-lg font-semibold tracking-tight text-white">{displayName}</h1>
-              <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+              <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
             </div>
             <ProfileHandle profile={profile} className="mt-1" />
             <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} className="mb-0 mt-2" />
           </div>
         </div>
-
-        {publicBadges.length > 0 && (
-          <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} className="mb-0" />
-        )}
 
         {profile.bio && (
           <TerminalSection label="About">
@@ -526,7 +490,7 @@ function TerminalLayout({ profile, links, settings, badges, viewCount, embeds, f
 
 function CompactLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full p-5" style={buildCardStyle(settings)}>
@@ -535,13 +499,12 @@ function CompactLayout({ profile, links, settings, badges, viewCount, embeds, fe
         <div className="min-w-0 flex-1">
           <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
             <h1 className="truncate text-lg font-semibold">{displayName}</h1>
-            <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+            <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
           </div>
           <ProfileHandle profile={profile} />
         </div>
       </div>
       <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-      <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
       <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
     </div>
   );
@@ -549,7 +512,7 @@ function CompactLayout({ profile, links, settings, badges, viewCount, embeds, fe
 
 function CardLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div
@@ -562,11 +525,10 @@ function CardLayout({ profile, links, settings, badges, viewCount, embeds, featu
         </div>
         <div className="relative z-10 mb-1 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
           <Username name={displayName} settings={settings} profile={profile} />
-          <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mb-3" />
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -575,7 +537,7 @@ function CardLayout({ profile, links, settings, badges, viewCount, embeds, featu
 
 function NeonLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div
@@ -592,13 +554,12 @@ function NeonLayout({ profile, links, settings, badges, viewCount, embeds, featu
           <div>
             <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
               <Username name={displayName} settings={settings} profile={profile} />
-              <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+              <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
             </div>
             <ProfileHandle profile={profile} className="mt-1" />
           </div>
         </div>
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -607,7 +568,7 @@ function NeonLayout({ profile, links, settings, badges, viewCount, embeds, featu
 
 function MagazineLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="relative w-full overflow-visible p-6 sm:p-8" style={buildCardStyle(settings)}>
@@ -626,12 +587,11 @@ function MagazineLayout({ profile, links, settings, badges, viewCount, embeds, f
         </div>
         <ProfileHandle profile={profile} className="mt-3" />
         <div className="relative z-10 mt-2 overflow-visible">
-          <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+          <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
       </div>
       <div className="mt-6 border-t border-white/[0.06] pt-6">
         <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        <ProfileBadgeSection badges={publicBadges} styleOptions={styleOptions} />
         <ProfileMainContent profile={profile} links={links} settings={settings} embeds={embeds} featured={featured} guestbook={guestbook} activity={activity} friends={friends} followerCount={followerCount} followingCount={followingCount} isFollowing={isFollowing} isLoggedIn={isLoggedIn} currentUserId={currentUserId} />
       </div>
     </div>
@@ -640,7 +600,7 @@ function MagazineLayout({ profile, links, settings, badges, viewCount, embeds, f
 
 function BentoLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
-  const { publicBadges, usernameBadges, styleOptions } = getLayoutBadges(badges, settings);
+  const { displayBadges, styleOptions } = getLayoutBadges(badges, settings);
 
   return (
     <div className="w-full p-4 sm:p-5" style={buildCardStyle(settings)}>
@@ -650,22 +610,14 @@ function BentoLayout({ profile, links, settings, badges, viewCount, embeds, feat
           <div className="min-w-0">
             <div className="relative z-10 bf-profile-row flex flex-wrap items-center gap-2 overflow-visible">
               <Username name={displayName} settings={settings} profile={profile} />
-              <BadgeRow badges={usernameBadges} compact styleOptions={styleOptions} />
+              <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
             </div>
             <ProfileHandle profile={profile} className="mt-1" />
           </div>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-4">
+        <div className="rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-4 sm:col-span-2">
           <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-neutral-600">Stats</p>
           <ProfileMeta profile={profile} settings={settings} viewCount={viewCount} />
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-4 overflow-visible">
-          <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-neutral-600">Badges</p>
-          {publicBadges.length > 0 ? (
-            <BadgeRow badges={publicBadges} styleOptions={styleOptions} />
-          ) : (
-            <p className="text-xs text-neutral-600">No badges yet</p>
-          )}
         </div>
         {profile.bio && (
           <div className="rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-4 sm:col-span-2">

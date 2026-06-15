@@ -64,12 +64,3 @@ export function preparePublicBadges(
   const limited = limit > 0 ? sorted.slice(0, limit) : sorted;
   return applyBadgeColorSettings(limited, settings);
 }
-
-/** Icon-only compact row next to username */
-export function prepareUsernameBadges(
-  badges: ProfileBadge[],
-  settings: BadgeColorSettings,
-  max = 4,
-): ProfileBadge[] {
-  return preparePublicBadges(badges, settings).slice(0, max);
-}
