@@ -93,6 +93,14 @@ export const LAYOUT_OPTIONS: {
   { value: "neon", label: "Neon", description: "Accent glow frame and highlights", preview: "neon" },
   { value: "magazine", label: "Magazine", description: "Bold headline with corner avatar", preview: "magazine" },
   { value: "bento", label: "Bento", description: "Grid tiles for profile sections", preview: "bento" },
+  { value: "sidebar", label: "Sidebar", description: "Left identity rail, content on the right", preview: "sidebar" },
+  { value: "hero", label: "Hero", description: "Full-bleed banner with overlaid headline", preview: "hero" },
+  { value: "polaroid", label: "Polaroid", description: "Tilted photo frame, scrapbook vibe", preview: "polaroid" },
+  { value: "cinematic", label: "Cinematic", description: "Widescreen letterbox with narrow column", preview: "cinematic" },
+  { value: "showcase", label: "Showcase", description: "Spotlight avatar with glow rings", preview: "showcase" },
+  { value: "retro", label: "Retro", description: "90s window chrome and beveled panels", preview: "retro" },
+  { value: "poster", label: "Poster", description: "Event poster with bold accent stripe", preview: "poster" },
+  { value: "glass", label: "Glass", description: "Frosted panel with floating color orbs", preview: "glass" },
 ];
 
 export const FONT_OPTIONS = [

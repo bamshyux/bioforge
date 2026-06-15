@@ -159,6 +159,112 @@ function LayoutPreview({ layout }: { layout: ProfileLayout }) {
           <div className="col-span-2 h-3 rounded bg-neutral-800/80" />
         </div>
       );
+    case "sidebar":
+      return (
+        <div className={`${base} flex`}>
+          <div className="flex w-2/5 flex-col items-center gap-1 border-r border-white/[0.06] p-1.5">
+            <div className="h-4 w-4 rounded-full bg-neutral-700" />
+            <div className="h-1 w-6 rounded bg-neutral-700" />
+          </div>
+          <div className="flex flex-1 flex-col justify-center gap-1 p-2">
+            <div className="h-1 w-full rounded bg-neutral-800" />
+            <div className="h-1 w-3/4 rounded bg-neutral-800/80" />
+          </div>
+        </div>
+      );
+    case "hero":
+      return (
+        <div className={base}>
+          <div className="relative h-8 bg-neutral-800">
+            <div className="absolute bottom-1 left-2 h-1.5 w-8 rounded bg-neutral-600" />
+          </div>
+          <div className="flex gap-1 px-2 pt-3">
+            <div className="h-4 w-4 rounded-full bg-neutral-700" />
+            <div className="mt-1 h-1 w-10 rounded bg-neutral-800" />
+          </div>
+        </div>
+      );
+    case "polaroid":
+      return (
+        <div className={`${base} flex items-end gap-1.5 p-2`}>
+          <div className="-rotate-6 rounded-sm bg-white p-0.5 pb-2 shadow">
+            <div className="h-5 w-5 bg-neutral-700" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <div className="h-1.5 w-8 rounded bg-neutral-700" />
+            <div className="h-1 w-full rounded bg-neutral-800" />
+          </div>
+        </div>
+      );
+    case "cinematic":
+      return (
+        <div className={`${base} bg-black`}>
+          <div className="h-1 bg-black" />
+          <div className="flex h-6 items-center justify-center bg-neutral-800/80">
+            <div className="h-1 w-8 rounded bg-neutral-600" />
+          </div>
+          <div className="h-1 bg-black" />
+          <div className="flex flex-col items-center gap-1 p-2">
+            <div className="h-3 w-3 rounded-full bg-neutral-700" />
+            <div className="h-1 w-10 rounded bg-neutral-800" />
+          </div>
+        </div>
+      );
+    case "showcase":
+      return (
+        <div className={`${base} flex flex-col items-center py-2`}>
+          <div className="relative">
+            <div className="absolute -inset-1 rounded-full border border-[#00e5cc]/30" />
+            <div className="h-7 w-7 rounded-full bg-neutral-700" />
+          </div>
+          <div className="mt-1.5 h-1 w-8 rounded bg-neutral-700" />
+          <div className="mt-2 h-1 w-12 rounded bg-neutral-800" />
+        </div>
+      );
+    case "retro":
+      return (
+        <div className="h-16 w-full overflow-hidden rounded-md border border-[#808080]">
+          <div className="h-2 bg-gradient-to-r from-[#000080] to-[#1084d0]" />
+          <div className="h-full bg-[#c0c0c0] p-0.5">
+            <div className="flex h-full gap-1 bg-[#0a0a0a] p-1.5">
+              <div className="h-4 w-4 shrink-0 rounded-full bg-neutral-700" />
+              <div className="flex-1 space-y-1">
+                <div className="h-1 w-6 rounded bg-neutral-700" />
+                <div className="h-1 w-full rounded bg-neutral-800" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    case "poster":
+      return (
+        <div className={`${base} flex`}>
+          <div className="w-1 shrink-0 bg-[#00e5cc]/60" />
+          <div className="flex flex-1 flex-col justify-center gap-1 p-2">
+            <div className="h-2 w-10 rounded bg-neutral-700" />
+            <div className="h-1 w-6 rounded bg-neutral-800" />
+            <div className="mt-1 h-1 w-full rounded bg-neutral-800/80" />
+          </div>
+        </div>
+      );
+    case "glass":
+      return (
+        <div className="relative h-16 w-full overflow-hidden rounded-md border border-white/15 bg-white/[0.04]">
+          <div className="absolute -left-2 -top-2 h-8 w-8 rounded-full bg-[#00e5cc]/30 blur-md" />
+          <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-[#00e5cc]/20 blur-md" />
+          <div className="relative flex flex-col items-center justify-center gap-1 py-2">
+            <div className="h-4 w-4 rounded-full bg-neutral-700/80" />
+            <div className="h-1 w-8 rounded bg-neutral-700/80" />
+          </div>
+        </div>
+      );
+    default:
+      return (
+        <div className={`${base} p-2`}>
+          <div className="h-1.5 w-10 rounded bg-neutral-700" />
+          <div className="mt-2 h-1 w-full rounded bg-neutral-800" />
+        </div>
+      );
   }
 }
 

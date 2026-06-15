@@ -123,28 +123,18 @@ export function BadgeChip({
           onMouseLeave={showTooltip ? handleLeave : undefined}
           onFocus={showTooltip ? handleEnter : undefined}
           onBlur={showTooltip ? handleLeave : undefined}
-          data-rarity={badge.rarity}
-          data-featured={badge.is_featured ? "true" : undefined}
-          className={`bf-badge-medallion relative inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 ${
-            hovered ? "z-[9999]" : "z-0"
-          } ${rarity.glow}`}
-          style={{
-            color: displayColor,
-            ["--badge-color" as string]: displayColor,
-            background: monochrome
-              ? "linear-gradient(155deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04))"
-              : `linear-gradient(155deg, color-mix(in srgb, ${displayColor} 38%, transparent), color-mix(in srgb, ${displayColor} 10%, transparent))`,
-          }}
+          className={`inline-flex shrink-0 items-center justify-center transition-opacity duration-150 hover:opacity-100 ${
+            badge.is_featured ? "opacity-80" : "opacity-55"
+          } ${hovered ? "z-[9999]" : "z-0"}`}
+          style={{ color: displayColor }}
         >
-          <span className="bf-badge-medallion__inner flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full">
-            <BadgeIcon
-              slug={badge.slug}
-              iconUrl={badge.icon_url}
-              size={16}
-              color={displayColor}
-              monochrome={monochrome}
-            />
-          </span>
+          <BadgeIcon
+            slug={badge.slug}
+            iconUrl={badge.icon_url}
+            size={13}
+            color={displayColor}
+            monochrome={monochrome}
+          />
         </span>
         {showTooltip && hovered && placement && (
           <BadgeTooltip badge={badge} rarityLabel={rarity.label} placement={placement} />
@@ -199,7 +189,11 @@ export function BadgeRow({
   if (badges.length === 0) return null;
 
   return (
-    <div className="bf-profile-row relative flex flex-wrap items-center gap-2 overflow-visible">
+    <div
+      className={`relative flex flex-wrap items-center overflow-visible ${
+        compact ? "bf-profile-inline-row gap-1" : "bf-profile-row gap-2"
+      }`}
+    >
       {badges.map((badge) => (
         <BadgeChip key={badge.profile_badge_id} badge={badge} compact={compact} styleOptions={styleOptions} />
       ))}

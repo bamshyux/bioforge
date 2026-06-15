@@ -13,7 +13,15 @@ export type ProfileLayout =
   | "card"
   | "neon"
   | "magazine"
-  | "bento";
+  | "bento"
+  | "sidebar"
+  | "hero"
+  | "polaroid"
+  | "cinematic"
+  | "showcase"
+  | "retro"
+  | "poster"
+  | "glass";
 
 export type BackgroundType =
   | "solid"
