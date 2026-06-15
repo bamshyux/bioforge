@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { applyDiscordCardConfig } from "@/lib/discord/card-config";
-import { isValidDiscordUserId } from "@/lib/discord/connection";
+import { isDiscordLinked } from "@/lib/discord/connection";
 import { getDiscordStatusWidget } from "@/lib/data/discord-widget";
 import { mergeSettings } from "@/lib/settings";
 import type { ProfileSettings } from "@/lib/types/settings";
@@ -26,18 +26,19 @@ export async function getSettingsByProfileId(
 
   let settings = mergeSettings(row, profileId);
   const widget = await getDiscordStatusWidget(profileId);
-  const connected = isValidDiscordUserId(settings.discord_user_id);
+  const linked = isDiscordLinked(settings);
 
-  if (!connected) {
+  if (!linked) {
     settings.discord_user_id = "";
     settings.discord_username = "";
     settings.discord_avatar = "";
     settings.show_discord_status = false;
-  } else if (widget) {
-    settings.show_discord_status = widget.is_enabled;
-    settings = applyDiscordCardConfig(settings, widget.config);
   } else {
+    // profile_settings is the source of truth; widget table only stores card config.
     settings.show_discord_status = row?.show_discord_status === true;
+    if (widget) {
+      settings = applyDiscordCardConfig(settings, widget.config);
+    }
   }
 
   return settings;

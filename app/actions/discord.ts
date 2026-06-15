@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isValidDiscordUserId } from "@/lib/discord/connection";
+import { isDiscordLinked } from "@/lib/discord/connection";
 import {
   removeDiscordStatusWidget,
   setDiscordStatusWidgetEnabled,
@@ -19,14 +19,19 @@ async function getAuthenticatedUserId() {
   return data.claims.sub as string;
 }
 
-async function getDiscordUserId(userId: string): Promise<string> {
+async function getDiscordLinkState(userId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profile_settings")
-    .select("widgets_discord_user_id")
+    .select("widgets_discord_user_id, discord_username")
     .eq("profile_id", userId)
     .maybeSingle();
-  return String((data as { widgets_discord_user_id?: string } | null)?.widgets_discord_user_id ?? "").trim();
+
+  const row = data as { widgets_discord_user_id?: string; discord_username?: string } | null;
+  const discordUserId = String(row?.widgets_discord_user_id ?? "").trim();
+  const discordUsername = String(row?.discord_username ?? "").trim();
+
+  return { discordUserId, discordUsername, linked: isDiscordLinked({ discord_user_id: discordUserId, discord_username: discordUsername }) };
 }
 
 async function revalidateProfile(userId: string) {
@@ -46,15 +51,15 @@ export async function toggleDiscordStatusAction(show: boolean): Promise<{ error?
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "Not signed in." };
 
-  const discordUserId = await getDiscordUserId(userId);
-  if (!isValidDiscordUserId(discordUserId) && show) {
+  const { linked } = await getDiscordLinkState(userId);
+  if (!linked && show) {
     return { error: "Connect your Discord account before enabling status on your profile." };
   }
 
-  await setDiscordStatusWidgetEnabled(userId, show && isValidDiscordUserId(discordUserId));
+  await setDiscordStatusWidgetEnabled(userId, show && linked);
 
   const patch = await omitUnsupportedSettingsColumns({
-    show_discord_status: show && isValidDiscordUserId(discordUserId),
+    show_discord_status: show && linked,
   });
   const supabase = await createClient();
   const { error } = await supabase
@@ -104,6 +109,7 @@ export async function saveDiscordUserIdAction(discordUserId: string): Promise<{ 
 
   const patch = await omitUnsupportedSettingsColumns({
     widgets_discord_user_id: trimmed,
+    discord_username: `Discord #${trimmed.slice(-4)}`,
     show_discord_status: false,
   });
   const supabase = await createClient();
@@ -124,8 +130,8 @@ export async function updateDiscordCardConfigAction(
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "Not signed in." };
 
-  const discordUserId = await getDiscordUserId(userId);
-  if (!isValidDiscordUserId(discordUserId)) {
+  const { linked } = await getDiscordLinkState(userId);
+  if (!linked) {
     return { error: "Connect Discord before customizing the card." };
   }
 
@@ -138,9 +144,10 @@ export async function sanitizeDiscordConnectionAction(): Promise<void> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return;
 
-  const discordUserId = await getDiscordUserId(userId);
-  if (isValidDiscordUserId(discordUserId)) return;
+  const { linked, discordUserId } = await getDiscordLinkState(userId);
+  if (linked || !discordUserId) return;
 
+  // Clear stale IDs / orphaned widget rows that were never properly linked.
   await removeDiscordStatusWidget(userId);
 
   const patch = await omitUnsupportedSettingsColumns({

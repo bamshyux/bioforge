@@ -1,3 +1,4 @@
+import { DEFAULT_DISCORD_CARD_CONFIG } from "@/lib/types/discord-widget";
 import type { DiscordCardStyle } from "@/lib/types/discord-widget";
 import type {
   BackgroundType,
@@ -84,6 +85,7 @@ export const DEFAULT_SETTINGS: Omit<
   show_discord_status: false,
   discord_card_style: "discord",
   discord_show_lanyard_hint: false,
+  discord_card_config: DEFAULT_DISCORD_CARD_CONFIG,
   custom_theme_id: null,
 };
 
@@ -314,6 +316,7 @@ export function mergeSettings(
     discord_show_lanyard_hint:
       (row as { discord_show_lanyard_hint?: boolean })?.discord_show_lanyard_hint ??
       DEFAULT_SETTINGS.discord_show_lanyard_hint,
+    discord_card_config: DEFAULT_DISCORD_CARD_CONFIG,
     custom_theme_id: row?.custom_theme_id ?? null,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
