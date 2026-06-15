@@ -4,6 +4,14 @@ import { buildProfileViewHash } from "@/lib/analytics/view-identity";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
+type RecordProfileViewResult = {
+  ok?: boolean;
+  recorded?: boolean;
+  deduplicated?: boolean;
+  skipped?: boolean;
+  error?: string;
+};
+
 export async function POST(request: Request) {
   let body: {
     profileId?: string;
@@ -33,8 +41,37 @@ export async function POST(request: Request) {
   const country = await resolveCountry(headersList);
   const supabase = await createClient();
 
-  const { data: auth } = await supabase.auth.getClaims();
-  const viewerId = auth?.claims?.sub as string | undefined;
+  if (eventType === "profile_view") {
+    const trackingHash = buildProfileViewHash(headersList, visitorHash);
+
+    const { data, error } = await supabase.rpc("record_profile_view", {
+      p_profile_id: profileId,
+      p_visitor_hash: trackingHash,
+      p_country: country.slice(0, 64),
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const result = (data ?? {}) as RecordProfileViewResult;
+
+    if (result.error === "profile_not_found") {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (result.recorded) {
+      const { syncAllMilestoneBadges } = await import("@/lib/badges/sync-milestones");
+      await syncAllMilestoneBadges(profileId);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      recorded: !!result.recorded,
+      deduplicated: !!result.deduplicated,
+      skipped: !!result.skipped,
+    });
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -47,7 +84,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
-  if (eventType === "link_click" && linkId) {
+  if (linkId) {
     const { data: link } = await supabase
       .from("links")
       .select("id")
@@ -60,49 +97,20 @@ export async function POST(request: Request) {
     }
   }
 
-  const trackingHash =
-    eventType === "profile_view"
-      ? buildProfileViewHash(headersList, visitorHash)
-      : sessionId
-        ? `${visitorHash}:${sessionId}`.slice(0, 128)
-        : visitorHash.slice(0, 64);
-
-  // Profile owners viewing their own page don't increment views.
-  if (eventType === "profile_view" && viewerId === profileId) {
-    return NextResponse.json({ ok: true, skipped: true });
-  }
-
-  // One profile view per device + IP, ever.
-  if (eventType === "profile_view") {
-    const { data: existing } = await supabase
-      .from("analytics_events")
-      .select("id")
-      .eq("profile_id", profileId)
-      .eq("event_type", "profile_view")
-      .eq("visitor_hash", trackingHash)
-      .limit(1)
-      .maybeSingle();
-
-    if (existing) {
-      return NextResponse.json({ ok: true, deduplicated: true });
-    }
-  }
+  const trackingHash = sessionId
+    ? `${visitorHash}:${sessionId}`.slice(0, 128)
+    : visitorHash.slice(0, 64);
 
   const { error } = await supabase.from("analytics_events").insert({
     profile_id: profileId,
-    event_type: eventType,
-    link_id: eventType === "link_click" ? linkId ?? null : null,
+    event_type: "link_click",
+    link_id: linkId ?? null,
     visitor_hash: trackingHash,
     country: country.slice(0, 64),
   });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  if (eventType === "profile_view") {
-    const { syncAllMilestoneBadges } = await import("@/lib/badges/sync-milestones");
-    await syncAllMilestoneBadges(profileId);
   }
 
   return NextResponse.json({ ok: true });

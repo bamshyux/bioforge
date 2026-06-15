@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { mergeSettings } from "@/lib/settings";
+import { clampCardLayout, mergeSettings } from "@/lib/settings";
+import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 import { formatSchemaError } from "@/lib/db/schema";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
 import type { SettingsFormState, SettingsSection } from "@/lib/types/settings";
@@ -139,6 +140,7 @@ function parseSectionUpdates(
           ? String(formData.get("content_alignment"))
           : existing.content_alignment) as import("@/lib/types/settings").ContentAlignment,
         layout_label: String(formData.get("layout_label") ?? existing.layout_label).slice(0, 64),
+        hide_card_border: parseBool(formData.get("hide_card_border")),
       };
     case "links":
       return {
@@ -211,7 +213,24 @@ export async function updateSettingsAction(
   return { success: "Settings saved." };
 }
 
-const MAX_BG_SIZE = 50 * 1024 * 1024;
+export async function updateCardLayoutAction(layout: {
+  card_offset_x: number;
+  card_offset_y: number;
+  card_width: number;
+}): Promise<SettingsFormState> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  await ensureSettingsRow(userId);
+  const patch = clampCardLayout(layout);
+
+  const { error } = await patchProfileSettings(userId, patch);
+  if (error) return { error };
+
+  await revalidateProfile(userId);
+  return { success: "Card layout saved." };
+}
+
 const MAX_MUSIC_SIZE = 20 * 1024 * 1024;
 
 async function uploadFile(
@@ -303,7 +322,7 @@ export async function uploadBackgroundAction(
     return { error: "Please select a file." };
   }
 
-  if (file.size > MAX_BG_SIZE) return { error: "File must be 50 MB or smaller." };
+  if (file.size > MAX_BACKGROUND_UPLOAD_BYTES) return { error: backgroundUploadSizeError() };
 
   await ensureSettingsRow(userId);
 

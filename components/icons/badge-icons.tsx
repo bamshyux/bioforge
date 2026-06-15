@@ -1,7 +1,8 @@
 import type { BadgeRarity } from "@/lib/types/badge";
-import { RARITY_STYLES } from "@/lib/types/badge";
+import { RARITY_VISUALS } from "@/lib/badges/rarity-visuals";
+import { VerifiedBadgeIcon } from "@/components/badges/verified-badge-icon";
 
-type IconProps = { size?: number; color?: string; className?: string };
+type IconProps = { size?: number; color?: string; className?: string; premium?: boolean };
 
 function Svg({ size = 16, children, className = "" }: IconProps & { children: React.ReactNode }) {
   return (
@@ -20,28 +21,16 @@ function Svg({ size = 16, children, className = "" }: IconProps & { children: Re
 }
 
 const paths: Record<string, (p: IconProps) => React.ReactNode> = {
-  verified: (p) => (
+  verified: (p) => <VerifiedBadgeIcon size={p.size ?? 20} className={p.className} />,
+  developer: (p) => (
     <Svg {...p}>
       <path
-        d="M12 2.8 6.2 5.4v5.9c0 4.1 2.7 7.9 5.8 8.7 3.1-.8 5.8-4.6 5.8-8.7V5.4L12 2.8z"
-        fill="currentColor"
-        fillOpacity="0.18"
+        d="M8.5 9 5 12l3.5 3M15.5 9 19 12l-3.5 3M14 7 10 17"
         stroke="currentColor"
-        strokeWidth="1.85"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.2 12.2 11.1 14.2 15.1 10.2"
-        stroke="currentColor"
-        strokeWidth="2.35"
+        strokeWidth={p.premium ? 2.4 : 2.25}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </Svg>
-  ),
-  developer: (p) => (
-    <Svg {...p}>
-      <path d="M8 9 4 12l4 3M16 9l4 3-4 3M14 6l-4 12" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   staff: (p) => (
@@ -77,23 +66,24 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   premium: (p) => (
     <Svg {...p}>
       <path
-        d="M5 8l7-4 7 4-7 13L5 8z"
+        d="M5.5 8.5 12 4.5l6.5 4v8.5L12 21.5 5.5 17V8.5z"
         fill="currentColor"
-        fillOpacity="0.2"
+        fillOpacity={p.premium ? 0.35 : 0.2}
         stroke="currentColor"
-        strokeWidth="1.85"
+        strokeWidth={p.premium ? 1.6 : 1.85}
         strokeLinejoin="round"
       />
+      <path d="M12 4.5v17" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.35" />
     </Svg>
   ),
   founder: (p) => (
     <Svg {...p}>
       <path
-        d="M12 2l2.5 7.5H22l-6 4.5 2.5 7.5L12 17l-6.5 4.5 2.5-7.5-6-4.5h7.5L12 2z"
+        d="M12 2.5 14.2 8.8H21l-5.8 4.2 2.2 6.5L12 17.8 6.6 19.5l2.2-6.5L3 8.8h6.8L12 2.5z"
         fill="currentColor"
-        fillOpacity="0.24"
+        fillOpacity={p.premium ? 0.4 : 0.24}
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth={p.premium ? 1.35 : 1.5}
         strokeLinejoin="round"
       />
     </Svg>
@@ -139,8 +129,16 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   og: (p) => (
     <Svg {...p}>
-      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2" />
-      <text x="12" y="14.8" textAnchor="middle" fill="currentColor" fontSize="7.5" fontWeight="800" fontFamily="system-ui, sans-serif">
+      <circle
+        cx="12"
+        cy="12"
+        r="8.5"
+        fill="currentColor"
+        fillOpacity={p.premium ? 0.28 : 0.14}
+        stroke="currentColor"
+        strokeWidth={p.premium ? 1.85 : 2}
+      />
+      <text x="12" y="15.2" textAnchor="middle" fill="currentColor" fontSize="7.2" fontWeight="900" fontFamily="system-ui, sans-serif">
         OG
       </text>
     </Svg>
@@ -285,6 +283,7 @@ export function BadgeIcon({
   className = "",
   monochrome = false,
   sharp = false,
+  premium = false,
 }: {
   slug: string;
   iconUrl?: string | null;
@@ -293,6 +292,7 @@ export function BadgeIcon({
   className?: string;
   monochrome?: boolean;
   sharp?: boolean;
+  premium?: boolean;
 }) {
   const glyphClass = sharp ? `bf-badge-glyph ${className}`.trim() : className;
 
@@ -335,11 +335,12 @@ export function BadgeIcon({
   const Icon = paths[slug] ?? paths.custom;
   return (
     <span className={`inline-flex shrink-0 ${glyphClass}`} style={{ color }}>
-      {Icon({ size, color, className: glyphClass })}
+      {Icon({ size, color, className: glyphClass, premium })}
     </span>
   );
 }
 
 export function rarityClass(rarity: BadgeRarity) {
-  return RARITY_STYLES[rarity] ?? RARITY_STYLES.common;
+  const visual = RARITY_VISUALS[rarity] ?? RARITY_VISUALS.common;
+  return { label: visual.label, accent: visual.accent };
 }

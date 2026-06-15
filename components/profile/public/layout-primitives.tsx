@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { buildCardStyle, getUsernameEffectClass } from "@/lib/settings";
 import { formatProfileUid } from "@/lib/profile";
@@ -115,14 +115,30 @@ function computeHoverTooltipPlacement(rect: DOMRect, estimatedHeight = 36) {
   };
 }
 
-export function Username({ name, settings, profile }: { name: string; settings: ProfileSettings; profile: Profile }) {
+export function Username({
+  name,
+  settings,
+  profile,
+  className,
+  style,
+  suffix,
+}: {
+  name: string;
+  settings: ProfileSettings;
+  profile: Profile;
+  className?: string;
+  style?: CSSProperties;
+  suffix?: string;
+}) {
   const effectClass = getUsernameEffectClass(settings.username_effect);
-  const glowStyle =
+  const glowStyle: CSSProperties =
     settings.username_effect === "glow"
       ? { textShadow: `0 0 24px ${settings.accent_color}` }
       : settings.neon_glow
         ? { textShadow: `0 0 20px ${settings.accent_color}80` }
         : {};
+  const headingClass = className ?? `text-2xl font-semibold tracking-tight sm:text-3xl ${effectClass}`;
+  const headingStyle = { ...glowStyle, ...style };
   const anchorRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
   const [placement, setPlacement] = useState<ReturnType<typeof computeHoverTooltipPlacement> | null>(null);
@@ -152,13 +168,11 @@ export function Username({ name, settings, profile }: { name: string; settings: 
         onMouseLeave={showUid ? handleLeave : undefined}
         onFocus={showUid ? handleEnter : undefined}
         onBlur={showUid ? handleLeave : undefined}
-        className={`relative inline-block ${hovered ? "z-[9999]" : ""}`}
+        className={`relative inline-block ${showUid ? "cursor-help" : ""} ${hovered ? "z-[9999]" : ""}`}
       >
-        <h1
-          className={`text-2xl font-semibold tracking-tight sm:text-3xl ${effectClass}`}
-          style={glowStyle}
-        >
+        <h1 className={headingClass} style={Object.keys(headingStyle).length ? headingStyle : undefined}>
           {name}
+          {suffix}
         </h1>
       </div>
       {showUid && hovered && placement &&

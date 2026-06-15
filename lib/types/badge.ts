@@ -88,9 +88,9 @@ export const RARITY_STYLES: Record<
   BadgeRarity,
   { ring: string; glow: string; label: string }
 > = {
-  common: { ring: "ring-white/10", glow: "", label: "Common" },
-  rare: { ring: "ring-blue-500/30", glow: "shadow-[0_0_12px_rgba(59,130,246,0.25)]", label: "Rare" },
-  epic: { ring: "ring-purple-500/40", glow: "shadow-[0_0_14px_rgba(168,85,247,0.3)]", label: "Epic" },
-  legendary: { ring: "ring-amber-500/50", glow: "shadow-[0_0_16px_rgba(245,158,11,0.35)]", label: "Legendary" },
-  mythic: { ring: "ring-[#fafafa]/50", glow: "shadow-[0_0_18px_rgba(255,255,255,0.4)]", label: "Mythic" },
+  common: { ring: "ring-slate-400/20", glow: "shadow-[0_0_10px_rgba(148,163,184,0.2)]", label: "Common" },
+  rare: { ring: "ring-sky-400/35", glow: "shadow-[0_0_14px_rgba(56,189,248,0.3)]", label: "Rare" },
+  epic: { ring: "ring-purple-400/40", glow: "shadow-[0_0_16px_rgba(192,132,252,0.35)]", label: "Epic" },
+  legendary: { ring: "ring-amber-400/45", glow: "shadow-[0_0_18px_rgba(251,191,36,0.4)]", label: "Legendary" },
+  mythic: { ring: "ring-white/40", glow: "shadow-[0_0_22px_rgba(255,255,255,0.35)]", label: "Mythic" },
 };

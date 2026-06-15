@@ -1,8 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-
-const MAX_BG_SIZE = 50 * 1024 * 1024;
+import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 
 async function removeExistingBackgroundFiles(userId: string) {
   const supabase = createClient();
@@ -25,8 +24,8 @@ export async function uploadBackgroundToStorage(
     throw new Error("Please select a file.");
   }
 
-  if (file.size > MAX_BG_SIZE) {
-    throw new Error("File must be 50 MB or smaller.");
+  if (file.size > MAX_BACKGROUND_UPLOAD_BYTES) {
+    throw new Error(backgroundUploadSizeError());
   }
 
   const isVideo = file.type === "video/mp4";

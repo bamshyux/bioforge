@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { BadgeIcon, rarityClass } from "@/components/icons/badge-icons";
+import { BadgeMedallion } from "@/components/badges/badge-medallion";
+import { rarityClass } from "@/components/icons/badge-icons";
 import type { BadgeStyleOptions } from "@/lib/badges/display";
-import { buildBadgeGlowFilter, COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/glow";
+import { COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/glow";
+import { getRarityVisual } from "@/lib/badges/rarity-visuals";
 import type { Badge, BadgeInventoryItem, ProfileBadge } from "@/lib/types/badge";
-import { RARITY_STYLES } from "@/lib/types/badge";
 
 type BadgeLike = Pick<Badge, "slug" | "name" | "color" | "description" | "rarity" | "category"> & {
   icon_url?: string | null;
@@ -18,22 +19,6 @@ function resolveDisplayColor(badge: BadgeLike, styleOptions?: BadgeStyleOptions)
   return badge.color;
 }
 
-function badgeChipBorderStyle(
-  displayColor: string,
-  options?: { featured?: boolean; monochrome?: boolean },
-): CSSProperties {
-  if (options?.monochrome) {
-    return { boxShadow: `inset 0 0 0 1px ${displayColor}40` };
-  }
-
-  const borderAlpha = options?.featured ? "55" : "40";
-  const glowAlpha = options?.featured ? "35" : "22";
-  const glowSize = options?.featured ? "16px" : "12px";
-  return {
-    boxShadow: `0 0 0 1px ${displayColor}${borderAlpha}, 0 0 ${glowSize} ${displayColor}${glowAlpha}`,
-  };
-}
-
 type TooltipPlacement = {
   top: number;
   left: number;
@@ -41,14 +26,14 @@ type TooltipPlacement = {
 };
 
 function computeTooltipPlacement(rect: DOMRect): TooltipPlacement {
-  const gap = 8;
-  const estimatedHeight = 88;
+  const gap = 10;
+  const estimatedHeight = 96;
   const padding = 12;
   const centerX = rect.left + rect.width / 2;
   const above = rect.top - estimatedHeight - gap > padding;
 
   return {
-    left: Math.min(Math.max(centerX, padding + 110), window.innerWidth - padding - 110),
+    left: Math.min(Math.max(centerX, padding + 120), window.innerWidth - padding - 120),
     top: above ? rect.top - gap : rect.bottom + gap,
     above,
   };
@@ -57,25 +42,34 @@ function computeTooltipPlacement(rect: DOMRect): TooltipPlacement {
 function BadgeTooltip({
   badge,
   rarityLabel,
+  rarityAccent,
   placement,
 }: {
   badge: BadgeLike;
   rarityLabel: string;
+  rarityAccent: string;
   placement: TooltipPlacement;
 }) {
   return createPortal(
     <div
       role="tooltip"
-      className="pointer-events-none fixed z-[10000] w-max max-w-[220px] rounded-lg border border-white/10 bg-[#141414] px-3 py-2 text-left shadow-xl"
+      className="bf-badge-tooltip pointer-events-none fixed z-[10000] w-max max-w-[240px] overflow-hidden rounded-xl bg-[#0a0a0a]/95 px-3.5 py-2.5 text-left shadow-2xl backdrop-blur-md"
       style={{
         left: placement.left,
         top: placement.top,
         transform: placement.above ? "translate(-50%, -100%)" : "translate(-50%, 0)",
+        boxShadow: `0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06), 0 0 24px ${rarityAccent}22`,
       }}
     >
-      <span className="block text-xs font-semibold text-white">{badge.name}</span>
-      <span className="mt-0.5 block text-[11px] leading-snug text-neutral-400">{badge.description}</span>
-      <span className="mt-1 block text-[10px] uppercase tracking-wider text-neutral-500">{rarityLabel}</span>
+      <div className="mb-2 h-0.5 w-full rounded-full opacity-80" style={{ background: rarityAccent }} />
+      <span className="block text-xs font-semibold tracking-tight text-white">{badge.name}</span>
+      <span className="mt-1 block text-[11px] leading-snug text-neutral-400">{badge.description}</span>
+      <span
+        className="mt-1.5 inline-block text-[9px] font-bold uppercase tracking-[0.2em]"
+        style={{ color: rarityAccent }}
+      >
+        {rarityLabel}
+      </span>
     </div>,
     document.body,
   );
@@ -93,11 +87,13 @@ export function BadgeChip({
   styleOptions?: BadgeStyleOptions;
 }) {
   const rarity = rarityClass(badge.rarity);
+  const rarityVisual = getRarityVisual(badge.rarity);
   const monochrome = styleOptions?.monochrome ?? false;
   const displayColor = resolveDisplayColor(badge, styleOptions);
   const chipRef = useRef<HTMLSpanElement>(null);
   const [hovered, setHovered] = useState(false);
   const [placement, setPlacement] = useState<TooltipPlacement | null>(null);
+  const medallionSize = compact ? COMPACT_BADGE_ICON_SIZE : 24;
 
   const updatePlacement = useCallback(() => {
     const rect = chipRef.current?.getBoundingClientRect();
@@ -114,43 +110,21 @@ export function BadgeChip({
     setPlacement(null);
   };
 
-  if (compact) {
-    return (
-      <>
-        <span
-          ref={chipRef}
-          tabIndex={showTooltip ? 0 : undefined}
-          onMouseEnter={showTooltip ? handleEnter : undefined}
-          onMouseLeave={showTooltip ? handleLeave : undefined}
-          onFocus={showTooltip ? handleEnter : undefined}
-          onBlur={showTooltip ? handleLeave : undefined}
-          className={`bf-badge-icon inline-flex shrink-0 items-center justify-center transition-[transform,filter] duration-200 ease-out ${
-            hovered ? "z-[9999] scale-110" : "z-0 scale-100"
-          }`}
-          style={{
-            color: displayColor,
-            filter: buildBadgeGlowFilter(badge, {
-              hovered,
-              featured: badge.is_featured,
-              monochrome,
-            }),
-          }}
-        >
-          <BadgeIcon
-            slug={badge.slug}
-            iconUrl={badge.icon_url}
-            size={COMPACT_BADGE_ICON_SIZE}
-            color={displayColor}
-            monochrome={monochrome}
-            sharp
-          />
-        </span>
-        {showTooltip && hovered && placement && (
-          <BadgeTooltip badge={badge} rarityLabel={rarity.label} placement={placement} />
-        )}
-      </>
-    );
-  }
+  const medallion = (
+    <BadgeMedallion
+      badge={{
+        slug: badge.slug,
+        color: displayColor,
+        rarity: badge.rarity,
+        icon_url: badge.icon_url,
+        is_featured: badge.is_featured,
+      }}
+      size={medallionSize}
+      hovered={hovered}
+      monochrome={monochrome}
+      featured={badge.is_featured}
+    />
+  );
 
   return (
     <>
@@ -161,26 +135,27 @@ export function BadgeChip({
         onMouseLeave={showTooltip ? handleLeave : undefined}
         onFocus={showTooltip ? handleEnter : undefined}
         onBlur={showTooltip ? handleLeave : undefined}
-        className={`relative inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-transform hover:scale-[1.03] ${
+        className={`bf-badge-chip inline-flex shrink-0 items-center gap-2 transition-transform duration-200 ease-out ${
           hovered ? "z-[9999]" : "z-0"
-        }`}
-        style={{
-          backgroundColor: `${displayColor}18`,
-          color: displayColor,
-          ...badgeChipBorderStyle(displayColor, { featured: badge.is_featured, monochrome }),
-        }}
+        } ${compact ? "" : "pr-0.5"}`}
       >
-        <BadgeIcon
-          slug={badge.slug}
-          iconUrl={badge.icon_url}
-          size={compact ? 12 : 14}
-          color={displayColor}
-          monochrome={monochrome}
-        />
-        {!compact && <span>{badge.name}</span>}
+        {medallion}
+        {!compact && (
+          <span className="flex flex-col leading-tight">
+            <span className="text-xs font-semibold text-white">{badge.name}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: rarityVisual.accent }}>
+              {rarity.label}
+            </span>
+          </span>
+        )}
       </span>
       {showTooltip && hovered && placement && (
-        <BadgeTooltip badge={badge} rarityLabel={rarity.label} placement={placement} />
+        <BadgeTooltip
+          badge={badge}
+          rarityLabel={rarity.label}
+          rarityAccent={monochrome ? "#e4e4e7" : rarityVisual.accent}
+          placement={placement}
+        />
       )}
     </>
   );
@@ -198,7 +173,7 @@ export function BadgeRow({
   if (badges.length === 0) return null;
 
   return (
-    <div className={`bf-badge-row relative overflow-visible ${compact ? "" : "bf-profile-row gap-2"}`}>
+    <div className={`bf-badge-row relative overflow-visible ${compact ? "gap-1" : "bf-profile-row gap-3"}`}>
       {badges.map((badge) => (
         <BadgeChip key={badge.profile_badge_id} badge={badge} compact={compact} styleOptions={styleOptions} />
       ))}
@@ -221,56 +196,72 @@ export function BadgeCard({
   draggable?: boolean;
   styleOptions?: BadgeStyleOptions;
 }) {
-  const style = RARITY_STYLES[badge.rarity];
+  const rarityVisual = getRarityVisual(badge.rarity);
   const monochrome = styleOptions?.monochrome ?? false;
   const displayColor = resolveDisplayColor(badge, styleOptions);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className={`relative rounded-xl border p-4 transition-all ${
-        earned
-          ? monochrome
-            ? "border-white/[0.08] bg-[#0f0f0f]"
-            : "border-white/[0.08] bg-[#0f0f0f]"
-          : "border-white/[0.04] bg-[#0a0a0a] opacity-50 grayscale"
-      }`}
+      className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-300 ${
+        earned ? "bg-[#0c0c0c]/90" : "bg-[#080808]/80 opacity-45"
+      } ${draggable && earned ? "cursor-grab active:cursor-grabbing" : ""}`}
       style={
-        earned && !monochrome
-          ? { boxShadow: `inset 0 0 0 1px ${displayColor}30, 0 0 14px ${displayColor}18` }
-          : earned && monochrome
-            ? { boxShadow: `inset 0 0 0 1px ${displayColor}25` }
-            : undefined
+        earned
+          ? {
+              boxShadow: hovered
+                ? `0 0 0 1px ${rarityVisual.accent}44, 0 16px 48px rgba(0,0,0,0.45), 0 0 32px ${rarityVisual.aura}`
+                : `0 0 0 1px rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.35), 0 0 20px ${rarityVisual.aura}`,
+            }
+          : undefined
       }
       draggable={draggable && earned}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-lg ring-1 ring-white/[0.06]"
-          style={{ backgroundColor: `${displayColor}15` }}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(circle at 50% 28%, ${rarityVisual.aura} 0%, transparent 62%)`,
+        }}
+        aria-hidden
+      />
+
+      <div className="relative flex flex-col items-center text-center">
+        <BadgeMedallion
+          badge={{
+            slug: badge.slug,
+            color: displayColor,
+            rarity: badge.rarity,
+            icon_url: badge.icon_url,
+            is_featured: badge.is_featured,
+          }}
+          size={48}
+          hovered={hovered}
+          monochrome={monochrome || !earned}
+          featured={badge.is_featured}
+        />
+
+        <p
+          className="mt-3 text-[9px] font-bold uppercase tracking-[0.22em]"
+          style={{ color: earned ? rarityVisual.accent : "#52525b" }}
         >
-          <BadgeIcon
-            slug={badge.slug}
-            iconUrl={badge.icon_url}
-            size={20}
-            color={displayColor}
-            monochrome={monochrome}
-            sharp
-          />
-        </div>
-        <span className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-500">
-          {style.label}
-        </span>
+          {rarityVisual.label}
+        </p>
+        <p className={`mt-1 text-sm font-semibold ${earned ? "text-white" : "text-neutral-500"}`}>{badge.name}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-neutral-500">{badge.description}</p>
       </div>
-      <p className="text-sm font-medium text-white">{badge.name}</p>
-      <p className="mt-1 text-xs leading-relaxed text-neutral-500">{badge.description}</p>
+
       {earned && (onToggleVisible || onToggleFeatured) && (
-        <div className="mt-3 flex gap-2 border-t border-white/[0.06] pt-3">
+        <div className="relative mt-4 flex justify-center gap-2 border-t border-white/[0.05] pt-3">
           {onToggleVisible && (
             <button
               type="button"
               onClick={onToggleVisible}
-              className={`rounded-md px-2 py-1 text-[10px] font-medium ${
-                badge.is_visible !== false ? "bg-[#fafafa]/10 text-[#fafafa]" : "bg-white/[0.04] text-neutral-500"
+              className={`rounded-lg px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                badge.is_visible !== false
+                  ? "bg-white/[0.08] text-white"
+                  : "bg-white/[0.03] text-neutral-500 hover:text-neutral-300"
               }`}
             >
               {badge.is_visible !== false ? "Visible" : "Hidden"}
@@ -280,8 +271,10 @@ export function BadgeCard({
             <button
               type="button"
               onClick={onToggleFeatured}
-              className={`rounded-md px-2 py-1 text-[10px] font-medium ${
-                badge.is_featured ? "bg-amber-500/10 text-amber-400" : "bg-white/[0.04] text-neutral-500"
+              className={`rounded-lg px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                badge.is_featured
+                  ? "bg-amber-500/15 text-amber-300"
+                  : "bg-white/[0.03] text-neutral-500 hover:text-neutral-300"
               }`}
             >
               {badge.is_featured ? "Featured" : "Feature"}
@@ -290,7 +283,9 @@ export function BadgeCard({
         </div>
       )}
       {!earned && (
-        <p className="mt-3 text-[10px] font-medium uppercase tracking-wider text-neutral-600">Locked</p>
+        <p className="relative mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600">
+          Locked
+        </p>
       )}
     </div>
   );

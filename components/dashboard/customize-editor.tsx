@@ -120,6 +120,7 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
           <div className="grid gap-3 sm:grid-cols-2">
             <ToggleField name="glassmorphism" label="Glassmorphism" defaultChecked={settings.glassmorphism} />
             <ToggleField name="neon_glow" label="Accent glow" defaultChecked={settings.neon_glow} />
+            <ToggleField name="hide_card_border" label="Hide card border" description="Removes the card outline — useful at 0% opacity" defaultChecked={settings.hide_card_border} />
             <ToggleField name="show_view_count" label="Show view count" defaultChecked={settings.show_view_count} />
             <ToggleField name="show_join_date" label="Show join date" defaultChecked={settings.show_join_date} />
             <ToggleField

@@ -25,7 +25,7 @@ import type { GuestbookEntry } from "@/lib/types/guestbook";
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { SocialProfile } from "@/lib/types/social";
 import { ProfileCreateCta } from "./profile-create-cta";
-import { ProfileParallaxCard } from "./profile-parallax";
+import { ProfileCardLayoutEditor } from "./profile-card-layout-editor";
 import {
   ProfileAvatar,
   ProfileHandle,
@@ -278,7 +278,7 @@ function TerminalLayout({ profile, links, settings, badges, viewCount, embeds, f
           <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-14 w-14 shrink-0" />
           <div className="min-w-0 flex-1">
             <div className="relative z-10 bf-profile-name-row overflow-visible">
-              <h1 className="text-lg font-semibold tracking-tight text-white">{displayName}</h1>
+              <Username name={displayName} settings={settings} profile={profile} className="text-lg font-semibold tracking-tight text-white" />
               <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
             </div>
             <ProfileHandle profile={profile} className="mt-1" />
@@ -327,7 +327,7 @@ function CompactLayout({ profile, links, settings, badges, viewCount, embeds, fe
         <ProfileAvatar profile={profile} displayName={displayName} accentColor={settings.accent_color} className="h-14 w-14 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="relative z-10 bf-profile-name-row overflow-visible">
-            <h1 className="truncate text-lg font-semibold">{displayName}</h1>
+            <Username name={displayName} settings={settings} profile={profile} className="truncate text-lg font-semibold" />
             <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
           </div>
           <ProfileHandle profile={profile} />
@@ -407,12 +407,13 @@ function MagazineLayout({ profile, links, settings, badges, viewCount, embeds, f
       <div className="bf-profile-block max-w-[75%] pr-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600">Profile</p>
         <div className="mt-2 bf-profile-name-row">
-          <h1
+          <Username
+            name={displayName}
+            settings={settings}
+            profile={profile}
             className={`text-4xl font-bold leading-none tracking-tight sm:text-5xl ${getUsernameEffectClass(settings.username_effect)}`}
             style={settings.neon_glow ? { textShadow: `0 0 30px ${settings.accent_color}60` } : undefined}
-          >
-            {displayName}
-          </h1>
+          />
           <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
         </div>
         <ProfileHandle profile={profile} className="mt-3" />
@@ -500,12 +501,13 @@ function HeroLayout({ profile, links, settings, badges, viewCount, embeds, featu
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
         <div className="relative flex h-full flex-col justify-end p-6 pb-14">
           <div className="relative z-10 bf-profile-name-row items-end overflow-visible">
-            <h1
+            <Username
+              name={displayName}
+              settings={settings}
+              profile={profile}
               className={`text-3xl font-bold tracking-tight text-white sm:text-4xl ${getUsernameEffectClass(settings.username_effect)}`}
               style={settings.neon_glow ? { textShadow: `0 0 30px ${settings.accent_color}80` } : undefined}
-            >
-              {displayName}
-            </h1>
+            />
             <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
           </div>
           <ProfileHandle profile={profile} className="mt-1 text-neutral-300" />
@@ -594,7 +596,7 @@ function CinematicLayout({ profile, links, settings, badges, viewCount, embeds, 
         <div className="absolute inset-0 bg-black/45" />
         <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
           <p className="text-[9px] font-medium uppercase tracking-[0.35em] text-white/50">Now streaming</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-wide text-white sm:text-3xl">{displayName}</h1>
+          <Username name={displayName} settings={settings} profile={profile} className="mt-2 text-2xl font-bold tracking-wide text-white sm:text-3xl" />
         </div>
       </div>
       <div className="h-2 bg-black sm:h-3" />
@@ -704,11 +706,12 @@ function PosterLayout({ profile, links, settings, badges, viewCount, embeds, fea
             <p className="text-[10px] font-bold uppercase tracking-[0.35em]" style={{ color: settings.accent_color }}>
               Now appearing
             </p>
-            <h1
+            <Username
+              name={displayName}
+              settings={settings}
+              profile={profile}
               className={`mt-2 text-3xl font-black uppercase leading-[0.95] tracking-tight sm:text-4xl ${getUsernameEffectClass(settings.username_effect)}`}
-            >
-              {displayName}
-            </h1>
+            />
             <div className="relative z-10 mt-3 bf-profile-name-row overflow-visible">
               <ProfileHandle profile={profile} className="mb-0" />
               <BadgeRow badges={displayBadges} compact styleOptions={styleOptions} />
@@ -735,11 +738,13 @@ function GlassLayout({ profile, links, settings, badges, viewCount, embeds, feat
       className="relative w-full overflow-hidden px-6 py-10"
       style={{
         borderRadius: settings.border_radius,
-        border: "1px solid rgba(255,255,255,0.12)",
+        border: settings.hide_card_border ? "none" : "1px solid rgba(255,255,255,0.12)",
         backgroundColor: `rgba(20, 20, 20, ${opacity * 0.55})`,
         backdropFilter: `blur(${blur}px) saturate(1.4)`,
         WebkitBackdropFilter: `blur(${blur}px) saturate(1.4)`,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)`,
+        boxShadow: settings.hide_card_border
+          ? "none"
+          : "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
       }}
     >
       <div
@@ -842,6 +847,7 @@ export function PublicProfileClient({
     (settings.background_type === "particles" || settings.particle_effect) &&
     settings.particle_effect;
   const Layout = LAYOUTS[settings.layout] ?? ClassicLayout;
+  const isOwner = currentUserId === profile.id;
   const layoutProps: LayoutProps = {
     profile,
     links,
@@ -885,16 +891,16 @@ export function PublicProfileClient({
           </header>
 
           <main
-            className={`flex flex-1 items-center justify-center px-5 py-20 ${
+            className={`relative flex flex-1 items-center justify-center px-5 py-20 ${
               settings.page_entrance ? "bf-page-entrance" : ""
             }`}
           >
             <div className="mx-auto w-full max-w-2xl">
-              <ProfileParallaxCard enabled={settings.profile_parallax}>
+              <ProfileCardLayoutEditor settings={settings} isOwner={isOwner} parallaxEnabled={settings.profile_parallax}>
                 <div className={getProfileAlignClass(settings.content_alignment)}>
                   <Layout {...layoutProps} />
                 </div>
-              </ProfileParallaxCard>
+              </ProfileCardLayoutEditor>
             </div>
           </main>
         </div>

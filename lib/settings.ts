@@ -72,6 +72,10 @@ export const DEFAULT_SETTINGS: Omit<
   enter_gate_button: "Click to enter",
   enter_gate_show_avatar: true,
   layout_label: "",
+  hide_card_border: false,
+  card_offset_x: 0,
+  card_offset_y: 0,
+  card_width: 100,
 };
 
 export const CONTENT_ALIGNMENT_OPTIONS: { value: ContentAlignment; label: string }[] = [
@@ -282,6 +286,10 @@ export function mergeSettings(
     enter_gate_button: row?.enter_gate_button ?? DEFAULT_SETTINGS.enter_gate_button,
     enter_gate_show_avatar: row?.enter_gate_show_avatar ?? DEFAULT_SETTINGS.enter_gate_show_avatar,
     layout_label: row?.layout_label ?? DEFAULT_SETTINGS.layout_label,
+    hide_card_border: row?.hide_card_border ?? DEFAULT_SETTINGS.hide_card_border,
+    card_offset_x: row?.card_offset_x ?? DEFAULT_SETTINGS.card_offset_x,
+    card_offset_y: row?.card_offset_y ?? DEFAULT_SETTINGS.card_offset_y,
+    card_width: row?.card_width ?? DEFAULT_SETTINGS.card_width,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };
@@ -297,8 +305,8 @@ export function buildCardStyle(settings: ProfileSettings): Record<string, string
 
   const base: Record<string, string | number | undefined> = {
     borderRadius: settings.border_radius,
-    border: `1px solid rgba(255,255,255,0.06)`,
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+    border: settings.hide_card_border ? "none" : "1px solid rgba(255,255,255,0.06)",
+    boxShadow: settings.hide_card_border ? "none" : "0 8px 32px rgba(0,0,0,0.4)",
   };
 
   if (settings.glassmorphism) {
@@ -313,6 +321,26 @@ export function buildCardStyle(settings: ProfileSettings): Record<string, string
   return {
     ...base,
     backgroundColor: `rgba(20, 20, 20, ${opacity})`,
+  };
+}
+
+export function getCardLayoutStyle(settings: ProfileSettings): Record<string, string | number> {
+  return {
+    width: `${settings.card_width}%`,
+    maxWidth: "100%",
+    transform: `translate(${settings.card_offset_x}px, ${settings.card_offset_y}px)`,
+  };
+}
+
+export function clampCardLayout(values: {
+  card_offset_x: number;
+  card_offset_y: number;
+  card_width: number;
+}) {
+  return {
+    card_offset_x: Math.min(500, Math.max(-500, Math.round(values.card_offset_x))),
+    card_offset_y: Math.min(500, Math.max(-500, Math.round(values.card_offset_y))),
+    card_width: Math.min(150, Math.max(50, Math.round(values.card_width))),
   };
 }
 

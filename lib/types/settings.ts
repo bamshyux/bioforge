@@ -155,6 +155,10 @@ export type ProfileSettings = {
   enter_gate_button: string;
   enter_gate_show_avatar: boolean;
   layout_label: string;
+  hide_card_border: boolean;
+  card_offset_x: number;
+  card_offset_y: number;
+  card_width: number;
   created_at: string;
   updated_at: string;
 };

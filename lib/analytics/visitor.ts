@@ -1,5 +1,6 @@
 const VISITOR_KEY = "bf_visitor_id";
 const SESSION_KEY = "bf_session_id";
+/** Per-profile flag so reopening the browser does not send duplicate view events. */
 const VIEW_RECORD_PREFIX = "bf_profile_view:";
 
 export function getVisitorId(): string {

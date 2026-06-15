@@ -17,14 +17,17 @@ export function AnalyticsTracker({ profileId }: { profileId: string }) {
     fetch("/api/analytics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({
         profileId,
         eventType: "profile_view",
         visitorHash,
       }),
     })
-      .then((response) => {
-        if (response.ok) markProfileViewRecorded(profileId);
+      .then(async (response) => {
+        if (!response.ok) return;
+        const data = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+        if (data?.ok) markProfileViewRecorded(profileId);
       })
       .catch(() => {});
   }, [profileId]);

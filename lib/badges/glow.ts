@@ -76,4 +76,4 @@ export function buildBadgeGlowFilter(
   ].join(" ");
 }
 
-export const COMPACT_BADGE_ICON_SIZE = 20;
+export const COMPACT_BADGE_ICON_SIZE = 22;
