@@ -1020,6 +1020,11 @@ export function PublicProfileClient({
     currentUserId,
   };
 
+  const unlockMusic = useCallback(() => {
+    if (!settings.music_autoplay) return;
+    window.dispatchEvent(new Event("bf-music-unlock"));
+  }, [settings.music_autoplay]);
+
   return (
     <>
       {fontUrl && <link rel="stylesheet" href={fontUrl} />}
@@ -1034,6 +1039,8 @@ export function PublicProfileClient({
       <div
         className="relative z-10 flex min-h-screen flex-col"
         style={{ color: settings.text_color, fontFamily: fontCss, "--bf-accent": settings.accent_color } as React.CSSProperties}
+        onPointerDownCapture={unlockMusic}
+        onTouchStartCapture={unlockMusic}
       >
         <header className="absolute inset-x-0 top-0 z-20 flex w-full items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
           <Link href="/" className="group opacity-90 transition-opacity hover:opacity-100">
