@@ -558,6 +558,49 @@ body {
   color: var(--bf-text);
 }
 
+/* Dashboard sidebar */
+.bf-dash-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.bf-dash-nav-link {
+  color: var(--bf-text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.bf-dash-nav-link:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bf-text);
+}
+
+.bf-dash-nav-link--active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--bf-text);
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.55);
+}
+
+.bf-dash-nav-group + .bf-dash-nav-group {
+  padding-top: 0.25rem;
+}
+
+.bf-dash-hero {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.bf-dash-stat-card {
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.bf-dash-stat-card--live {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+}
+
+.bf-dash-stat-card--live p:last-child {
+  color: #a3a3a3;
+}
+
 /* Range sliders — guns.lol-style pill track + glowing thumb */
 .bf-range-wrap {
   padding: 6px 2px 2px;

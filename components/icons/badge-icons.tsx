@@ -147,10 +147,38 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   "year-one": (p) => (
     <Svg {...p}>
-      <path d="M6 14c0-4 2.7-7 6-7s6 3 6 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M8.5 7.5 12 4l3.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 4v6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="16.5" r="1.4" fill="currentColor" />
+      <circle
+        cx="12"
+        cy="12"
+        r="8.25"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="currentColor"
+        fillOpacity="0.14"
+      />
+      <path
+        d="M5.6 10.4c.9-1.7 2.4-2.8 4.2-3.2M18.4 10.4c-.9-1.7-2.4-2.8-4.2-3.2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6 17.1c1.7 1 3.6 1.3 6 1.3s4.3-.3 6-1.3"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <text
+        x="12"
+        y="16.4"
+        textAnchor="middle"
+        fill="currentColor"
+        fontSize="10"
+        fontWeight="800"
+        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      >
+        1
+      </text>
     </Svg>
   ),
   "followers-100": (p) => (
