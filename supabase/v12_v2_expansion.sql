@@ -191,8 +191,8 @@ create index if not exists activity_events_profile_idx on public.activity_events
 -- ─── Milestone badges (followers + account age) ─────────────────────────────
 insert into public.badges (slug, name, description, icon, color, category, rarity, award_rule)
 values
-  ('followers-100', '100 Followers', 'Reached 100 followers', 'users', '#a855f7', 'community', 'rare', 'followers_100'),
-  ('account-1yr', 'One Year', 'BioForge member for 1 year', 'calendar', '#f59e0b', 'community', 'rare', 'account_1yr')
+  ('followers-100', '100 Followers', 'Reached 100 followers', 'followers-100', '#a855f7', 'community', 'rare', 'followers_100'),
+  ('account-1yr', 'One Year', 'BioForge member for 1 year', 'account-1yr', '#f59e0b', 'community', 'rare', 'account_1yr')
 on conflict (slug) do nothing;
 
 -- ─── Sync all milestone badges ──────────────────────────────────────────────

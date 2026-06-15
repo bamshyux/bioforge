@@ -254,6 +254,7 @@ export function BadgeCard({
             size={20}
             color={displayColor}
             monochrome={monochrome}
+            sharp
           />
         </div>
         <span className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-500">

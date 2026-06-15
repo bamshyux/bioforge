@@ -23,14 +23,20 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   verified: (p) => (
     <Svg {...p}>
       <path
-        d="M12 3l2.2 1.1 2.5-.3 1.1 2.2 2.2 1.1-.3 2.5 1.1 2.2-2.2 1.1-.3 2.5-2.5-.3-2.2 1.1-2.2L12 3z"
+        d="M12 2.8 6.2 5.4v5.9c0 4.1 2.7 7.9 5.8 8.7 3.1-.8 5.8-4.6 5.8-8.7V5.4L12 2.8z"
         fill="currentColor"
-        fillOpacity="0.22"
+        fillOpacity="0.18"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.85"
         strokeLinejoin="round"
       />
-      <path d="M9 12.5 11 14.5 15.5 10" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9.2 12.2 11.1 14.2 15.1 10.2"
+        stroke="currentColor"
+        strokeWidth="2.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   ),
   developer: (p) => (
@@ -51,12 +57,21 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   creator: (p) => (
     <Svg {...p}>
-      <path d="M12 3v12M8 7h8M6 21h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <rect x="4" y="8" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+      <circle cx="12" cy="13.5" r="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M9 5h6v3H9V5z" stroke="currentColor" strokeWidth="1.85" strokeLinejoin="round" />
+      <circle cx="12" cy="13.5" r="1.1" fill="currentColor" />
     </Svg>
   ),
   partner: (p) => (
     <Svg {...p}>
-      <path d="m7 7 5 5M17 7l-5 5M12 12v9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M7.5 14.5a3 3 0 1 0 0-6h1.8M16.5 14.5a3 3 0 1 1 0-6h-1.8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path d="M11.2 11.5h1.6M10 9.5 12 7.5 14 9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   premium: (p) => (
@@ -85,12 +100,16 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   donor: (p) => (
     <Svg {...p}>
-      <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+      <rect x="5" y="10" width="14" height="9" rx="1.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M5 10h14M12 10V7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 7.5c-1.2-2-3.3-1.5-3.3.4.1 1.2 1.4 1.8 3.3 3.1 1.9-1.3 3.2-1.9 3.3-3.1 0-1.9-2.1-2.4-3.3-.4z" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </Svg>
   ),
   supporter: (p) => (
     <Svg {...p}>
-      <path d="M12 21s-6-4.35-6-10a3.5 3.5 0 0 1 6-2 3.5 3.5 0 0 1 6 2c0 5.65-6 10-6 10z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 10 9.5 8v9L5 15V10z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M9.5 10.5H12c2.2 0 4 1.4 4 3.2S14.2 17 12 17H9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16.5 11.5v4M18.5 12v3" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
     </Svg>
   ),
   helper: (p) => (
@@ -112,31 +131,71 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   "community-choice": (p) => (
     <Svg {...p}>
-      <path d="M12 3 9 9H3l5.5 4-2 8L12 16l5.5 5-2-8L21 9h-6l-3-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="12" cy="10" r="4.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7.2v2.8l1.8 1" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 18.5 12 16l3.5 2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 21h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </Svg>
   ),
   og: (p) => (
     <Svg {...p}>
-      <path d="M4 12h16M12 4v16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="14.8" textAnchor="middle" fill="currentColor" fontSize="7.5" fontWeight="800" fontFamily="system-ui, sans-serif">
+        OG
+      </text>
     </Svg>
   ),
   "year-one": (p) => (
     <Svg {...p}>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 14c0-4 2.7-7 6-7s6 3 6 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8.5 7.5 12 4l3.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 4v6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="16.5" r="1.4" fill="currentColor" />
+    </Svg>
+  ),
+  "followers-100": (p) => (
+    <Svg {...p}>
+      <circle cx="9" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.85" />
+      <circle cx="15.5" cy="10.5" r="2" stroke="currentColor" strokeWidth="1.85" />
+      <path d="M5.5 18.5c0-2.8 1.8-4.5 3.5-4.5s3.5 1.7 3.5 4.5M13 18.5c0-2.2 1.2-3.5 2.5-3.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
+      <path d="M16.5 8.5h3.5v3.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="17.2" y="11.2" textAnchor="middle" fill="currentColor" fontSize="4.5" fontWeight="700">100</text>
+    </Svg>
+  ),
+  "account-1yr": (p) => (
+    <Svg {...p}>
+      <rect x="5" y="6" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M5 10h14M9 4v3M15 4v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M9.5 14.5 11.3 16.3 15 12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   "views-100": (p) => (
-    <Svg {...p}><text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="9" fontWeight="700">100</text></Svg>
+    <Svg {...p}>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="21" textAnchor="middle" fill="currentColor" fontSize="5.5" fontWeight="700">100</text>
+    </Svg>
   ),
   "views-1k": (p) => (
-    <Svg {...p}><text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="9" fontWeight="700">1K</text></Svg>
+    <Svg {...p}>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="21" textAnchor="middle" fill="currentColor" fontSize="5.5" fontWeight="700">1K</text>
+    </Svg>
   ),
   "views-10k": (p) => (
-    <Svg {...p}><text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="8" fontWeight="700">10K</text></Svg>
+    <Svg {...p}>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="21" textAnchor="middle" fill="currentColor" fontSize="5" fontWeight="700">10K</text>
+    </Svg>
   ),
   "views-100k": (p) => (
-    <Svg {...p}><text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="7" fontWeight="700">100K</text></Svg>
+    <Svg {...p}>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="21" textAnchor="middle" fill="currentColor" fontSize="4.5" fontWeight="700">100K</text>
+    </Svg>
   ),
   champion: (p) => (
     <Svg {...p}>
