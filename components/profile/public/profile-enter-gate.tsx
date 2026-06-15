@@ -10,7 +10,7 @@ type ProfileEnterGateProps = {
 };
 
 export function ProfileEnterGate({ profile, settings, onEnter }: ProfileEnterGateProps) {
-  const displayName = profile.display_name?.trim() || profile.username;
+  const displayName = profile.display_name?.trim() || profile.username || "User";
   const title = settings.enter_gate_title.trim() || displayName;
   const subtitle = settings.enter_gate_subtitle.trim();
   const buttonLabel = settings.enter_gate_button.trim() || "Click to enter";
