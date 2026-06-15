@@ -32,8 +32,8 @@ export function CustomThemePreview({ css }: { css: string }) {
                   J
                 </div>
                 <div>
-                  <h1 className="username text-xl font-semibold text-white">joshua</h1>
-                  <p className="profile-handle text-sm text-neutral-500">@joshua</p>
+                  <h1 className="username text-xl font-semibold text-white">johndoe</h1>
+                  <p className="profile-handle text-sm text-neutral-500">@johndoe</p>
                 </div>
               </div>
               <div className="profile-meta mb-3 flex gap-3 text-xs text-neutral-400">
