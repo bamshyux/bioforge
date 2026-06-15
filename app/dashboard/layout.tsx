@@ -23,6 +23,9 @@ export default async function DashboardLayout({
   await syncFounderBadges(userId);
   await syncSignupBadgesAction(userId);
   const email = (data.claims.email as string | undefined) ?? "User";
+  const sessionId = data.claims.session_id as string | undefined;
+  const { touchUserSession } = await import("@/lib/data/account-settings");
+  await touchUserSession(userId, sessionId);
   const profile = await getProfileByUserId(userId);
   const showManageAccounts = await isSuperAdminEmail(email);
 

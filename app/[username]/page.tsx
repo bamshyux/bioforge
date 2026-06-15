@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { syncMilestoneBadges } from "@/app/actions/badges";
 import { getPublicViewCount } from "@/lib/data/analytics";
+import { getProfileVisibility, shouldHideViewCounts } from "@/lib/data/account-settings";
 import { getActivityFeed } from "@/lib/data/activity";
 import { getBadgesByProfileId } from "@/lib/data/badges";
 import { getEmbedsByProfileId } from "@/lib/data/embeds";
@@ -41,11 +42,16 @@ export default async function UsernamePage({ params }: PageProps) {
   const profile = await getProfileByUsername(normalized);
   if (!profile) notFound();
 
-  await syncMilestoneBadges(profile.id);
-
   const supabase = await createClient();
   const { data: authData } = await supabase.auth.getClaims();
   const currentUserId = authData?.claims?.sub as string | undefined;
+
+  const visibility = await getProfileVisibility(profile.id);
+  if (visibility === "private" && currentUserId !== profile.id) {
+    notFound();
+  }
+
+  await syncMilestoneBadges(profile.id);
 
   const [
     links,
@@ -59,6 +65,7 @@ export default async function UsernamePage({ params }: PageProps) {
     friends,
     followCounts,
     following,
+    hideViewCounts,
   ] = await Promise.all([
     getLinksByProfileId(profile.id),
     getSettingsByProfileId(profile.id),
@@ -71,7 +78,12 @@ export default async function UsernamePage({ params }: PageProps) {
     getFriends(profile.id),
     getFollowCounts(profile.id),
     currentUserId ? isFollowing(currentUserId, profile.id) : Promise.resolve(false),
+    shouldHideViewCounts(profile.id),
   ]);
+
+  if (hideViewCounts) {
+    settings.show_view_count = false;
+  }
 
   return (
     <PublicProfileView

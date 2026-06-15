@@ -71,7 +71,6 @@ export const DEFAULT_SETTINGS: Omit<
   enter_gate_subtitle: "",
   enter_gate_button: "Click to enter",
   enter_gate_show_avatar: true,
-  enter_gate_blur: true,
 };
 
 export const CONTENT_ALIGNMENT_OPTIONS: { value: ContentAlignment; label: string }[] = [
@@ -107,6 +106,27 @@ export const LAYOUT_OPTIONS: {
   { value: "retro", label: "Retro", description: "90s window chrome and beveled panels", preview: "retro" },
   { value: "poster", label: "Poster", description: "Event poster with bold accent stripe", preview: "poster" },
   { value: "glass", label: "Glass", description: "Frosted panel with floating color orbs", preview: "glass" },
+  { value: "vaporwave", label: "Vaporwave", description: "Retro grid, skewed type, neon strip", preview: "vaporwave" },
+  { value: "brutalist", label: "Brutalist", description: "Raw borders, oversized uppercase type", preview: "brutalist" },
+  { value: "newspaper", label: "Newspaper", description: "Serif headline, column body text", preview: "newspaper" },
+  { value: "ticket", label: "Ticket", description: "Event stub with perforated tear line", preview: "ticket" },
+  { value: "vinyl", label: "Vinyl", description: "Album cover square with track listing", preview: "vinyl" },
+  { value: "discord", label: "Discord", description: "Banner header with status dot avatar", preview: "discord" },
+  { value: "twitch", label: "Twitch", description: "Streamer live badge and purple accents", preview: "twitch" },
+  { value: "idcard", label: "ID Card", description: "Badge-style photo ID with barcode strip", preview: "idcard" },
+  { value: "blueprint", label: "Blueprint", description: "Technical grid, engineering labels", preview: "blueprint" },
+  { value: "comic", label: "Comic", description: "Bold panels and speech-bubble bio", preview: "comic" },
+  { value: "cyberpunk", label: "Cyberpunk", description: "Neon accent bar, scanline overlay", preview: "cyberpunk" },
+  { value: "luxury", label: "Luxury", description: "Elegant serif, gold dividers, refined spacing", preview: "luxury" },
+  { value: "receipt", label: "Receipt", description: "Thermal paper printout aesthetic", preview: "receipt" },
+  { value: "zine", label: "Zine", description: "DIY collage, tape strips, bold headlines", preview: "zine" },
+  { value: "orbit", label: "Orbit", description: "Avatar centered in spinning ring orbit", preview: "orbit" },
+  { value: "wave", label: "Wave", description: "Banner header with fluid wave divider", preview: "wave" },
+  { value: "mosaic", label: "Mosaic", description: "Color tile grid header with avatar", preview: "mosaic" },
+  { value: "aurora", label: "Aurora", description: "Northern lights gradient header band", preview: "aurora" },
+  { value: "hologram", label: "Hologram", description: "Iridescent animated border frame", preview: "hologram" },
+  { value: "spotify", label: "Spotify", description: "Artist page with large square avatar", preview: "spotify" },
+  { value: "spotlight", label: "Spotlight", description: "Stage spotlight on dark background", preview: "spotlight" },
 ];
 
 export const FONT_OPTIONS = [
@@ -255,12 +275,11 @@ export function mergeSettings(
     links_style: (row?.links_style ?? DEFAULT_SETTINGS.links_style) as import("@/lib/types/settings").LinksStyle,
     profile_parallax: row?.profile_parallax ?? DEFAULT_SETTINGS.profile_parallax,
     content_alignment: (row?.content_alignment ?? DEFAULT_SETTINGS.content_alignment) as ContentAlignment,
-    enter_gate_enabled: row?.enter_gate_enabled ?? DEFAULT_SETTINGS.enter_gate_enabled,
+    enter_gate_enabled: true,
     enter_gate_title: row?.enter_gate_title ?? DEFAULT_SETTINGS.enter_gate_title,
     enter_gate_subtitle: row?.enter_gate_subtitle ?? DEFAULT_SETTINGS.enter_gate_subtitle,
     enter_gate_button: row?.enter_gate_button ?? DEFAULT_SETTINGS.enter_gate_button,
     enter_gate_show_avatar: row?.enter_gate_show_avatar ?? DEFAULT_SETTINGS.enter_gate_show_avatar,
-    enter_gate_blur: row?.enter_gate_blur ?? DEFAULT_SETTINGS.enter_gate_blur,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };

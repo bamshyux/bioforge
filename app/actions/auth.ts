@@ -33,40 +33,52 @@ export async function signUpAction(
     return { error: "Password must be at least 6 characters." };
   }
 
-  let sessionCreated = false;
+  const admin = createAdminClient();
+  if (!admin) {
+    return {
+      error:
+        "Account registration is temporarily unavailable. SUPABASE_SERVICE_ROLE_KEY must be set on the server.",
+    };
+  }
 
   try {
-    const supabase = await createClient();
-    const siteUrl = getSiteUrl();
-
-    const { data, error } = await supabase.auth.signUp({
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
-      options: {
-        emailRedirectTo: `${siteUrl}/auth/confirm?next=/dashboard`,
-      },
+      email_confirm: true,
     });
 
-    if (error) {
-      return { error: error.message };
+    if (createError) {
+      const message = createError.message.toLowerCase();
+      if (message.includes("already") || message.includes("registered")) {
+        return { error: "An account with this email already exists. Try logging in." };
+      }
+      return { error: createError.message };
     }
 
-    if (data.session) {
-      sessionCreated = true;
-      const profile = data.user ? await getProfileByUserId(data.user.id) : null;
-      if (data.user?.id) {
-        await syncSignupBadges(data.user.id);
-      }
+    const supabase = await createClient();
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      return { error: signInError.message };
+    }
+
+    if (signInData.user?.id) {
+      await syncSignupBadges(signInData.user.id);
+      const profile = await getProfileByUserId(signInData.user.id);
       void sendWelcomeEmail({
         to: email,
         displayName: profile?.display_name,
         username: profile?.username,
       });
-    } else {
-      return {
-        success:
-          "Check your email for a confirmation link to activate your account.",
-      };
+
+      const { recordLoginEvent } = await import("@/lib/data/account-settings");
+      await recordLoginEvent(signInData.user.id, true);
+    } else if (created.user?.id) {
+      await syncSignupBadges(created.user.id);
     }
   } catch (error) {
     const message =
@@ -82,11 +94,7 @@ export async function signUpAction(
     return { error: message };
   }
 
-  if (sessionCreated) {
-    redirect("/dashboard");
-  }
-
-  return {};
+  redirect("/dashboard");
 }
 
 export async function signInAction(
@@ -102,13 +110,18 @@ export async function signInAction(
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       return { error: error.message };
+    }
+
+    if (data.user?.id) {
+      const { recordLoginEvent } = await import("@/lib/data/account-settings");
+      await recordLoginEvent(data.user.id, true);
     }
   } catch (error) {
     const message =

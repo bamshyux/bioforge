@@ -17,6 +17,7 @@ import {
   IconMusic,
   IconOverview,
   IconProfile,
+  IconSettings,
 } from "@/components/icons/dashboard-icons";
 import { SITE_HOST } from "@/lib/site";
 
@@ -194,6 +195,15 @@ export function DashboardSidebar({
             onToggle={() => toggleGroup(group.id)}
           />
         ))}
+
+        <div className="bf-dash-nav-group border-t border-white/[0.06] pt-3">
+          <NavLink
+            href="/dashboard/settings"
+            label="Settings"
+            Icon={IconSettings}
+            active={pathname.startsWith("/dashboard/settings")}
+          />
+        </div>
 
         {showManageAccounts ? (
           <div className="bf-dash-nav-group border-t border-white/[0.06] pt-3">

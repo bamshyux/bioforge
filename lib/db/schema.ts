@@ -60,7 +60,6 @@ export const REQUIRED_PROFILE_SETTINGS_COLUMNS = [
   "enter_gate_subtitle",
   "enter_gate_button",
   "enter_gate_show_avatar",
-  "enter_gate_blur",
   "created_at",
   "updated_at",
 ] as const;
@@ -96,7 +95,6 @@ const COLUMN_MIGRATIONS: Record<string, string> = {
   enter_gate_subtitle: "supabase/v24_enter_gate.sql",
   enter_gate_button: "supabase/v24_enter_gate.sql",
   enter_gate_show_avatar: "supabase/v24_enter_gate.sql",
-  enter_gate_blur: "supabase/v24_enter_gate.sql",
   overlay_opacity: "supabase/v3_features.sql",
   vignette: "supabase/v3_features.sql",
   noise_texture: "supabase/v3_features.sql",

@@ -1,16 +1,12 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
-  buildCardStyle,
   getFontCss,
   getGoogleFontsUrl,
   getProfileAlignClass,
-  getUsernameEffectClass,
 } from "@/lib/settings";
-import { formatProfileUid } from "@/lib/profile";
 import type { ProfileBadge } from "@/lib/types/badge";
 import type { ProfileLink } from "@/lib/types/link";
 import type { Profile } from "@/lib/types/profile";
@@ -18,7 +14,6 @@ import type { ProfileSettings } from "@/lib/types/settings";
 import { CriedLogo } from "@/components/brand/logo";
 import { AnalyticsTracker } from "./analytics-tracker";
 import { BadgeRow } from "@/components/badges/badge-ui";
-import { preparePublicBadges, buildBadgeStyleOptions } from "@/lib/badges/display";
 import { MusicPlayer } from "./music-player";
 import { ParticleCanvas } from "./particle-canvas";
 import { ProfileBackground } from "./profile-background";
@@ -29,188 +24,21 @@ import type { FeaturedBlock } from "@/lib/types/featured";
 import type { GuestbookEntry } from "@/lib/types/guestbook";
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { SocialProfile } from "@/lib/types/social";
-import { ProfileContentSections } from "./profile-content-sections";
 import { ProfileCreateCta } from "./profile-create-cta";
 import { ProfileParallaxCard } from "./profile-parallax";
-
-function ProfileHandle({ profile, className = "" }: { profile: Profile; className?: string }) {
-  return (
-    <p className={`text-sm text-neutral-500 ${className}`.trim()}>
-      @{profile.username}
-    </p>
-  );
-}
-
-function ProfileMeta({
-  profile,
-  settings,
-  viewCount,
-  className = "",
-}: {
-  profile: Profile;
-  settings: ProfileSettings;
-  viewCount: number;
-  className?: string;
-}) {
-  const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  });
-  return (
-    <div className={`mb-5 bf-profile-row flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral-400 ${className}`.trim()}>
-      {settings.show_view_count && <span>{viewCount.toLocaleString()} views</span>}
-      {settings.show_join_date && <span>Joined {joinDate}</span>}
-    </div>
-  );
-}
-
-function ProfileAvatar({
-  profile,
-  displayName,
-  accentColor,
-  className = "h-24 w-24",
-}: {
-  profile: Profile;
-  displayName: string;
-  accentColor: string;
-  className?: string;
-}) {
-  const ring = `0 0 0 2px ${accentColor}40, 0 8px 24px rgba(0,0,0,0.5)`;
-
-  if (profile.avatar_url) {
-    return (
-      <img
-        src={profile.avatar_url}
-        alt={displayName}
-        className={`${className} rounded-full object-cover`}
-        style={{ boxShadow: ring }}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={`${className} flex items-center justify-center rounded-full text-2xl font-bold text-[#090909]`}
-      style={{ background: accentColor, boxShadow: ring }}
-    >
-      {displayName.charAt(0).toUpperCase()}
-    </div>
-  );
-}
-
-function computeHoverTooltipPlacement(rect: DOMRect, estimatedHeight = 36) {
-  const gap = 8;
-  const padding = 12;
-  const centerX = rect.left + rect.width / 2;
-  const above = rect.top - estimatedHeight - gap > padding;
-
-  return {
-    left: Math.min(Math.max(centerX, padding + 60), window.innerWidth - padding - 60),
-    top: above ? rect.top - gap : rect.bottom + gap,
-    above,
-  };
-}
-
-function Username({ name, settings, profile }: { name: string; settings: ProfileSettings; profile: Profile }) {
-  const effectClass = getUsernameEffectClass(settings.username_effect);
-  const glowStyle =
-    settings.username_effect === "glow"
-      ? { textShadow: `0 0 24px ${settings.accent_color}` }
-      : settings.neon_glow
-        ? { textShadow: `0 0 20px ${settings.accent_color}80` }
-        : {};
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState(false);
-  const [placement, setPlacement] = useState<ReturnType<typeof computeHoverTooltipPlacement> | null>(null);
-  const showUid = profile.uid != null;
-
-  const updatePlacement = useCallback(() => {
-    const rect = anchorRef.current?.getBoundingClientRect();
-    if (rect) setPlacement(computeHoverTooltipPlacement(rect));
-  }, []);
-
-  const handleEnter = () => {
-    updatePlacement();
-    setHovered(true);
-  };
-
-  const handleLeave = () => {
-    setHovered(false);
-    setPlacement(null);
-  };
-
-  return (
-    <>
-      <div
-        ref={anchorRef}
-        tabIndex={showUid ? 0 : undefined}
-        onMouseEnter={showUid ? handleEnter : undefined}
-        onMouseLeave={showUid ? handleLeave : undefined}
-        onFocus={showUid ? handleEnter : undefined}
-        onBlur={showUid ? handleLeave : undefined}
-        className={`relative inline-block ${hovered ? "z-[9999]" : ""}`}
-      >
-        <h1
-          className={`text-2xl font-semibold tracking-tight sm:text-3xl ${effectClass}`}
-          style={glowStyle}
-        >
-          {name}
-        </h1>
-      </div>
-      {showUid && hovered && placement &&
-        createPortal(
-          <div
-            role="tooltip"
-            className="pointer-events-none fixed z-[10000] w-max rounded-lg border border-white/10 bg-[#141414] px-3 py-1.5 text-xs font-medium text-neutral-300 shadow-xl"
-            style={{
-              left: placement.left,
-              top: placement.top,
-              transform: placement.above ? "translate(-50%, -100%)" : "translate(-50%, 0)",
-            }}
-          >
-            {formatProfileUid(profile.uid!)}
-          </div>,
-          document.body,
-        )}
-    </>
-  );
-}
-
-type LayoutProps = {
-  profile: Profile;
-  links: ProfileLink[];
-  settings: ProfileSettings;
-  badges: ProfileBadge[];
-  viewCount: number;
-  embeds: ProfileEmbed[];
-  featured: FeaturedBlock[];
-  guestbook: GuestbookEntry[];
-  activity: ActivityEvent[];
-  friends: SocialProfile[];
-  followerCount: number;
-  followingCount: number;
-  isFollowing: boolean;
-  isLoggedIn: boolean;
-  currentUserId?: string | null;
-};
-
-function ProfileMainContent(props: Omit<LayoutProps, "badges" | "viewCount"> & { hideBio?: boolean }) {
-  return <ProfileContentSections {...props} />;
-}
-
-function getLayoutBadges(badges: ProfileBadge[], settings: ProfileSettings) {
-  return {
-    displayBadges: preparePublicBadges(badges, settings),
-    styleOptions: buildBadgeStyleOptions(settings),
-  };
-}
-
-function bannerTopRadius(borderRadius: number) {
-  return {
-    borderTopLeftRadius: borderRadius,
-    borderTopRightRadius: borderRadius,
-  };
-}
+import {
+  ProfileAvatar,
+  ProfileHandle,
+  ProfileMainContent,
+  ProfileMeta,
+  Username,
+  bannerTopRadius,
+  buildCardStyle,
+  getLayoutBadges,
+  getUsernameEffectClass,
+  type LayoutProps,
+} from "./layout-primitives";
+import { EXTENDED_LAYOUTS } from "./profile-layouts-extra";
 
 function ClassicLayout({ profile, links, settings, badges, viewCount, embeds, featured, guestbook, activity, friends, followerCount, followingCount, isFollowing, isLoggedIn, currentUserId }: LayoutProps) {
   const displayName = profile.display_name || profile.username || "User";
@@ -962,6 +790,7 @@ const LAYOUTS = {
   retro: RetroLayout,
   poster: PosterLayout,
   glass: GlassLayout,
+  ...EXTENDED_LAYOUTS,
 };
 
 export function PublicProfileClient({
@@ -997,8 +826,7 @@ export function PublicProfileClient({
   isLoggedIn: boolean;
   currentUserId?: string | null;
 }) {
-  const gateActive = settings.enter_gate_enabled;
-  const [entered, setEntered] = useState(!gateActive);
+  const [entered, setEntered] = useState(false);
   const playMusicRef = useRef<(() => void) | null>(null);
 
   const handleEnter = useCallback(() => {
@@ -1007,9 +835,6 @@ export function PublicProfileClient({
       playMusicRef.current?.();
     }
   }, [settings.music_autoplay]);
-
-  const showProfile = !gateActive || entered;
-  const gateVisible = gateActive && !entered;
 
   const fontCss = getFontCss(settings.font_family);
   const fontUrl = getGoogleFontsUrl(settings.font_family);
@@ -1037,50 +862,49 @@ export function PublicProfileClient({
 
   return (
     <>
-      {fontUrl && <link rel="stylesheet" href={fontUrl} />}
-      <ProfileBackground settings={settings} />
-      {showParticles && settings.particle_effect && (
+      {entered && fontUrl ? <link rel="stylesheet" href={fontUrl} /> : null}
+      {entered ? <ProfileBackground settings={settings} /> : null}
+      {entered && showParticles && settings.particle_effect ? (
         <ParticleCanvas effect={settings.particle_effect} />
-      )}
-      {showProfile && <AnalyticsTracker profileId={profile.id} />}
-      {showProfile && (
+      ) : null}
+      {entered ? <AnalyticsTracker profileId={profile.id} /> : null}
+      {entered ? (
         <CursorEffectCanvas effect={settings.cursor_effect} color={settings.accent_color} />
-      )}
+      ) : null}
 
-      <div
-        className={`relative z-10 flex min-h-screen flex-col transition-[filter] duration-500 ${
-          gateVisible && settings.enter_gate_blur ? "scale-[1.02] blur-md brightness-75" : ""
-        }`}
-        style={{ color: settings.text_color, fontFamily: fontCss, "--bf-accent": settings.accent_color } as React.CSSProperties}
-        aria-hidden={gateVisible}
-      >
-        <header className="absolute inset-x-0 top-0 z-20 flex w-full items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
-          <Link href="/" className="group opacity-90 transition-opacity hover:opacity-100">
-            <CriedLogo size={24} variant="muted" />
-          </Link>
-          <ProfileCreateCta />
-        </header>
-
-        <main
-          className={`flex flex-1 items-center justify-center px-5 py-20 ${
-            settings.page_entrance && showProfile ? "bf-page-entrance" : ""
-          }`}
+      {entered ? (
+        <div
+          className="relative z-10 flex min-h-screen flex-col"
+          style={{ color: settings.text_color, fontFamily: fontCss, "--bf-accent": settings.accent_color } as React.CSSProperties}
         >
-          <div className="mx-auto w-full max-w-2xl">
-            <ProfileParallaxCard enabled={settings.profile_parallax && showProfile}>
-              <div className={getProfileAlignClass(settings.content_alignment)}>
-                <Layout {...layoutProps} />
-              </div>
-            </ProfileParallaxCard>
-          </div>
-        </main>
-      </div>
+          <header className="absolute inset-x-0 top-0 z-20 flex w-full items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
+            <Link href="/" className="group opacity-90 transition-opacity hover:opacity-100">
+              <CriedLogo size={24} variant="muted" />
+            </Link>
+            <ProfileCreateCta />
+          </header>
+
+          <main
+            className={`flex flex-1 items-center justify-center px-5 py-20 ${
+              settings.page_entrance ? "bf-page-entrance" : ""
+            }`}
+          >
+            <div className="mx-auto w-full max-w-2xl">
+              <ProfileParallaxCard enabled={settings.profile_parallax}>
+                <div className={getProfileAlignClass(settings.content_alignment)}>
+                  <Layout {...layoutProps} />
+                </div>
+              </ProfileParallaxCard>
+            </div>
+          </main>
+        </div>
+      ) : null}
 
       {settings.music_url ? (
-        <div className={gateVisible ? "pointer-events-none opacity-0" : undefined}>
+        <div className={!entered ? "pointer-events-none opacity-0" : undefined}>
           <MusicPlayer
             settings={settings}
-            deferAutoplay={gateActive && !entered}
+            deferAutoplay={!entered}
             onPlayReady={(play) => {
               playMusicRef.current = play;
             }}
@@ -1088,9 +912,9 @@ export function PublicProfileClient({
         </div>
       ) : null}
 
-      {gateVisible && (
+      {!entered ? (
         <ProfileEnterGate profile={profile} settings={settings} onEnter={handleEnter} />
-      )}
+      ) : null}
     </>
   );
 }

@@ -21,7 +21,28 @@ export type ProfileLayout =
   | "showcase"
   | "retro"
   | "poster"
-  | "glass";
+  | "glass"
+  | "vaporwave"
+  | "brutalist"
+  | "newspaper"
+  | "ticket"
+  | "vinyl"
+  | "discord"
+  | "twitch"
+  | "idcard"
+  | "blueprint"
+  | "comic"
+  | "cyberpunk"
+  | "luxury"
+  | "receipt"
+  | "zine"
+  | "orbit"
+  | "wave"
+  | "mosaic"
+  | "aurora"
+  | "hologram"
+  | "spotify"
+  | "spotlight";
 
 export type BackgroundType =
   | "solid"
@@ -133,7 +154,6 @@ export type ProfileSettings = {
   enter_gate_subtitle: string;
   enter_gate_button: string;
   enter_gate_show_avatar: boolean;
-  enter_gate_blur: boolean;
   created_at: string;
   updated_at: string;
 };

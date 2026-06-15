@@ -19,7 +19,7 @@ export function ProfileEnterGate({ profile, settings, onEnter }: ProfileEnterGat
   return (
     <button
       type="button"
-      className="bf-enter-gate fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-black/55 px-6 backdrop-blur-sm"
+      className="bf-enter-gate fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-[#090909] px-6"
       onClick={onEnter}
       aria-label={buttonLabel}
     >

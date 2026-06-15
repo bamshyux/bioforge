@@ -40,17 +40,10 @@ export function EffectsEditor({ settings }: { settings: ProfileSettings }) {
           <div className="rounded-xl border border-white/[0.06] bg-[#0c0c0c] p-4">
             <p className="mb-4 text-sm font-medium text-white">Click to enter</p>
             <p className="mb-4 text-xs leading-relaxed text-neutral-500">
-              Visitors see a full-screen intro before your profile loads — like guns.lol. Click anywhere on the screen to enter.
+              Every profile requires a click before loading — like guns.lol. Customize the intro screen below.
             </p>
 
             <div className="space-y-4">
-              <ToggleField
-                name="enter_gate_enabled"
-                label="Enable click-to-enter"
-                description="Require a click before showing your profile"
-                defaultChecked={settings.enter_gate_enabled}
-              />
-
               <div>
                 <label htmlFor="enter_gate_title" className={labelClassName}>
                   Headline
@@ -96,18 +89,11 @@ export function EffectsEditor({ settings }: { settings: ProfileSettings }) {
                 />
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ToggleField
-                  name="enter_gate_show_avatar"
-                  label="Show avatar"
-                  defaultChecked={settings.enter_gate_show_avatar}
-                />
-                <ToggleField
-                  name="enter_gate_blur"
-                  label="Blur profile behind gate"
-                  defaultChecked={settings.enter_gate_blur}
-                />
-              </div>
+              <ToggleField
+                name="enter_gate_show_avatar"
+                label="Show avatar"
+                defaultChecked={settings.enter_gate_show_avatar}
+              />
             </div>
           </div>
 
