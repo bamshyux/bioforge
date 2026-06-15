@@ -4,10 +4,11 @@ import { useCallback, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { BadgeIcon, rarityClass } from "@/components/icons/badge-icons";
 import type { BadgeStyleOptions } from "@/lib/badges/display";
+import { buildBadgeGlowFilter, COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/glow";
 import type { Badge, BadgeInventoryItem, ProfileBadge } from "@/lib/types/badge";
 import { RARITY_STYLES } from "@/lib/types/badge";
 
-type BadgeLike = Pick<Badge, "slug" | "name" | "color" | "description" | "rarity"> & {
+type BadgeLike = Pick<Badge, "slug" | "name" | "color" | "description" | "rarity" | "category"> & {
   icon_url?: string | null;
   is_featured?: boolean;
 };
@@ -114,7 +115,6 @@ export function BadgeChip({
   };
 
   if (compact) {
-    const borderAlpha = badge.is_featured ? "45" : "32";
     return (
       <>
         <span
@@ -124,21 +124,25 @@ export function BadgeChip({
           onMouseLeave={showTooltip ? handleLeave : undefined}
           onFocus={showTooltip ? handleEnter : undefined}
           onBlur={showTooltip ? handleLeave : undefined}
-          className={`inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] transition-[filter,background-color] duration-150 hover:brightness-110 ${
-            hovered ? "z-[9999]" : "z-0"
+          className={`bf-badge-icon inline-flex shrink-0 items-center justify-center transition-[transform,filter] duration-200 ease-out ${
+            hovered ? "z-[9999] scale-110" : "z-0 scale-100"
           }`}
           style={{
             color: displayColor,
-            backgroundColor: monochrome ? "rgba(255,255,255,0.08)" : `${displayColor}20`,
-            boxShadow: `inset 0 0 0 1px ${displayColor}${borderAlpha}`,
+            filter: buildBadgeGlowFilter(badge, {
+              hovered,
+              featured: badge.is_featured,
+              monochrome,
+            }),
           }}
         >
           <BadgeIcon
             slug={badge.slug}
             iconUrl={badge.icon_url}
-            size={12}
+            size={COMPACT_BADGE_ICON_SIZE}
             color={displayColor}
             monochrome={monochrome}
+            sharp
           />
         </span>
         {showTooltip && hovered && placement && (

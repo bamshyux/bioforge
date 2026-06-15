@@ -5,7 +5,15 @@ type IconProps = { size?: number; color?: string; className?: string };
 
 function Svg({ size = 16, children, className = "" }: IconProps & { children: React.ReactNode }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden
+      shapeRendering="geometricPrecision"
+    >
       {children}
     </svg>
   );
@@ -14,19 +22,26 @@ function Svg({ size = 16, children, className = "" }: IconProps & { children: Re
 const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   verified: (p) => (
     <Svg {...p}>
-      <path d="M9 12.5 11 14.5 15.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 3l2.2 1.1 2.5-.3 1.1 2.2 2.2 1.1-.3 2.5 1.1 2.2-2.2 1.1-.3 2.5-2.5-.3-2.2 1.1-2.2L12 3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path
+        d="M12 3l2.2 1.1 2.5-.3 1.1 2.2 2.2 1.1-.3 2.5 1.1 2.2-2.2 1.1-.3 2.5-2.5-.3-2.2 1.1-2.2L12 3z"
+        fill="currentColor"
+        fillOpacity="0.22"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M9 12.5 11 14.5 15.5 10" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   developer: (p) => (
     <Svg {...p}>
-      <path d="M8 9 4 12l4 3M16 9l4 3-4 3M14 6l-4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 9 4 12l4 3M16 9l4 3-4 3M14 6l-4 12" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   staff: (p) => (
     <Svg {...p}>
-      <rect x="4" y="8" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M8 8V6a4 4 0 0 1 8 0v2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <rect x="4" y="8" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 8V6a4 4 0 0 1 8 0v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </Svg>
   ),
   moderator: (p) => (
@@ -46,12 +61,26 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   premium: (p) => (
     <Svg {...p}>
-      <path d="M5 8l7-4 7 4-7 13L5 8z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+      <path
+        d="M5 8l7-4 7 4-7 13L5 8z"
+        fill="currentColor"
+        fillOpacity="0.2"
+        stroke="currentColor"
+        strokeWidth="1.85"
+        strokeLinejoin="round"
+      />
     </Svg>
   ),
   founder: (p) => (
     <Svg {...p}>
-      <path d="M12 2l2.5 7.5H22l-6 4.5 2.5 7.5L12 17l-6.5 4.5 2.5-7.5-6-4.5h7.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path
+        d="M12 2l2.5 7.5H22l-6 4.5 2.5 7.5L12 17l-6.5 4.5 2.5-7.5-6-4.5h7.5L12 2z"
+        fill="currentColor"
+        fillOpacity="0.24"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
     </Svg>
   ),
   donor: (p) => (
@@ -93,8 +122,8 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   "year-one": (p) => (
     <Svg {...p}>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   "views-100": (p) => (
@@ -168,6 +197,7 @@ export function BadgeIcon({
   color = "currentColor",
   className = "",
   monochrome = false,
+  sharp = false,
 }: {
   slug: string;
   iconUrl?: string | null;
@@ -175,11 +205,14 @@ export function BadgeIcon({
   color?: string;
   className?: string;
   monochrome?: boolean;
+  sharp?: boolean;
 }) {
+  const glyphClass = sharp ? `bf-badge-glyph ${className}`.trim() : className;
+
   if (iconUrl && monochrome) {
     return (
       <span
-        className={`inline-block shrink-0 ${className}`}
+        className={`inline-block shrink-0 ${glyphClass}`}
         style={{
           width: size,
           height: size,
@@ -205,7 +238,8 @@ export function BadgeIcon({
         alt=""
         width={size}
         height={size}
-        className={`inline-block shrink-0 object-contain ${className}`}
+        draggable={false}
+        className={`inline-block shrink-0 object-contain ${glyphClass}`}
         aria-hidden
       />
     );
@@ -213,8 +247,8 @@ export function BadgeIcon({
 
   const Icon = paths[slug] ?? paths.custom;
   return (
-    <span className={`inline-flex shrink-0 ${className}`} style={{ color }}>
-      {Icon({ size, color, className })}
+    <span className={`inline-flex shrink-0 ${glyphClass}`} style={{ color }}>
+      {Icon({ size, color, className: glyphClass })}
     </span>
   );
 }

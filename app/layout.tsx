@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SchemaErrorBanner } from "@/components/dev/schema-error-banner";
 import { getProfileSettingsSchemaValidation } from "@/lib/db/validate-schema";
-import { SITE_HOST } from "@/lib/site";
+import { siteMetadata } from "@/lib/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,11 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(`https://${SITE_HOST}`),
-  title: "BioForge — Forge your digital identity",
-  description: "The modern bio link platform for creators, gamers, and builders.",
-};
+export const metadata: Metadata = siteMetadata;
 
 export default async function RootLayout({
   children,
