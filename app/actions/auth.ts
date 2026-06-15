@@ -13,6 +13,100 @@ export type AuthActionState = {
   success?: string;
 };
 
+async function finishNewSignup(userId: string, email: string) {
+  await syncSignupBadges(userId);
+  const profile = await getProfileByUserId(userId);
+  void sendWelcomeEmail({
+    to: email,
+    displayName: profile?.display_name,
+    username: profile?.username,
+  });
+
+  const { recordLoginEvent } = await import("@/lib/data/account-settings");
+  await recordLoginEvent(userId, true);
+}
+
+function isDuplicateEmailError(message: string) {
+  const lower = message.toLowerCase();
+  return lower.includes("already") || lower.includes("registered") || lower.includes("exists");
+}
+
+function isEmailDeliveryError(message: string) {
+  const lower = message.toLowerCase();
+  return lower.includes("confirmation email") || lower.includes("error sending");
+}
+
+async function signUpWithAdmin(email: string, password: string): Promise<AuthActionState | "ok"> {
+  const admin = createAdminClient();
+  if (!admin) return { error: "admin_unavailable" };
+
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+
+  if (createError) {
+    if (isDuplicateEmailError(createError.message)) {
+      return { error: "An account with this email already exists. Try logging in." };
+    }
+    return { error: createError.message };
+  }
+
+  const supabase = await createClient();
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInError) {
+    return { error: signInError.message };
+  }
+
+  const userId = signInData.user?.id ?? created.user?.id;
+  if (userId) {
+    await finishNewSignup(userId, email);
+  }
+
+  return "ok";
+}
+
+async function signUpWithPublicClient(email: string, password: string): Promise<AuthActionState | "ok"> {
+  const supabase = await createClient();
+  const siteUrl = getSiteUrl();
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/confirm?next=/dashboard`,
+    },
+  });
+
+  if (error) {
+    if (isDuplicateEmailError(error.message)) {
+      return { error: "An account with this email already exists. Try logging in." };
+    }
+    if (isEmailDeliveryError(error.message)) {
+      return { error: "email_delivery_failed" };
+    }
+    return { error: error.message };
+  }
+
+  if (data.session && data.user) {
+    await finishNewSignup(data.user.id, email);
+    return "ok";
+  }
+
+  if (data.user) {
+    return {
+      success: "Check your email for a confirmation link to activate your account.",
+    };
+  }
+
+  return { error: "Could not create your account. Please try again." };
+}
+
 export async function signUpAction(
   _prevState: AuthActionState,
   formData: FormData,
@@ -33,53 +127,32 @@ export async function signUpAction(
     return { error: "Password must be at least 6 characters." };
   }
 
-  const admin = createAdminClient();
-  if (!admin) {
-    return {
-      error:
-        "Account registration is temporarily unavailable. SUPABASE_SERVICE_ROLE_KEY must be set on the server.",
-    };
-  }
-
   try {
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-
-    if (createError) {
-      const message = createError.message.toLowerCase();
-      if (message.includes("already") || message.includes("registered")) {
-        return { error: "An account with this email already exists. Try logging in." };
-      }
-      return { error: createError.message };
+    const adminResult = await signUpWithAdmin(email, password);
+    if (adminResult === "ok") {
+      redirect("/dashboard");
     }
 
-    const supabase = await createClient();
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      return { error: signInError.message };
+    if (adminResult.error !== "admin_unavailable") {
+      return adminResult;
     }
 
-    if (signInData.user?.id) {
-      await syncSignupBadges(signInData.user.id);
-      const profile = await getProfileByUserId(signInData.user.id);
-      void sendWelcomeEmail({
-        to: email,
-        displayName: profile?.display_name,
-        username: profile?.username,
-      });
-
-      const { recordLoginEvent } = await import("@/lib/data/account-settings");
-      await recordLoginEvent(signInData.user.id, true);
-    } else if (created.user?.id) {
-      await syncSignupBadges(created.user.id);
+    const publicResult = await signUpWithPublicClient(email, password);
+    if (publicResult === "ok") {
+      redirect("/dashboard");
     }
+
+    if (publicResult.error === "email_delivery_failed") {
+      console.error(
+        "[auth] signup email delivery failed — add SUPABASE_SERVICE_ROLE_KEY to server env, or disable Confirm email in Supabase Auth settings.",
+      );
+      return {
+        error:
+          "We couldn't finish creating your account because email confirmation isn't configured. The site owner needs to add the Supabase secret key to the server or disable email confirmation in Supabase.",
+      };
+    }
+
+    return publicResult;
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to reach Supabase.";
@@ -93,8 +166,6 @@ export async function signUpAction(
 
     return { error: message };
   }
-
-  redirect("/dashboard");
 }
 
 export async function signInAction(
