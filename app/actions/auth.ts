@@ -1,6 +1,13 @@
 "use server";
 
-import { buildAuthEmailErrorMessage, isEmailDeliveryError, SIGNUP_EMAIL_VERIFY_NEXT } from "@/lib/auth/auth-email-shared";
+import {
+  AUTH_FLOW_RECOVERY,
+  AUTH_FLOW_SIGNUP,
+  AUTH_INTENT_COOKIE,
+  buildAuthEmailErrorMessage,
+  isEmailDeliveryError,
+  SIGNUP_EMAIL_VERIFY_NEXT,
+} from "@/lib/auth/auth-email-shared";
 import { deliverSignupConfirmationEmail } from "@/lib/auth/deliver-auth-link-email";
 import { deliverPasswordResetEmail } from "@/lib/auth/send-password-reset";
 import { sendWelcomeEmail } from "@/lib/email";
@@ -11,6 +18,7 @@ import { getSiteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export type AuthActionState = {
@@ -39,6 +47,8 @@ function isDuplicateEmailError(message: string) {
 async function signUpWithAdmin(email: string, password: string): Promise<AuthActionState | "ok"> {
   const admin = createAdminClient();
   if (!admin) return { error: "admin_unavailable" };
+
+  await setAuthIntent(AUTH_FLOW_SIGNUP);
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
@@ -86,15 +96,28 @@ async function signUpWithAdmin(email: string, password: string): Promise<AuthAct
   };
 }
 
+async function setAuthIntent(intent: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(AUTH_INTENT_COOKIE, intent, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60,
+    path: "/",
+  });
+}
+
 async function signUpWithPublicClient(email: string, password: string): Promise<AuthActionState | "ok"> {
   const supabase = await createClient();
   const siteUrl = getSiteUrl();
+
+  await setAuthIntent(AUTH_FLOW_SIGNUP);
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${siteUrl}/auth/confirm?next=${encodeURIComponent(SIGNUP_EMAIL_VERIFY_NEXT)}`,
+      emailRedirectTo: `${siteUrl}/auth/confirm?next=${encodeURIComponent(SIGNUP_EMAIL_VERIFY_NEXT)}&flow=${AUTH_FLOW_SIGNUP}`,
     },
   });
 
@@ -268,6 +291,8 @@ export async function requestPasswordResetAction(
 
   const guardError = await guardSensitiveAction({ scope: "password_reset", email });
   if (guardError) return { error: guardError };
+
+  await setAuthIntent(AUTH_FLOW_RECOVERY);
 
   const result = await deliverPasswordResetEmail(email);
 

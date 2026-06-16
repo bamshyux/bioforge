@@ -15,6 +15,15 @@ export const SIGNUP_EMAIL_VERIFY_NEXT = "/?email_verified=1";
 /** Password reset form after a recovery link is verified. */
 export const PASSWORD_RESET_NEXT = "/auth/update-password";
 
+/** PKCE callback used only by password reset emails. */
+export const PASSWORD_RECOVERY_CALLBACK = "/auth/recovery/callback";
+
+export const AUTH_FLOW_RECOVERY = "recovery";
+export const AUTH_FLOW_SIGNUP = "signup";
+
+/** Short-lived cookie set when user starts a password reset or signup flow. */
+export const AUTH_INTENT_COOKIE = "auth_intent";
+
 export type AuthEmailDeliveryResult = {
   sent: boolean;
   resendError?: string;
@@ -50,15 +59,19 @@ export function buildRedirectCandidates(siteUrl: string, nextPath: string, linkT
 
   if (linkType === "recovery") {
     return [
+      `${siteUrl}${PASSWORD_RECOVERY_CALLBACK}`,
       `${siteUrl}${PASSWORD_RESET_NEXT}`,
-      `${siteUrl}/auth/callback?next=${encodedNext}`,
-      `${siteUrl}/auth/confirm?next=${encodedNext}`,
+      `${siteUrl}/auth/callback?next=${encodedNext}&flow=${AUTH_FLOW_RECOVERY}`,
+      `${siteUrl}/auth/confirm?next=${encodedNext}&flow=${AUTH_FLOW_RECOVERY}`,
     ];
   }
 
+  const flowQuery =
+    linkType === "magiclink" || linkType === "signup" ? `&flow=${AUTH_FLOW_SIGNUP}` : "";
+
   return [
-    `${siteUrl}/auth/callback?next=${encodedNext}`,
-    `${siteUrl}/auth/confirm?next=${encodedNext}`,
+    `${siteUrl}/auth/callback?next=${encodedNext}${flowQuery}`,
+    `${siteUrl}/auth/confirm?next=${encodedNext}${flowQuery}`,
     `${siteUrl}/auth/callback`,
   ];
 }
@@ -77,7 +90,14 @@ export function buildAuthConfirmUrl(
   nextPath: string,
 ) {
   const type = authLinkTypeToOtpType(linkType);
-  return `${siteUrl}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(type)}&next=${encodeURIComponent(nextPath)}`;
+  const flow =
+    linkType === "recovery"
+      ? AUTH_FLOW_RECOVERY
+      : linkType === "magiclink" || linkType === "signup"
+        ? AUTH_FLOW_SIGNUP
+        : null;
+  const flowParam = flow ? `&flow=${encodeURIComponent(flow)}` : "";
+  return `${siteUrl}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(type)}&next=${encodeURIComponent(nextPath)}${flowParam}`;
 }
 
 export function buildAuthEmailErrorMessage(input: {

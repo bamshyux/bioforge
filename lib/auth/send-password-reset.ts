@@ -2,6 +2,7 @@ import {
   buildAuthConfirmUrl,
   isEmailDeliveryError,
   isRedirectUrlError,
+  PASSWORD_RECOVERY_CALLBACK,
   PASSWORD_RESET_NEXT,
   type AuthEmailDeliveryResult,
 } from "@/lib/auth/auth-email-shared";
@@ -22,7 +23,7 @@ export function buildPasswordResetRedirect(siteUrl: string) {
   const nextPath = PASSWORD_RESET_NEXT;
   return {
     nextPath,
-    redirectTo: `${siteUrl}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
+    redirectTo: `${siteUrl}${PASSWORD_RECOVERY_CALLBACK}`,
     confirmUrl(tokenHash: string) {
       return buildAuthConfirmUrl(siteUrl, tokenHash, "recovery", nextPath);
     },
