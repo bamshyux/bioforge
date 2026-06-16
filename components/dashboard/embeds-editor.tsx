@@ -26,7 +26,7 @@ export function EmbedsEditor({ embeds: initialEmbeds }: { embeds: ProfileEmbed[]
   const [embeds, setEmbeds] = useState(initialEmbeds);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [state, formAction, isPending] = useActionState(createEmbedAction, initial);
-  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(state, isPending);
   const [isPendingAction, startTransition] = useTransition();
   const [formKey, setFormKey] = useState(0);
 

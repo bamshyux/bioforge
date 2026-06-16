@@ -219,23 +219,29 @@ export function DashboardFormTracker({ children }: { children: ReactNode }) {
   );
 }
 
-/** Clear the unsaved banner after a successful form save. */
-export function useClearUnsavedOnSuccess(state: {
-  success?: string | boolean | null;
-  error?: string | null;
-}) {
+/** Clear the unsaved banner after a form save finishes. */
+export function useClearUnsavedOnSuccess(
+  state: { success?: string | boolean | null; error?: string | null },
+  isPending = false,
+) {
   const context = useUnsavedChangesOptional();
   const markCleanRef = useRef(context?.markClean);
   const clearSavingRef = useRef(context?.clearSaving);
+  const wasPendingRef = useRef(false);
 
   markCleanRef.current = context?.markClean;
   clearSavingRef.current = context?.clearSaving;
 
   useEffect(() => {
+    const finished = wasPendingRef.current && !isPending;
+    wasPendingRef.current = isPending;
+
+    if (!finished) return;
+
     if (state.success) {
       markCleanRef.current?.();
-    } else if (state.error) {
+    } else {
       clearSavingRef.current?.();
     }
-  }, [state.success, state.error]);
+  }, [isPending, state.success, state.error]);
 }

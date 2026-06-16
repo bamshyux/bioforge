@@ -25,7 +25,7 @@ const initial: FeaturedFormState = {};
 export function FeaturedEditor({ blocks }: { blocks: FeaturedBlock[] }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(createFeaturedBlockAction, initial);
-  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(state, isPending);
   const [, startTransition] = useTransition();
 
   return (

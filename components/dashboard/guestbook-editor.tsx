@@ -30,7 +30,7 @@ export function GuestbookEditor({
 }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(updateGuestbookSettingsAction, initial);
-  useSettingsRefresh(state);
+  useSettingsRefresh(state, isPending);
 
   return (
     <>

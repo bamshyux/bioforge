@@ -30,7 +30,7 @@ export function useSettingsForm(section: SettingsSection, successMessage?: strin
   const router = useRouter();
   const unsaved = useUnsavedChangesOptional();
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
-  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(state, isPending);
 
   useEffect(() => {
     if (state.success) {
@@ -98,10 +98,9 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
   const submit = useCallback(
     (values: T) => {
       skipSyncRef.current = true;
-      unsaved?.markSaving();
       rawSubmit(values);
     },
-    [rawSubmit, unsaved],
+    [rawSubmit],
   );
 
   return { form, setForm, patchForm, submit, state, isPending };
@@ -120,7 +119,7 @@ function useFormActionSection<T extends SettingsFormValues>(
   const router = useRouter();
   const unsaved = useUnsavedChangesOptional();
   const [state, formAction, isPending] = useActionState(action, initial);
-  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(state, isPending);
 
   useEffect(() => {
     if (state.success) {
@@ -184,10 +183,9 @@ export function useSocialDashboardSection(
   const submit = useCallback(
     (values: SocialFormValues) => {
       skipSyncRef.current = true;
-      unsaved?.markSaving();
       rawSubmit(values);
     },
-    [rawSubmit, unsaved],
+    [rawSubmit],
   );
 
   return { form, patchForm, submit, state, isPending };

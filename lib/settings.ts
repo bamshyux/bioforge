@@ -443,20 +443,11 @@ export function buildCardStyle(settings: ProfileSettings): Record<string, string
 
 export const CARD_LAYOUT_MIN_HEIGHT = 280;
 
-function cardHeightStyle(maxHeight: number): Record<string, string | number> {
-  if (maxHeight <= 0) return {};
-  return {
-    maxHeight: Math.max(CARD_LAYOUT_MIN_HEIGHT, maxHeight),
-    overflowY: "auto",
-  };
-}
-
 export function getCardLayoutStyle(settings: ProfileSettings): Record<string, string | number> {
   return {
     width: `${settings.card_width}%`,
     maxWidth: "100%",
     transform: `translate(${settings.card_offset_x}px, ${settings.card_offset_y}px)`,
-    ...cardHeightStyle(settings.card_max_height),
   };
 }
 

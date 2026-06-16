@@ -113,7 +113,7 @@ export function BadgesEditor({
 }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(updateBadgeDisplaySettingsAction, initial);
-  useClearUnsavedOnSuccess(state);
+  useClearUnsavedOnSuccess(state, isPending);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("all");
 

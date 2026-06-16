@@ -6,6 +6,7 @@ import { CARD_LAYOUT_MIN_HEIGHT, clampCardLayout, getCardLayoutStyle } from "@/l
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { ProfileEditWidgetsPanel } from "./profile-edit-widgets-panel";
+import { ProfileCardHeightScaler, measureProfileCardNaturalHeight } from "./profile-card-height-scaler";
 import { ProfileParallaxCard } from "./profile-parallax";
 
 export type CardLayoutState = {
@@ -43,17 +44,7 @@ function layoutFromPatch(patch: ReturnType<typeof clampCardLayout>): CardLayoutS
 }
 
 function measureNaturalHeight(container: HTMLDivElement | null) {
-  if (!container) return CARD_LAYOUT_MIN_HEIGHT;
-
-  const prevMaxHeight = container.style.maxHeight;
-  const prevOverflowY = container.style.overflowY;
-  container.style.maxHeight = "none";
-  container.style.overflowY = "visible";
-  const height = container.scrollHeight;
-  container.style.maxHeight = prevMaxHeight;
-  container.style.overflowY = prevOverflowY;
-
-  return Math.max(CARD_LAYOUT_MIN_HEIGHT, height);
+  return measureProfileCardNaturalHeight(container);
 }
 
 function resolveResizeHeight(nextHeight: number, naturalHeight: number) {
@@ -304,7 +295,9 @@ export function ProfileCardLayoutEditor({
   if (!isOwner) {
     return (
       <div className="mx-auto w-full" style={getCardLayoutStyle(settings)}>
-        <ProfileParallaxCard enabled={!!parallaxEnabled}>{children}</ProfileParallaxCard>
+        <ProfileCardHeightScaler maxHeight={settings.card_max_height}>
+          <ProfileParallaxCard enabled={!!parallaxEnabled}>{children}</ProfileParallaxCard>
+        </ProfileCardHeightScaler>
       </div>
     );
   }
@@ -413,7 +406,9 @@ export function ProfileCardLayoutEditor({
             />
           </>
         )}
-        <ProfileParallaxCard enabled={!!parallaxEnabled && !editMode}>{children}</ProfileParallaxCard>
+        <ProfileCardHeightScaler maxHeight={layout.maxHeight}>
+          <ProfileParallaxCard enabled={!!parallaxEnabled && !editMode}>{children}</ProfileParallaxCard>
+        </ProfileCardHeightScaler>
       </div>
     </>
   );

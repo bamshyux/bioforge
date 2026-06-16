@@ -47,9 +47,9 @@ export function ProfileEditor({
   const [avatarFeedback, setAvatarFeedback] = useState<ProfileFormState>({});
   const [bannerFeedback, setBannerFeedback] = useState<ProfileFormState>({});
 
-  useClearUnsavedOnSuccess(state);
-  useClearUnsavedOnSuccess(avatarFeedback);
-  useClearUnsavedOnSuccess(bannerFeedback);
+  useClearUnsavedOnSuccess(state, isPending);
+  useClearUnsavedOnSuccess(avatarFeedback, avatarUploading);
+  useClearUnsavedOnSuccess(bannerFeedback, bannerUploading);
 
   useEffect(() => {
     return () => {

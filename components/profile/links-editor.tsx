@@ -289,7 +289,7 @@ export function LinksEditor({ links: initialLinks, settings }: { links: ProfileL
     settingsInitial,
   );
 
-  useSettingsRefresh(linkSettingsState);
+  useSettingsRefresh(linkSettingsState, linkSettingsPending);
 
   useEffect(() => {
     setLinks(initialLinks);
