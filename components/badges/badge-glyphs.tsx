@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { OgBadgeMarkFromColor } from "@/components/badges/og-badge-mark";
 
 /**
  * Icon-first badge glyphs — 24×24 viewBox, readable at 16×16 by silhouette.
@@ -134,35 +135,7 @@ export function BadgeGlyph({ slug, color }: { slug: string; color: string }): Re
       );
 
     case "og":
-      return (
-        <>
-          <rect x="4.1" y="3.2" width="2.1" height="17.2" rx="0.55" fill={c} opacity="0.5" />
-          <circle cx="5.15" cy="3.2" r="1.35" fill={c} />
-          <path d="M6.4 5.8v12.4L20.2 12 6.4 5.8z" fill={c} />
-          <path
-            d="M6.4 5.8v12.4L20.2 12 6.4 5.8z"
-            fill="none"
-            stroke="#000"
-            strokeOpacity="0.2"
-            strokeWidth="0.75"
-            strokeLinejoin="round"
-          />
-          <path d="M6.4 5.8l6.8 3.4v5.6l-6.8 3.4" fill={hi} opacity="0.28" />
-          <text
-            x="12.6"
-            y="13.6"
-            textAnchor="middle"
-            fill="#120f08"
-            fillOpacity="0.88"
-            fontSize="7.2"
-            fontWeight="900"
-            fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
-            letterSpacing="-0.35"
-          >
-            OG
-          </text>
-        </>
-      );
+      return <OgBadgeMarkFromColor color={c} />;
 
     case "year-one":
       return (

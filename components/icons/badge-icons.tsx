@@ -1,6 +1,7 @@
 import type { BadgeRarity } from "@/lib/types/badge";
 import { RARITY_VISUALS } from "@/lib/badges/rarity-visuals";
 import { VerifiedBadgeIcon } from "@/components/badges/verified-badge-icon";
+import { OgBadgeMark } from "@/components/badges/og-badge-mark";
 
 type IconProps = { size?: number; color?: string; className?: string; premium?: boolean };
 
@@ -129,31 +130,7 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   og: (p) => (
     <Svg {...p}>
-      <rect x="4.1" y="3.2" width="2.1" height="17.2" rx="0.55" fill="currentColor" opacity="0.5" />
-      <circle cx="5.15" cy="3.2" r="1.35" fill="currentColor" />
-      <path d="M6.4 5.8v12.4L20.2 12 6.4 5.8z" fill="currentColor" fillOpacity={p.premium ? 1 : 0.92} />
-      <path
-        d="M6.4 5.8v12.4L20.2 12 6.4 5.8z"
-        fill="none"
-        stroke="currentColor"
-        strokeOpacity="0.22"
-        strokeWidth="0.75"
-        strokeLinejoin="round"
-      />
-      <path d="M6.4 5.8l6.8 3.4v5.6l-6.8 3.4" fill="currentColor" fillOpacity="0.22" />
-      <text
-        x="12.6"
-        y="13.6"
-        textAnchor="middle"
-        fill="currentColor"
-        fillOpacity="0.55"
-        fontSize="7.2"
-        fontWeight="900"
-        fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
-        letterSpacing="-0.35"
-      >
-        OG
-      </text>
+      <OgBadgeMark fill="currentColor" letter="#ffffff" border="#ffffff" />
     </Svg>
   ),
   "year-one": (p) => (
