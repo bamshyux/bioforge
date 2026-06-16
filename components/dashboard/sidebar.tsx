@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { DiscordCommunityPromo } from "@/components/discord/discord-community-promo";
 import {
   DASHBOARD_SECTIONS,
   getSectionForPath,
@@ -166,6 +167,10 @@ export function DashboardSidebar({
             </Link>
           </div>
         ) : null}
+
+        <div className="mt-4 shrink-0 border-t border-white/[0.06] pt-4">
+          <DiscordCommunityPromo variant="sidebar" />
+        </div>
       </nav>
     </aside>
   );

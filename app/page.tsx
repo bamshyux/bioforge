@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DiscordCommunityPromo } from "@/components/discord/discord-community-promo";
 import { CriedLogo } from "@/components/brand/logo";
 import { HomeActivityFeed } from "@/components/home/home-activity-feed";
 import { HomeFeaturedProfiles } from "@/components/home/home-featured-profiles";
@@ -126,7 +127,10 @@ export default async function Home() {
         <HomeWhyChoose />
         <HomeRoadmap items={roadmap} />
         <HomeTestimonials testimonials={testimonials} />
+        <DiscordCommunityPromo variant="section" />
       </main>
+
+      <DiscordCommunityPromo variant="floating" />
 
       <footer className="bf-home-enter bf-home-enter-6 relative z-10 border-t border-white/[0.04] py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">

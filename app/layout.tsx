@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { DiscordCommunityPromo } from "@/components/discord/discord-community-promo";
 import { GlobalSiteBanner } from "@/components/admin/global-site-banner";
 import { AuthHashRecoveryRedirect } from "@/components/auth/auth-hash-recovery-redirect";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { SchemaErrorBanner } from "@/components/dev/schema-error-banner";
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { getProfileSettingsSchemaValidation } from "@/lib/db/validate-schema";
 import { siteMetadata } from "@/lib/metadata";
 import "./globals.css";
@@ -39,6 +41,7 @@ export default async function RootLayout({
         )}
         <GlobalSiteBanner />
         {children}
+        <ScrollToTopButton />
         <CookieConsentBanner />
       </body>
     </html>
