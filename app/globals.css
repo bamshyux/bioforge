@@ -1177,6 +1177,77 @@ body {
   animation: bf-live-pulse 2.2s ease-out infinite;
 }
 
+/* Dashboard — Explore Profiles */
+.bf-explore-page {
+  animation: bf-explore-page-in 0.45s ease;
+}
+
+.bf-explore-hero-glow {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.06), transparent 42%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.04), transparent 36%);
+  animation: bf-explore-hero-glow 8s ease-in-out infinite alternate;
+}
+
+.bf-explore-card {
+  animation: bf-explore-card-in 0.5s ease backwards;
+}
+
+.bf-explore-search:focus-within {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.bf-explore-skeleton {
+  animation: bf-explore-skeleton 1.4s ease-in-out infinite;
+}
+
+.bf-explore-pagination button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+@keyframes bf-explore-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bf-explore-hero-glow {
+  from {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes bf-explore-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bf-explore-skeleton {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
 @keyframes bf-live-pulse {
   0% {
     transform: scale(1);

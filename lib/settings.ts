@@ -71,6 +71,7 @@ export const DEFAULT_SETTINGS: Omit<
   show_badges: true,
   badge_display_limit: 5,
   badges_monochrome: false,
+  badges_custom_monochrome: false,
   badges_glow: true,
   badge_color: "#ffffff",
   links_monochrome: false,
@@ -374,6 +375,8 @@ export function mergeSettings(
     show_badges: row?.show_badges ?? DEFAULT_SETTINGS.show_badges,
     badge_display_limit: row?.badge_display_limit ?? DEFAULT_SETTINGS.badge_display_limit,
     badges_monochrome: row?.badges_monochrome ?? DEFAULT_SETTINGS.badges_monochrome,
+    badges_custom_monochrome:
+      row?.badges_custom_monochrome ?? DEFAULT_SETTINGS.badges_custom_monochrome,
     badges_glow: row?.badges_glow ?? DEFAULT_SETTINGS.badges_glow,
     badge_color: row?.badge_color ?? DEFAULT_SETTINGS.badge_color,
     links_monochrome: row?.links_monochrome ?? DEFAULT_SETTINGS.links_monochrome,

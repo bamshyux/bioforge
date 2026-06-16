@@ -3,12 +3,19 @@ import type { ProfileSettings } from "@/lib/types/settings";
 
 export type BadgeColorSettings = Pick<
   ProfileSettings,
-  "show_badges" | "badge_display_limit" | "badges_monochrome" | "text_color"
+  | "show_badges"
+  | "badge_display_limit"
+  | "badges_monochrome"
+  | "badges_custom_monochrome"
+  | "text_color"
 >;
 
 export type BadgeStyleOptions = {
+  /** Monochrome default/catalog badges */
   monochrome?: boolean;
-  /** Applied when monochrome is on — uses profile text color from Customize */
+  /** Monochrome custom admin-created badges */
+  monochromeCustom?: boolean;
+  /** Applied when a badge is monochrome — uses profile text color from Customize */
   color?: string;
   /** Subtle color-matched glow around badge seals */
   glow?: boolean;
@@ -21,31 +28,56 @@ export function getMonochromeBadgeColor(
   return settings.text_color;
 }
 
+export function shouldMonochromeBadge(
+  badge: Pick<ProfileBadge, "category">,
+  settings: Pick<ProfileSettings, "badges_monochrome" | "badges_custom_monochrome">,
+): boolean {
+  if (badge.category === "custom") return settings.badges_custom_monochrome;
+  return settings.badges_monochrome;
+}
+
+export function resolveBadgeMonochrome(
+  badge: Pick<ProfileBadge, "category">,
+  styleOptions?: BadgeStyleOptions,
+): boolean {
+  if (badge.category === "custom") return styleOptions?.monochromeCustom ?? false;
+  return styleOptions?.monochrome ?? false;
+}
+
 export function resolveBadgeColor(
-  badge: Pick<ProfileBadge, "color">,
-  settings: Pick<ProfileSettings, "badges_monochrome" | "text_color">,
+  badge: Pick<ProfileBadge, "category" | "color">,
+  settings: Pick<ProfileSettings, "badges_monochrome" | "badges_custom_monochrome" | "text_color">,
 ): string {
-  if (settings.badges_monochrome) return getMonochromeBadgeColor(settings);
+  if (shouldMonochromeBadge(badge, settings)) return getMonochromeBadgeColor(settings);
   return badge.color;
 }
 
 export function buildBadgeStyleOptions(
-  settings: Pick<ProfileSettings, "badges_monochrome" | "text_color" | "badges_glow">,
+  settings: Pick<
+    ProfileSettings,
+    "badges_monochrome" | "badges_custom_monochrome" | "text_color" | "badges_glow"
+  >,
 ): BadgeStyleOptions {
+  const anyMonochrome = settings.badges_monochrome || settings.badges_custom_monochrome;
+
   return {
     monochrome: settings.badges_monochrome,
-    color: settings.badges_monochrome ? getMonochromeBadgeColor(settings) : undefined,
+    monochromeCustom: settings.badges_custom_monochrome,
+    color: anyMonochrome ? getMonochromeBadgeColor(settings) : undefined,
     glow: settings.badges_glow ?? true,
   };
 }
 
 export function applyBadgeColorSettings(
   badges: ProfileBadge[],
-  settings: Pick<ProfileSettings, "badges_monochrome" | "text_color">,
+  settings: Pick<ProfileSettings, "badges_monochrome" | "badges_custom_monochrome" | "text_color">,
 ): ProfileBadge[] {
-  if (!settings.badges_monochrome) return badges;
-  const color = getMonochromeBadgeColor(settings);
-  return badges.map((badge) => ({ ...badge, color }));
+  const monoColor = getMonochromeBadgeColor(settings);
+
+  return badges.map((badge) => {
+    if (!shouldMonochromeBadge(badge, settings)) return badge;
+    return { ...badge, color: monoColor };
+  });
 }
 
 /** Order and filter badges for public profile display */

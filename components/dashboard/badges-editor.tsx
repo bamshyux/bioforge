@@ -24,7 +24,7 @@ import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes
 import { BADGE_CATEGORIES, type Badge, type BadgeFormState, type BadgeInventoryItem } from "@/lib/types/badge";
 import type { ProfileBadge } from "@/lib/types/badge";
 import type { ProfileSettings } from "@/lib/types/settings";
-import { buildBadgeStyleOptions, preparePublicBadges } from "@/lib/badges/display";
+import { buildBadgeStyleOptions, preparePublicBadges, shouldMonochromeBadge } from "@/lib/badges/display";
 import type { Profile } from "@/lib/types/profile";
 
 const initial: BadgeFormState = {};
@@ -123,7 +123,6 @@ export function BadgesEditor({
   const locked = inventory.filter((b) => !b.earned);
   const badgeStyleOptions = buildBadgeStyleOptions(settings);
   const publicPreview = preparePublicBadges(earnedBadges, settings);
-  const monoColor = settings.badges_monochrome ? settings.text_color : null;
 
   const filtered = useMemo(() => {
     return inventory.filter((b) => {
@@ -137,14 +136,18 @@ export function BadgesEditor({
   }, [inventory, query, category]);
 
   const styledInventory = useMemo(() => {
-    if (!monoColor) return filtered;
-    return filtered.map((badge) => ({ ...badge, color: monoColor }));
-  }, [filtered, monoColor]);
+    return filtered.map((badge) => {
+      if (!shouldMonochromeBadge(badge, settings)) return badge;
+      return { ...badge, color: settings.text_color };
+    });
+  }, [filtered, settings]);
 
   const styledEarned = useMemo(() => {
-    if (!monoColor) return earned;
-    return earned.map((badge) => ({ ...badge, color: monoColor }));
-  }, [earned, monoColor]);
+    return earned.map((badge) => {
+      if (!shouldMonochromeBadge(badge, settings)) return badge;
+      return { ...badge, color: settings.text_color };
+    });
+  }, [earned, settings]);
 
   const refresh = () => router.refresh();
 
@@ -166,8 +169,14 @@ export function BadgesEditor({
               <ToggleField
                 name="badges_monochrome"
                 label="Monochrome badges"
-                description={`Tint all badges to your text color (${settings.text_color}) from Customize`}
+                description={`Tint default catalog badges to your text color (${settings.text_color})`}
                 defaultChecked={settings.badges_monochrome}
+              />
+              <ToggleField
+                name="badges_custom_monochrome"
+                label="Monochrome custom badges"
+                description="Also tint admin-created custom badges. Turn off to keep custom badges in full color while defaults stay monochrome."
+                defaultChecked={settings.badges_custom_monochrome}
               />
               <ToggleField
                 name="badges_glow"
@@ -185,7 +194,7 @@ export function BadgesEditor({
               />
               <p className="text-xs text-neutral-600">
                 Set limit to 0 to show all visible badges. Featured badges appear first.
-                Monochrome uses your text color from Dashboard → Customize.
+                Monochrome uses your text color from Dashboard → Customize. Turn both monochrome options off for full color on every badge.
               </p>
               <FormFeedback error={state.error} success={state.success} />
               <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>

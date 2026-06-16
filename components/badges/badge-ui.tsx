@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { BadgeMedallion } from "@/components/badges/badge-medallion";
 import { rarityClass } from "@/components/icons/badge-icons";
 import type { BadgeStyleOptions } from "@/lib/badges/display";
+import { resolveBadgeMonochrome } from "@/lib/badges/display";
 import { COMPACT_BADGE_ICON_SIZE } from "@/lib/badges/badge-visuals";
 import { getRarityVisual } from "@/lib/badges/rarity-visuals";
 import type { Badge, BadgeInventoryItem, ProfileBadge } from "@/lib/types/badge";
@@ -15,7 +16,9 @@ type BadgeLike = Pick<Badge, "slug" | "name" | "color" | "description" | "rarity
 };
 
 function resolveDisplayColor(badge: BadgeLike, styleOptions?: BadgeStyleOptions): string {
-  if (styleOptions?.monochrome && styleOptions.color) return styleOptions.color;
+  if (resolveBadgeMonochrome(badge, styleOptions) && styleOptions?.color) {
+    return styleOptions.color;
+  }
   return badge.color;
 }
 
@@ -88,7 +91,7 @@ export function BadgeChip({
 }) {
   const rarity = rarityClass(badge.rarity);
   const rarityVisual = getRarityVisual(badge.rarity);
-  const monochrome = styleOptions?.monochrome ?? false;
+  const monochrome = resolveBadgeMonochrome(badge, styleOptions);
   const glowEnabled = styleOptions?.glow ?? true;
   const displayColor = resolveDisplayColor(badge, styleOptions);
   const chipRef = useRef<HTMLSpanElement>(null);
@@ -199,7 +202,7 @@ export function BadgeCard({
   styleOptions?: BadgeStyleOptions;
 }) {
   const rarityVisual = getRarityVisual(badge.rarity);
-  const monochrome = styleOptions?.monochrome ?? false;
+  const monochrome = resolveBadgeMonochrome(badge, styleOptions);
   const glowEnabled = styleOptions?.glow ?? true;
   const displayColor = resolveDisplayColor(badge, styleOptions);
   const [hovered, setHovered] = useState(false);

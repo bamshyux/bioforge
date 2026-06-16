@@ -118,6 +118,16 @@ export function IconAnalytics(p: IconProps) {
   );
 }
 
+export function IconExplore(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+      <path d="M8 11h6M11 8v6" />
+    </Icon>
+  );
+}
+
 export function IconSettings(p: IconProps) {
   return (
     <Icon {...p}>

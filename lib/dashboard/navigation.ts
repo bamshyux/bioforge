@@ -10,6 +10,7 @@ import {
   IconMusic,
   IconOverview,
   IconProfile,
+  IconExplore,
   IconSettings,
 } from "@/components/icons/dashboard-icons";
 
@@ -260,6 +261,13 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         Icon: IconSettings,
       },
       {
+        href: "/dashboard/explore",
+        label: "Explore Profiles",
+        description: "Discover creators on cried.bio",
+        keywords: ["explore", "discover", "profiles", "users", "browse"],
+        Icon: IconExplore,
+      },
+      {
         href: "/dashboard/premium",
         label: "Premium",
         description: "Upgrade your account",
@@ -328,6 +336,7 @@ export function getSectionForPath(pathname: string): DashboardSection | undefine
   return DASHBOARD_SECTIONS.find((section) => {
     if (pathname === section.href) return true;
     if (section.id === "settings" && pathname.startsWith("/dashboard/premium")) return true;
+    if (section.id === "settings" && pathname.startsWith("/dashboard/explore")) return true;
     return section.items.some((item) => pathname.startsWith(item.href) && item.href !== "/dashboard");
   }) ?? DASHBOARD_SECTIONS.find((section) =>
     section.href !== "/dashboard" && pathname.startsWith(section.href),
@@ -349,7 +358,11 @@ export function isNavActive(pathname: string, href: string): boolean {
     return pathname.startsWith("/dashboard/profile") || pathname.startsWith("/dashboard/links");
   }
   if (href === "/dashboard/settings") {
-    return pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/premium");
+    return (
+      pathname.startsWith("/dashboard/settings") ||
+      pathname.startsWith("/dashboard/premium") ||
+      pathname.startsWith("/dashboard/explore")
+    );
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
