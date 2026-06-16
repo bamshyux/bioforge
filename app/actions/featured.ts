@@ -8,6 +8,58 @@ import type { FeaturedBlockType, FeaturedFormState } from "@/lib/types/featured"
 import { MAX_FEATURED_BLOCKS } from "@/lib/types/featured";
 import { createClient } from "@/lib/supabase/server";
 
+const MAX_FEATURED_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_FEATURED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+async function uploadFeaturedImage(userId: string, file: File): Promise<string> {
+  if (!ALLOWED_FEATURED_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Images must be JPEG, PNG, WebP, or GIF.");
+  }
+  if (file.size > MAX_FEATURED_IMAGE_SIZE) {
+    throw new Error("Images must be 5 MB or smaller.");
+  }
+
+  const ext = file.type.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+  const path = `${userId}/featured/${Date.now()}.${ext}`;
+
+  const supabase = await createClient();
+  const { error } = await supabase.storage
+    .from("profiles")
+    .upload(path, file, { upsert: false, contentType: file.type });
+
+  if (error) throw new Error(error.message);
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("profiles").getPublicUrl(path);
+
+  return `${publicUrl}?v=${Date.now()}`;
+}
+
+async function resolveFeaturedThumbnail(
+  userId: string,
+  blockType: FeaturedBlockType,
+  formData: FormData,
+): Promise<string | null> {
+  const thumbnailUrl = String(formData.get("thumbnail_url") ?? "").trim() || null;
+  const imageFile = formData.get("image_file");
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    return uploadFeaturedImage(userId, imageFile);
+  }
+
+  if (blockType === "image" && !thumbnailUrl) {
+    throw new Error("Image blocks need an uploaded image or image URL.");
+  }
+
+  return thumbnailUrl;
+}
+
 export async function createFeaturedBlockAction(
   _prev: FeaturedFormState,
   formData: FormData,
@@ -20,9 +72,15 @@ export async function createFeaturedBlockAction(
   const description = String(formData.get("description") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
   const accentColor = String(formData.get("accent_color") ?? "#fafafa");
-  const thumbnailUrl = String(formData.get("thumbnail_url") ?? "").trim() || null;
 
   if (!title) return { error: "Title is required." };
+
+  let thumbnailUrl: string | null;
+  try {
+    thumbnailUrl = await resolveFeaturedThumbnail(userId, blockType, formData);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Image upload failed." };
+  }
 
   const entitlements = await getPremiumEntitlements(userId);
   const count = await countFeaturedBlocks(userId);

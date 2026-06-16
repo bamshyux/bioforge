@@ -27,26 +27,38 @@ export function ProfileFeaturedSection({
 
 function FeaturedCard({ block, settings }: { block: FeaturedBlock; settings: ProfileSettings }) {
   const accent = block.accent_color || settings.accent_color;
+  const isImageBlock = block.block_type === "image" && block.thumbnail_url;
+
   const inner = (
     <div
-      className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0f0f0f] p-4 transition-all hover:border-white/[0.12]"
+      className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0f0f0f] transition-all hover:border-white/[0.12] ${
+        isImageBlock ? "p-0" : "p-4"
+      }`}
       style={{ boxShadow: `0 0 0 1px ${accent}15` }}
     >
       {block.thumbnail_url && (
-        <div className="mb-3 overflow-hidden rounded-lg">
-          <img src={block.thumbnail_url} alt="" className="h-24 w-full object-cover" />
+        <div className={isImageBlock ? "overflow-hidden" : "mb-3 overflow-hidden rounded-lg"}>
+          <img
+            src={block.thumbnail_url}
+            alt=""
+            className={isImageBlock ? "aspect-[4/3] w-full object-cover" : "h-24 w-full object-cover"}
+          />
         </div>
       )}
-      <p className="text-sm font-semibold text-white">{block.title}</p>
-      {block.description && (
-        <p className="mt-1 line-clamp-2 text-xs text-neutral-400">{block.description}</p>
-      )}
-      <span
-        className="mt-3 inline-block text-[10px] font-medium uppercase tracking-wider"
-        style={{ color: accent }}
-      >
-        {block.block_type.replace("_", " ")}
-      </span>
+      <div className={isImageBlock ? "p-4" : ""}>
+        <p className="text-sm font-semibold text-white">{block.title}</p>
+        {block.description && (
+          <p className="mt-1 line-clamp-2 text-xs text-neutral-400">{block.description}</p>
+        )}
+        {!isImageBlock ? (
+          <span
+            className="mt-3 inline-block text-[10px] font-medium uppercase tracking-wider"
+            style={{ color: accent }}
+          >
+            {block.block_type.replace("_", " ")}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 

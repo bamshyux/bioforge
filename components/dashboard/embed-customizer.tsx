@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { updateEmbedConfigAction } from "@/app/actions/embeds";
 import { ProfileEmbedItem } from "@/components/profile/public/profile-embed-item";
 import {
+  buttonPrimaryClassName,
+  buttonSecondaryClassName,
   inputClassName,
   labelClassName,
   SliderField,
@@ -62,13 +64,11 @@ function ColorInput({
   value,
   fallback,
   onChange,
-  onCommit,
 }: {
   label: string;
   value: string;
   fallback: string;
   onChange: (value: string) => void;
-  onCommit?: (value: string) => void;
 }) {
   return (
     <div>
@@ -77,27 +77,20 @@ function ColorInput({
         <input
           type="color"
           value={value || fallback}
-          onChange={(e) => {
-            onChange(e.target.value);
-            onCommit?.(e.target.value);
-          }}
+          onChange={(e) => onChange(e.target.value)}
           className="h-10 w-12 cursor-pointer rounded-lg border border-white/[0.08] bg-[#141414]"
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onBlur={() => onCommit?.(value)}
           placeholder={`Auto (${fallback})`}
           className="min-w-0 flex-1 rounded-lg border border-white/[0.08] bg-[#0f0f0f] px-3 py-2 text-xs text-white placeholder:text-neutral-600"
         />
         {value ? (
           <button
             type="button"
-            onClick={() => {
-              onChange("");
-              onCommit?.("");
-            }}
+            onClick={() => onChange("")}
             className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-500 hover:text-white"
           >
             Auto
@@ -148,6 +141,10 @@ function isRoblox(type: EmbedType) {
   return type === "roblox" || type === "roblox_profile";
 }
 
+function configsEqual(a: EmbedConfig, b: EmbedConfig) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function EmbedCustomizer({
   embed,
   settings,
@@ -155,25 +152,40 @@ export function EmbedCustomizer({
   embed: ProfileEmbed;
   settings: ProfileSettings;
 }) {
+  const [savedConfig, setSavedConfig] = useState<EmbedConfig>(embed.config);
   const [config, setConfig] = useState<EmbedConfig>(embed.config);
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    setSavedConfig(embed.config);
     setConfig(embed.config);
+    setStatus("idle");
   }, [embed.config]);
 
-  const patch = (partial: Partial<EmbedConfig>) => {
-    const next = { ...config, ...partial };
-    setConfig(next);
+  const isDirty = useMemo(() => !configsEqual(config, savedConfig), [config, savedConfig]);
+
+  const updateDraft = (partial: Partial<EmbedConfig>) => {
+    setConfig((current) => ({ ...current, ...partial }));
     setStatus("idle");
+  };
+
+  const handleReset = () => {
+    setConfig(savedConfig);
+    setStatus("idle");
+  };
+
+  const handleSave = () => {
     startTransition(async () => {
-      const result = await updateEmbedConfigAction(embed.id, partial);
+      const result = await updateEmbedConfigAction(embed.id, config);
       if (result.error) {
         setStatus("error");
         return;
       }
-      if (result.config) setConfig(result.config);
+      if (result.config) {
+        setSavedConfig(result.config);
+        setConfig(result.config);
+      }
       setStatus("saved");
     });
   };
@@ -200,8 +212,7 @@ export function EmbedCustomizer({
             <input
               type="text"
               value={config.custom_title}
-              onChange={(e) => setConfig({ ...config, custom_title: e.target.value })}
-              onBlur={() => patch({ custom_title: config.custom_title })}
+              onChange={(e) => updateDraft({ custom_title: e.target.value })}
               placeholder={embed.title}
               className={inputClassName}
             />
@@ -211,8 +222,7 @@ export function EmbedCustomizer({
             <input
               type="text"
               value={config.description}
-              onChange={(e) => setConfig({ ...config, description: e.target.value })}
-              onBlur={() => patch({ description: config.description })}
+              onChange={(e) => updateDraft({ description: e.target.value })}
               placeholder="Optional subtitle or caption"
               className={inputClassName}
             />
@@ -223,7 +233,7 @@ export function EmbedCustomizer({
           name={`show_title_${embed.id}`}
           label="Show title on profile"
           checked={config.show_title}
-          onCheckedChange={(checked) => patch({ show_title: checked })}
+          onCheckedChange={(show_title) => updateDraft({ show_title })}
         />
 
         <ChipGrid
@@ -231,7 +241,7 @@ export function EmbedCustomizer({
           options={displayOptions}
           value={config.display_mode}
           getLabel={(option) => DISPLAY_LABELS[option]}
-          onChange={(display_mode) => patch({ display_mode })}
+          onChange={(display_mode) => updateDraft({ display_mode })}
         />
 
         {config.display_mode === "iframe" ? (
@@ -240,7 +250,7 @@ export function EmbedCustomizer({
             options={aspectOptions}
             value={config.aspect_ratio}
             getLabel={(option) => ASPECT_LABELS[option]}
-            onChange={(aspect_ratio) => patch({ aspect_ratio })}
+            onChange={(aspect_ratio) => updateDraft({ aspect_ratio })}
           />
         ) : null}
 
@@ -250,7 +260,7 @@ export function EmbedCustomizer({
             options={["default", "minimal", "glass", "bordered"] as const}
             value={config.card_style}
             getLabel={(option) => STYLE_LABELS[option]}
-            onChange={(card_style) => patch({ card_style })}
+            onChange={(card_style) => updateDraft({ card_style })}
           />
         ) : null}
 
@@ -259,7 +269,7 @@ export function EmbedCustomizer({
           options={["stretch", "left", "center", "right"] as const}
           value={config.alignment}
           getLabel={(option) => ALIGN_LABELS[option]}
-          onChange={(alignment) => patch({ alignment })}
+          onChange={(alignment) => updateDraft({ alignment })}
         />
 
         {embed.embed_type === "roblox_profile" ? (
@@ -269,13 +279,13 @@ export function EmbedCustomizer({
               label="Show avatar"
               description="Display the Roblox headshot on the card."
               checked={config.show_avatar}
-              onCheckedChange={(show_avatar) => patch({ show_avatar })}
+              onCheckedChange={(show_avatar) => updateDraft({ show_avatar })}
             />
             <ToggleField
               name={`show_username_${embed.id}`}
               label="Show username"
               checked={config.show_username}
-              onCheckedChange={(show_username) => patch({ show_username })}
+              onCheckedChange={(show_username) => updateDraft({ show_username })}
             />
           </>
         ) : null}
@@ -285,7 +295,7 @@ export function EmbedCustomizer({
             name={`show_thumbnail_${embed.id}`}
             label="Show game thumbnail"
             checked={config.show_thumbnail}
-            onCheckedChange={(show_thumbnail) => patch({ show_thumbnail })}
+            onCheckedChange={(show_thumbnail) => updateDraft({ show_thumbnail })}
           />
         ) : null}
 
@@ -296,7 +306,7 @@ export function EmbedCustomizer({
             description="Use a shorter player instead of a wide video frame."
             checked={config.compact_player}
             onCheckedChange={(compact_player) =>
-              patch({ compact_player, aspect_ratio: compact_player ? "auto" : "16:9" })
+              updateDraft({ compact_player, aspect_ratio: compact_player ? "auto" : "16:9" })
             }
           />
         ) : null}
@@ -307,7 +317,7 @@ export function EmbedCustomizer({
             options={["dark", "light"] as const}
             value={config.theme}
             getLabel={(option: EmbedTheme) => (option === "dark" ? "Dark" : "Light")}
-            onChange={(theme) => patch({ theme })}
+            onChange={(theme) => updateDraft({ theme })}
           />
         ) : null}
 
@@ -316,7 +326,7 @@ export function EmbedCustomizer({
             name={`autoplay_${embed.id}`}
             label="Autoplay"
             checked={config.autoplay}
-            onCheckedChange={(autoplay) => patch({ autoplay })}
+            onCheckedChange={(autoplay) => updateDraft({ autoplay })}
           />
         ) : null}
 
@@ -325,15 +335,13 @@ export function EmbedCustomizer({
             label="Accent color"
             value={config.accent_color}
             fallback={settings.accent_color}
-            onChange={(accent_color) => setConfig({ ...config, accent_color })}
-            onCommit={(accent_color) => patch({ accent_color })}
+            onChange={(accent_color) => updateDraft({ accent_color })}
           />
           <ColorInput
             label="Background"
             value={config.background_color}
             fallback="#0f0f0f"
-            onChange={(background_color) => setConfig({ ...config, background_color })}
-            onCommit={(background_color) => patch({ background_color })}
+            onChange={(background_color) => updateDraft({ background_color })}
           />
         </div>
 
@@ -343,19 +351,43 @@ export function EmbedCustomizer({
           min={0}
           max={24}
           value={config.border_radius}
-          onChange={(border_radius) => patch({ border_radius })}
+          onChange={(border_radius) => updateDraft({ border_radius })}
         />
 
         <ToggleField
           name={`border_${embed.id}`}
           label="Show border"
           checked={config.show_border}
-          onCheckedChange={(show_border) => patch({ show_border })}
+          onCheckedChange={(show_border) => updateDraft({ show_border })}
         />
 
-        {status === "saved" ? <p className="text-xs text-emerald-400">Saved</p> : null}
-        {status === "error" ? <p className="text-xs text-red-400">Could not save changes.</p> : null}
-        {isPending ? <p className="text-xs text-neutral-500">Saving...</p> : null}
+        <div className="flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-4">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!isDirty || isPending}
+            className={buttonPrimaryClassName}
+          >
+            {isPending ? "Saving..." : "Save changes"}
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={!isDirty || isPending}
+            className={buttonSecondaryClassName}
+          >
+            Reset
+          </button>
+          {isDirty && !isPending ? (
+            <p className="text-xs text-amber-400/90">Unsaved changes</p>
+          ) : null}
+          {status === "saved" && !isDirty ? (
+            <p className="text-xs text-emerald-400">Saved</p>
+          ) : null}
+          {status === "error" ? (
+            <p className="text-xs text-red-400">Could not save changes.</p>
+          ) : null}
+        </div>
       </div>
 
       <div className="rounded-xl border border-white/[0.06] bg-[#090909] p-4">
