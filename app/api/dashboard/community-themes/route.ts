@@ -1,8 +1,5 @@
-import {
-  COMMUNITY_THEMES_PAGE_SIZE,
-  searchCommunityThemes,
-} from "@/lib/data/community-themes";
-import type { CommunityThemeSort } from "@/lib/types/community-theme";
+import { searchCommunityThemes } from "@/lib/data/community-themes";
+import { COMMUNITY_THEMES_PAGE_SIZE, type CommunityThemeSort } from "@/lib/types/community-theme";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
