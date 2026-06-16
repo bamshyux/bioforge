@@ -76,8 +76,11 @@ export function PresetCard({
             </p>
           </div>
           {isActive ? (
-            <span className="shrink-0 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
-              Active
+            <span
+              className="shrink-0 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300"
+              title="This preset was last applied to your live profile"
+            >
+              Applied
             </span>
           ) : null}
         </div>

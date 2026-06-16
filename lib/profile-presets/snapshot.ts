@@ -263,7 +263,7 @@ export async function applyProfilePresetSnapshot(
     const { data: insertedLinks, error: linksError } = await supabase
       .from("links")
       .insert(
-        sortedLinks.map((link) => ({
+        sortedLinks.map((link, index) => ({
           profile_id: userId,
           title: link.title,
           url: link.url,
@@ -272,13 +272,12 @@ export async function applyProfilePresetSnapshot(
           background_color: link.background_color,
           animation: link.animation,
           is_featured: link.is_featured,
-          sort_order: link.sort_order,
+          sort_order: index,
         })),
       )
-      .select("id")
-      .order("sort_order", { ascending: true });
+      .select("id");
 
-    if (linksError) return { error: linksError.message };
+    if (linksError) return { error: formatSchemaError(linksError.message) };
 
     if (
       insertedLinks &&

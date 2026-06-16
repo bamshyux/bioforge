@@ -8,7 +8,6 @@ import {
   buttonPrimaryClassName,
   cardClassName,
   FormFeedback,
-  inputClassName,
   PageHeader,
 } from "@/components/dashboard/form-fields";
 import { useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
@@ -25,8 +24,6 @@ export function ProfilePresetsShell({
   const router = useRouter();
   const unsaved = useUnsavedChangesOptional();
   const [activeId, setActiveId] = useState(activePresetId);
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [presetName, setPresetName] = useState("");
   const [feedback, setFeedback] = useState<{ error?: string; success?: string }>({});
   const [isPending, startTransition] = useTransition();
 
@@ -37,10 +34,9 @@ export function ProfilePresetsShell({
   const checkUnsavedBeforeApply = useCallback(() => {
     if (!unsaved?.isDirty) return true;
 
-    const saveFirst = window.confirm(
+    return window.confirm(
       "You have unsaved changes on another dashboard page. Apply this preset anyway? Your unsaved edits will remain in the editor until you save or reset them.",
     );
-    return saveFirst;
   }, [unsaved?.isDirty]);
 
   function refresh() {
@@ -51,6 +47,31 @@ export function ProfilePresetsShell({
     setActiveId(presetId);
     unsaved?.markClean();
     refresh();
+  }
+
+  function handleSaveCurrentProfile() {
+    if (initialPresets.length >= MAX_PROFILE_PRESETS) {
+      setFeedback({ error: `Maximum ${MAX_PROFILE_PRESETS} presets allowed.` });
+      return;
+    }
+
+    const name = window.prompt("Name this preset");
+    if (name === null) return;
+
+    const presetName = name.trim();
+    if (!presetName) {
+      setFeedback({ error: "Preset name is required." });
+      return;
+    }
+
+    startTransition(async () => {
+      setFeedback({});
+      const result = await saveCurrentProfilePresetAction(presetName);
+      setFeedback(result);
+      if (result.error) return;
+      if (result.presetId) setActiveId(result.presetId);
+      refresh();
+    });
   }
 
   return (
@@ -74,61 +95,14 @@ export function ProfilePresetsShell({
         <button
           type="button"
           disabled={isPending || initialPresets.length >= MAX_PROFILE_PRESETS}
-          onClick={() => {
-            setPresetName("");
-            setSaveOpen(true);
-            setFeedback({});
-          }}
+          onClick={handleSaveCurrentProfile}
           className={buttonPrimaryClassName}
         >
-          Save Current Profile
+          {isPending ? "Saving..." : "Save Current Profile"}
         </button>
       </div>
 
       <FormFeedback error={feedback.error} success={feedback.success} />
-
-      {saveOpen ? (
-        <div className={`${cardClassName} space-y-4`}>
-          <h3 className="text-sm font-semibold text-white">Name this preset</h3>
-          <form
-            className="flex flex-col gap-3 sm:flex-row"
-            onSubmit={(event) => {
-              event.preventDefault();
-              startTransition(async () => {
-                setFeedback({});
-                const result = await saveCurrentProfilePresetAction(presetName);
-                setFeedback(result);
-                if (result.error) return;
-                setSaveOpen(false);
-                setPresetName("");
-                if (result.presetId) setActiveId(result.presetId);
-                refresh();
-              });
-            }}
-          >
-            <input
-              value={presetName}
-              onChange={(event) => setPresetName(event.target.value)}
-              maxLength={60}
-              required
-              placeholder="e.g. Gaming setup, Minimal dark, Stream night"
-              className={`${inputClassName} min-w-0 flex-1`}
-            />
-            <div className="flex gap-2">
-              <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
-                {isPending ? "Saving..." : "Save preset"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSaveOpen(false)}
-                className="rounded-lg border border-white/[0.08] px-4 py-2 text-sm font-medium text-neutral-300 hover:text-white"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : null}
 
       {initialPresets.length === 0 ? (
         <div className={`${cardClassName} py-16 text-center`}>
