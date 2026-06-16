@@ -189,16 +189,15 @@ export async function createAnnouncementAction(
   return { success: "Announcement created." };
 }
 
-export async function deleteAnnouncementAction(id: string): Promise<AdminFormState> {
+export async function deleteAnnouncementAction(id: string, _formData?: FormData): Promise<void> {
   const gate = await guard();
-  if ("error" in gate) return { error: gate.error };
+  if ("error" in gate) throw new Error(gate.error);
 
   const supabase = await db();
   const { error } = await supabase.from("announcements").delete().eq("id", id);
-  if (error) return { error: error.message };
+  if (error) throw new Error(error.message);
 
   revalidatePath("/dashboard/admin/announcements");
-  return { success: "Announcement deleted." };
 }
 
 export async function sendAdminNotificationAction(
@@ -293,16 +292,15 @@ export async function addReservedUsernameAction(
   return { success: "Reserved username added." };
 }
 
-export async function removeReservedUsernameAction(username: string): Promise<AdminFormState> {
+export async function removeReservedUsernameAction(username: string, _formData?: FormData): Promise<void> {
   const gate = await guard("owner");
-  if ("error" in gate) return { error: gate.error };
+  if ("error" in gate) throw new Error(gate.error);
 
   const supabase = await db();
   const { error } = await supabase.from("reserved_usernames").delete().eq("username", username);
-  if (error) return { error: error.message };
+  if (error) throw new Error(error.message);
 
   revalidatePath("/dashboard/admin/owner");
-  return { success: "Removed." };
 }
 
 export async function updateBadgeAdminAction(
