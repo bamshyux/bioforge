@@ -65,7 +65,7 @@ export function OgBadgeMark({
   );
 }
 
-export function OgBadgeMarkFromColor(color: string): ReactNode {
+export function OgBadgeMarkFromColor({ color }: { color: string }): ReactNode {
   const palette = ogBadgePalette(color);
   return <OgBadgeMark {...palette} />;
 }
