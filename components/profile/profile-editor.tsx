@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   removeProfileImageAction,
@@ -18,7 +18,7 @@ import {
   labelClassName,
   RemoveMediaButton,
 } from "@/components/dashboard/form-fields";
-import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
+import { useClearUnsavedOnSuccess, useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
 import { SITE_HOST } from "@/lib/site";
 
 const initialState: ProfileFormState = {};
@@ -34,8 +34,10 @@ export function ProfileEditor({
   settings?: ProfileSettings;
 }) {
   const router = useRouter();
+  const unsaved = useUnsavedChangesOptional();
   const [isRemoving, startRemove] = useTransition();
-  const [state, formAction, isPending] = useActionState(updateProfileAction, initialState);
+  const [state, setState] = useState<ProfileFormState>(initialState);
+  const [isPending, setIsPending] = useState(false);
   const [bioPreview, setBioPreview] = useState(profile?.bio ?? "");
 
   const [avatarInputKey, setAvatarInputKey] = useState(0);
@@ -47,9 +49,28 @@ export function ProfileEditor({
   const [avatarFeedback, setAvatarFeedback] = useState<ProfileFormState>({});
   const [bannerFeedback, setBannerFeedback] = useState<ProfileFormState>({});
 
-  useClearUnsavedOnSuccess(state, isPending);
   useClearUnsavedOnSuccess(avatarFeedback, avatarUploading);
   useClearUnsavedOnSuccess(bannerFeedback, bannerUploading);
+
+  const handleProfileSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    unsaved?.markSaving();
+    setIsPending(true);
+    try {
+      const result = await updateProfileAction(state, new FormData(event.currentTarget));
+      setState(result);
+      if (result.success) {
+        unsaved?.markClean();
+        router.refresh();
+      } else {
+        unsaved?.clearSaving();
+      }
+    } catch {
+      unsaved?.clearSaving();
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -125,7 +146,7 @@ export function ProfileEditor({
 
   return (
     <div className="space-y-6">
-      <form action={formAction} data-dashboard-primary-form className="space-y-6">
+      <form onSubmit={handleProfileSave} data-dashboard-primary-form className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
           <label htmlFor="username" className={labelClassName}>Username</label>

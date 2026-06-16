@@ -111,6 +111,7 @@ export function BioStyleEditor({
     settings,
     readBioStyleForm,
     "Bio styling saved.",
+    "bio-style",
   );
 
   const handleSave = (event: React.FormEvent) => {
@@ -136,7 +137,11 @@ export function BioStyleEditor({
         </p>
       </div>
 
-      <form onSubmit={handleSave} data-dashboard-section-form="bio" className="space-y-5">
+      <form
+        onSubmit={handleSave}
+        data-dashboard-settings-form="bio-style"
+        className="space-y-5"
+      >
         <div className="rounded-xl border border-white/[0.06] bg-[#0a0a0a] p-4">
           <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-600">Preview</p>
           <ProfileBio text={sampleText} settings={preview} className="!mb-0" />

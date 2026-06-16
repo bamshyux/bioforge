@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useActionState } from "react";
 import { updateSettingsAction } from "@/app/actions/settings";
 import { updateSocialSettingsAction } from "@/app/actions/social";
-import { useClearUnsavedOnSuccess, useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
+import { useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
 import type { ProfileSettings, SettingsFormState, SettingsSection } from "@/lib/types/settings";
 
 const initial: SettingsFormState = {};
@@ -26,33 +25,83 @@ function appendToFormData(fd: FormData, values: SettingsFormValues) {
   }
 }
 
-export function useSettingsForm(section: SettingsSection, successMessage?: string) {
+function formatDisplayState(state: SettingsFormState, successMessage?: string): SettingsFormState {
+  return {
+    ...state,
+    success:
+      state.success === "Settings saved." && successMessage ? successMessage : state.success,
+  };
+}
+
+function useManagedSettingsAction(
+  action: (prev: SettingsFormState, formData: FormData) => Promise<SettingsFormState>,
+  successMessage?: string,
+) {
   const router = useRouter();
   const unsaved = useUnsavedChangesOptional();
-  const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
-  useClearUnsavedOnSuccess(state, isPending);
+  const [state, setState] = useState<SettingsFormState>(initial);
+  const [isPending, setIsPending] = useState(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
-  useEffect(() => {
-    if (state.success) {
-      router.refresh();
-    }
-  }, [state.success, router]);
+  const finishSave = useCallback(
+    (result: SettingsFormState) => {
+      setState(result);
+      if (result.success) {
+        unsaved?.markClean();
+        router.refresh();
+      } else {
+        unsaved?.clearSaving();
+      }
+    },
+    [router, unsaved],
+  );
+
+  const runAction = useCallback(
+    (buildFormData: () => FormData) => {
+      unsaved?.markSaving();
+      setIsPending(true);
+      void (async () => {
+        try {
+          const result = await action(stateRef.current, buildFormData());
+          finishSave(result);
+        } catch {
+          unsaved?.clearSaving();
+        } finally {
+          setIsPending(false);
+        }
+      })();
+    },
+    [action, finishSave, unsaved],
+  );
+
+  const displayState = useMemo(
+    () => formatDisplayState(state, successMessage),
+    [state, successMessage],
+  );
+
+  return { state: displayState, isPending, runAction };
+}
+
+export function useSettingsForm(section: SettingsSection, successMessage?: string) {
+  const { state, isPending, runAction } = useManagedSettingsAction(
+    updateSettingsAction,
+    successMessage,
+  );
 
   const submit = useCallback(
     (values: SettingsFormValues) => {
-      unsaved?.markSaving();
-      const fd = new FormData();
-      fd.set("_section", section);
-      appendToFormData(fd, values);
-      formAction(fd);
+      runAction(() => {
+        const fd = new FormData();
+        fd.set("_section", section);
+        appendToFormData(fd, values);
+        return fd;
+      });
     },
-    [formAction, section, unsaved],
+    [runAction, section],
   );
 
-  const displaySuccess =
-    state.success === "Settings saved." && successMessage ? successMessage : state.success;
-
-  return { state: { ...state, success: displaySuccess }, submit, isPending };
+  return { state, submit, isPending };
 }
 
 /**
@@ -65,6 +114,7 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
   settings: ProfileSettings,
   readForm: (settings: ProfileSettings) => T,
   successMessage?: string,
+  settingsFormId?: string,
 ) {
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -91,8 +141,13 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
     (partial: Partial<T>) => {
       setForm((prev) => ({ ...prev, ...partial }));
       unsaved?.markDirty();
+      const selector = settingsFormId
+        ? `main form[data-dashboard-settings-form="${settingsFormId}"]`
+        : `main form[data-dashboard-section-form="${section}"]`;
+      const sectionForm = document.querySelector<HTMLFormElement>(selector);
+      if (sectionForm) unsaved?.setLastDirtyForm(sectionForm);
     },
-    [unsaved],
+    [section, settingsFormId, unsaved],
   );
 
   const submit = useCallback(
@@ -116,31 +171,20 @@ function useFormActionSection<T extends SettingsFormValues>(
   action: (prev: SettingsFormState, formData: FormData) => Promise<SettingsFormState>,
   successMessage?: string,
 ) {
-  const router = useRouter();
-  const unsaved = useUnsavedChangesOptional();
-  const [state, formAction, isPending] = useActionState(action, initial);
-  useClearUnsavedOnSuccess(state, isPending);
-
-  useEffect(() => {
-    if (state.success) {
-      router.refresh();
-    }
-  }, [state.success, router]);
+  const { state, isPending, runAction } = useManagedSettingsAction(action, successMessage);
 
   const submit = useCallback(
     (values: T) => {
-      unsaved?.markSaving();
-      const fd = new FormData();
-      appendToFormData(fd, values);
-      formAction(fd);
+      runAction(() => {
+        const fd = new FormData();
+        appendToFormData(fd, values);
+        return fd;
+      });
     },
-    [formAction, unsaved],
+    [runAction],
   );
 
-  const displaySuccess =
-    state.success === "Settings saved." && successMessage ? successMessage : state.success;
-
-  return { state: { ...state, success: displaySuccess }, submit, isPending };
+  return { state, submit, isPending };
 }
 
 export function useSocialDashboardSection(

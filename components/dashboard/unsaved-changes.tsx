@@ -27,6 +27,14 @@ const UnsavedChangesContext = createContext<UnsavedChangesContextValue | null>(n
 function findDashboardSaveForm(lastForm: HTMLFormElement | null): HTMLFormElement | null {
   if (lastForm?.isConnected) return lastForm;
 
+  const settingsForms = document.querySelectorAll<HTMLFormElement>(
+    "main form[data-dashboard-settings-form]",
+  );
+  if (settingsForms.length === 1) return settingsForms[0] ?? null;
+
+  const sectionForms = document.querySelectorAll<HTMLFormElement>("main form[data-dashboard-section-form]");
+  if (sectionForms.length === 1) return sectionForms[0] ?? null;
+
   const primary = document.querySelector<HTMLFormElement>("main form[data-dashboard-primary-form]");
   if (primary) return primary;
 
@@ -67,7 +75,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     savingTimeoutRef.current = setTimeout(() => {
       setIsSaving(false);
       savingTimeoutRef.current = null;
-    }, 30000);
+    }, 15000);
   }, [clearSavingTimeout]);
 
   const clearSaving = useCallback(() => {
@@ -81,17 +89,21 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
   const saveChanges = useCallback(() => {
     const form = findDashboardSaveForm(lastDirtyFormRef.current);
-    if (!form) return;
+    if (!form) {
+      clearSaving();
+      return;
+    }
 
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]:not(:disabled)');
     if (!submit) {
+      clearSaving();
       form.querySelector('button[type="submit"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
     markSaving();
     form.requestSubmit();
-  }, [markSaving]);
+  }, [clearSaving, markSaving]);
 
   useEffect(() => {
     if (!isDirty || isSaving) return;
@@ -201,47 +213,34 @@ export function DashboardFormTracker({ children }: { children: ReactNode }) {
     [context],
   );
 
-  const handleSubmit = useCallback(
-    (event: React.FormEvent<HTMLDivElement>) => {
-      if (!context) return;
-      const form = event.target;
-      if (!(form instanceof HTMLFormElement)) return;
-      context.setLastDirtyForm(form);
-      context.markSaving();
-    },
-    [context],
-  );
-
   return (
-    <div onInput={handleMarkDirty} onChange={handleMarkDirty} onSubmitCapture={handleSubmit}>
+    <div onInput={handleMarkDirty} onChange={handleMarkDirty}>
       {children}
     </div>
   );
 }
 
-/** Clear the unsaved banner after a form save finishes. */
+/** Clear the unsaved banner after native form actions (action={formAction}) finish. */
 export function useClearUnsavedOnSuccess(
   state: { success?: string | boolean | null; error?: string | null },
   isPending = false,
 ) {
   const context = useUnsavedChangesOptional();
-  const markCleanRef = useRef(context?.markClean);
-  const clearSavingRef = useRef(context?.clearSaving);
   const wasPendingRef = useRef(false);
 
-  markCleanRef.current = context?.markClean;
-  clearSavingRef.current = context?.clearSaving;
-
   useEffect(() => {
-    const finished = wasPendingRef.current && !isPending;
-    wasPendingRef.current = isPending;
+    if (isPending) {
+      wasPendingRef.current = true;
+      return;
+    }
 
-    if (!finished) return;
+    if (!wasPendingRef.current) return;
+    wasPendingRef.current = false;
 
     if (state.success) {
-      markCleanRef.current?.();
+      context?.markClean();
     } else {
-      clearSavingRef.current?.();
+      context?.clearSaving();
     }
-  }, [isPending, state.success, state.error]);
+  }, [isPending, state.success, state.error, context]);
 }
