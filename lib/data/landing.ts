@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   LandingActivityItem,
   LandingFeaturedProfile,
+  LandingFeaturedProfileRow,
   LandingProfile,
   LandingRoadmapItem,
   LandingStats,
@@ -302,13 +303,29 @@ export async function getFloatingProfileCards(limit = 8): Promise<LandingProfile
 
 // ─── Admin helpers ───
 
-export async function listLandingFeaturedProfiles() {
+export async function listLandingFeaturedProfiles(): Promise<LandingFeaturedProfileRow[]> {
   const supabase = await db();
   const { data } = await supabase
     .from("landing_featured_profiles")
     .select("id, sort_order, is_active, profile_id, profiles:profile_id (username, display_name)")
     .order("sort_order", { ascending: true });
-  return data ?? [];
+
+  return (data ?? []).map((row) => {
+    const profileRaw = row.profiles as
+      | { username: string | null; display_name: string | null }
+      | { username: string | null; display_name: string | null }[]
+      | null;
+
+    const profile = Array.isArray(profileRaw) ? (profileRaw[0] ?? null) : profileRaw;
+
+    return {
+      id: row.id,
+      sort_order: row.sort_order,
+      is_active: row.is_active,
+      profile_id: row.profile_id,
+      profiles: profile,
+    };
+  });
 }
 
 export async function listLandingTestimonialsAdmin() {

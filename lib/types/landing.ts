@@ -56,6 +56,14 @@ export type LandingThemePreview = {
   install_count: number;
 };
 
+export type LandingFeaturedProfileRow = {
+  id: string;
+  sort_order: number;
+  is_active: boolean;
+  profile_id: string;
+  profiles: { username: string | null; display_name: string | null } | null;
+};
+
 export type LandingFeaturedProfile = LandingProfile & {
   sort_order: number;
 };

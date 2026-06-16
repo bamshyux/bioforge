@@ -7,10 +7,5 @@ export default async function AdminLandingPage() {
     listLandingTestimonialsAdmin(),
   ]);
 
-  return (
-    <AdminLandingPanel
-      featured={featured as Parameters<typeof AdminLandingPanel>[0]["featured"]}
-      testimonials={testimonials}
-    />
-  );
+  return <AdminLandingPanel featured={featured} testimonials={testimonials} />;
 }

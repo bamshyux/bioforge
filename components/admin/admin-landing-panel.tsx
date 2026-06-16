@@ -20,23 +20,15 @@ import {
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import type { AdminFormState } from "@/lib/types/admin";
-import type { LandingTestimonial } from "@/lib/types/landing";
+import type { LandingFeaturedProfileRow, LandingTestimonial } from "@/lib/types/landing";
 
 const initial: AdminFormState = {};
-
-type FeaturedRow = {
-  id: string;
-  sort_order: number;
-  is_active: boolean;
-  profile_id: string;
-  profiles: { username: string | null; display_name: string | null } | null;
-};
 
 export function AdminLandingPanel({
   featured,
   testimonials,
 }: {
-  featured: FeaturedRow[];
+  featured: LandingFeaturedProfileRow[];
   testimonials: LandingTestimonial[];
 }) {
   const [featuredState, featuredAction, featuredPending] = useActionState(
