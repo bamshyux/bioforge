@@ -1,11 +1,8 @@
 import type { EmbedType } from "@/lib/types/embed";
+import type { ParsedEmbed } from "@/lib/types/embed";
+import { buildRobloxProfileUrl } from "@/lib/embeds/roblox-profile";
 
-export type ParsedEmbed = {
-  embed_type: EmbedType;
-  embed_id: string;
-  title: string;
-  url: string;
-};
+export type { ParsedEmbed } from "@/lib/types/embed";
 
 const PATTERNS: { type: EmbedType; regex: RegExp; title: string }[] = [
   { type: "youtube", regex: /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/i, title: "YouTube Video" },
@@ -14,20 +11,29 @@ const PATTERNS: { type: EmbedType; regex: RegExp; title: string }[] = [
   { type: "spotify_playlist", regex: /open\.spotify\.com\/playlist\/([\w\d]+)/i, title: "Spotify Playlist" },
   { type: "spotify_track", regex: /open\.spotify\.com\/track\/([\w\d]+)/i, title: "Spotify Track" },
   { type: "soundcloud", regex: /soundcloud\.com\/([\w-]+\/[\w-]+)/i, title: "SoundCloud Track" },
+  { type: "roblox_profile", regex: /roblox\.com\/users\/(\d+)(?:\/profile)?(?:[/?#]|$)/i, title: "Roblox Profile" },
+  { type: "roblox_profile", regex: /roblox\.com\/users\/profile\?username=([\w.]+)/i, title: "Roblox Profile" },
+  { type: "roblox_profile", regex: /roblox\.com\/@([\w.]+)/i, title: "Roblox Profile" },
+  { type: "roblox_profile", regex: /roblox\.com\/user\.aspx\?username=([\w.]+)/i, title: "Roblox Profile" },
   { type: "roblox", regex: /roblox\.com\/games\/(\d+)/i, title: "Roblox Game" },
   { type: "discord", regex: /discord(?:\.gg|(?:app)?\.com\/invite)\/([\w-]+)/i, title: "Discord Server" },
 ];
 
 export function parseEmbedUrl(raw: string): ParsedEmbed | null {
-  const url = raw.trim();
-  if (!url) return null;
+  const inputUrl = raw.trim();
+  if (!inputUrl) return null;
 
   for (const { type, regex, title } of PATTERNS) {
-    const match = url.match(regex);
+    const match = inputUrl.match(regex);
     if (!match) continue;
     const embedId = match[1] || match[2] || "";
     if (!embedId) continue;
-    return { embed_type: type, embed_id: embedId, title, url };
+    return {
+      embed_type: type,
+      embed_id: embedId,
+      title,
+      url: type === "roblox_profile" ? buildRobloxProfileUrl(embedId) : inputUrl,
+    };
   }
 
   return null;
@@ -51,6 +57,8 @@ export function getEmbedIframeSrc(type: EmbedType, embedId: string): string | nu
       return `https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/${embedId}&color=%23fafafa`;
     case "roblox":
       return `https://www.roblox.com/games/${embedId}`;
+    case "roblox_profile":
+      return null;
     case "discord":
       if (/^\d{17,20}$/.test(embedId)) {
         return `https://discord.com/widget?id=${embedId}&theme=dark`;
@@ -84,6 +92,8 @@ export function getEmbedIframeSrcServer(type: EmbedType, embedId: string, hostna
       }
       return `https://discord.com/widget?invite=${encodeURIComponent(embedId)}&theme=dark`;
     case "roblox":
+      return null;
+    case "roblox_profile":
       return null;
     default:
       return null;

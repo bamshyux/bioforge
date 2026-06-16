@@ -135,6 +135,56 @@ export async function deleteGuestbookEntryAction(entryId: string) {
   return { success: true };
 }
 
+export async function pinGuestbookEntryAction(entryId: string) {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  const supabase = await createClient();
+  const { data: entry } = await supabase
+    .from("guestbook_entries")
+    .select("id, is_approved")
+    .eq("id", entryId)
+    .eq("profile_id", userId)
+    .maybeSingle();
+
+  if (!entry) return { error: "Message not found." };
+  if (!entry.is_approved) return { error: "Only approved messages can be pinned." };
+
+  await supabase
+    .from("guestbook_entries")
+    .update({ is_pinned: false, pinned_at: null })
+    .eq("profile_id", userId)
+    .eq("is_pinned", true);
+
+  const { error } = await supabase
+    .from("guestbook_entries")
+    .update({ is_pinned: true, pinned_at: new Date().toISOString() })
+    .eq("id", entryId)
+    .eq("profile_id", userId);
+
+  if (error) return { error: error.message };
+
+  await revalidateUserProfile(userId);
+  return { success: true };
+}
+
+export async function unpinGuestbookEntryAction(entryId: string) {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("guestbook_entries")
+    .update({ is_pinned: false, pinned_at: null })
+    .eq("id", entryId)
+    .eq("profile_id", userId);
+
+  if (error) return { error: error.message };
+
+  await revalidateUserProfile(userId);
+  return { success: true };
+}
+
 export async function banGuestbookUserAction(bannedUserId: string) {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in." };

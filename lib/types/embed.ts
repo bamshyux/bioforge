@@ -6,6 +6,7 @@ export type EmbedType =
   | "spotify_playlist"
   | "soundcloud"
   | "roblox"
+  | "roblox_profile"
   | "discord";
 
 export type ProfileEmbed = {
@@ -23,6 +24,13 @@ export type ProfileEmbed = {
 
 export type EmbedFormState = { error?: string; success?: string };
 
+export type ParsedEmbed = {
+  embed_type: EmbedType;
+  embed_id: string;
+  title: string;
+  url: string;
+};
+
 export const EMBED_TYPE_OPTIONS: { value: EmbedType; label: string }[] = [
   { value: "youtube", label: "YouTube Video" },
   { value: "twitch", label: "Twitch Stream" },
@@ -31,5 +39,6 @@ export const EMBED_TYPE_OPTIONS: { value: EmbedType; label: string }[] = [
   { value: "spotify_playlist", label: "Spotify Playlist" },
   { value: "soundcloud", label: "SoundCloud Track" },
   { value: "roblox", label: "Roblox Game" },
+  { value: "roblox_profile", label: "Roblox Profile" },
   { value: "discord", label: "Discord Server Widget" },
 ];

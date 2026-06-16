@@ -1,6 +1,6 @@
 "use server";
 
-import { requireSuperAdmin } from "@/lib/auth/super-admin";
+import { requireAdminAccess } from "@/lib/auth/admin-access";
 import {
   addModerationWord,
   listModerationAudit,
@@ -18,7 +18,7 @@ export type ModerationActionState = {
 };
 
 async function guardSuperAdmin() {
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdminAccess("admin");
   if ("error" in auth) return { error: auth.error } as const;
   return auth;
 }

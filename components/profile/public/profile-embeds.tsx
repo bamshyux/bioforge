@@ -3,6 +3,7 @@
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { getEmbedIframeSrc } from "@/lib/embeds/parse";
+import { isRobloxLinkEmbed, robloxEmbedLinkLabel } from "@/lib/embeds/roblox-profile";
 
 export function ProfileEmbedsSection({
   embeds,
@@ -19,12 +20,7 @@ export function ProfileEmbedsSection({
   return (
     <div className="profile-embeds bf-profile-block mb-5 space-y-3">
       {visible.map((embed) => {
-        const src = getEmbedIframeSrc(embed.embed_type, embed.embed_id) ??
-          (embed.embed_type === "roblox"
-            ? null
-            : getEmbedIframeSrc(embed.embed_type, embed.embed_id));
-
-        if (embed.embed_type === "roblox") {
+        if (isRobloxLinkEmbed(embed.embed_type)) {
           return (
             <a
               key={embed.id}
@@ -34,11 +30,12 @@ export function ProfileEmbedsSection({
               className="profile-embed block rounded-xl border border-white/[0.08] bg-[#0f0f0f] p-4 transition-colors hover:border-[var(--bf-accent)]/30"
             >
               <p className="text-sm font-medium text-white">{embed.title}</p>
-              <p className="mt-1 text-xs text-neutral-500">Play on Roblox →</p>
+              <p className="mt-1 text-xs text-neutral-500">{robloxEmbedLinkLabel(embed.embed_type)}</p>
             </a>
           );
         }
 
+        const src = getEmbedIframeSrc(embed.embed_type, embed.embed_id);
         const iframeSrc =
           embed.embed_type === "twitch"
             ? embed.embed_id.match(/^\d+$/)

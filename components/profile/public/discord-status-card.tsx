@@ -8,6 +8,25 @@ import { DISCORD_LANYARD_INVITE_URL } from "@/lib/discord/messages";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
+function CustomStatusLine({
+  activity,
+  secondaryClass,
+  primaryClass,
+}: {
+  activity: DiscordActivity;
+  secondaryClass: string;
+  primaryClass: string;
+}) {
+  const text = activity.state?.trim() || activity.name?.trim();
+  if (!text) return null;
+
+  return (
+    <p className={`profile-discord-status__custom-status text-xs leading-snug ${secondaryClass}`}>
+      Custom Status: <span className={`font-medium ${primaryClass}`}>{text}</span>
+    </p>
+  );
+}
+
 function ActivityBlock({
   label,
   title,
@@ -93,15 +112,7 @@ function renderActivity(
   };
 
   if (activity.type === 4) {
-    return (
-      <ActivityBlock
-        label="Custom Status"
-        title={activity.state || activity.name}
-        line1={activity.state ? activity.name : undefined}
-        imageUrl={activity.largeImageUrl}
-        {...props}
-      />
-    );
+    return null;
   }
 
   return (
@@ -156,8 +167,13 @@ export function DiscordStatusCard({
   previewActivity?: boolean;
 }) {
   const config = configOverride ?? configFromProfileSettings(settings);
-  const hasActivity = Boolean(presence.activity || presence.spotify) || previewActivity;
-  const showHint = config.show_lanyard_hint && !live && !hasActivity;
+  const customStatusActivity =
+    config.show_activity && presence.activity?.type === 4 ? presence.activity : null;
+  const panelActivity =
+    presence.activity && presence.activity.type !== 4 ? presence.activity : null;
+  const hasActivity =
+    Boolean(panelActivity || presence.spotify) || previewActivity;
+  const showHint = config.show_lanyard_hint && !live && !hasActivity && !customStatusActivity;
   const showActivity = config.show_activity && config.style !== "compact";
   const hasActivityContent = showActivity && hasActivity;
   const appearance = resolveDiscordCardAppearance(config, settings.accent_color, {
@@ -178,7 +194,7 @@ export function DiscordStatusCard({
       style={appearance.shellStyle}
     >
       <div
-        className={`flex items-center gap-3 px-3 ${appearance.headerPadding} ${
+        className={`profile-discord-status__header flex items-center gap-3 px-3 ${appearance.headerPadding} ${
           appearance.isPill ? "pr-4" : ""
         }`}
       >
@@ -196,7 +212,7 @@ export function DiscordStatusCard({
             />
           </div>
         ) : null}
-        <div className="min-w-0 flex-1">
+        <div className="profile-discord-status__header-text min-w-0 flex-1">
           <p className={`truncate font-semibold leading-tight ${appearance.textPrimaryClass}`}>
             {displayName}
           </p>
@@ -204,6 +220,13 @@ export function DiscordStatusCard({
             <p className={`truncate text-sm leading-snug ${appearance.textSecondaryClass}`}>
               {statusLabel}
             </p>
+          ) : null}
+          {customStatusActivity ? (
+            <CustomStatusLine
+              activity={customStatusActivity}
+              secondaryClass={appearance.textSecondaryClass}
+              primaryClass={appearance.textPrimaryClass}
+            />
           ) : null}
         </div>
       </div>
@@ -221,8 +244,8 @@ export function DiscordStatusCard({
           secondaryClass={appearance.textSecondaryClass}
           primaryClass={appearance.textPrimaryClass}
         />
-      ) : showActivity && presence.activity ? (
-        renderActivity(presence.activity, false, appearance)
+      ) : showActivity && panelActivity ? (
+        renderActivity(panelActivity, false, appearance)
       ) : showActivity && previewSpotify ? (
         <ActivityBlock
           label="Listening to Spotify"
@@ -250,8 +273,8 @@ export function DiscordStatusCard({
             secondaryClass={appearance.textSecondaryClass}
             primaryClass={appearance.textPrimaryClass}
           />
-        ) : presence.activity ? (
-          renderActivity(presence.activity, true, appearance)
+        ) : panelActivity ? (
+          renderActivity(panelActivity, true, appearance)
         ) : previewSpotify ? (
           <ActivityBlock
             label="Spotify"

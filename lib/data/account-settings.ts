@@ -232,6 +232,21 @@ export async function touchUserSession(userId: string, sessionId: string | undef
     },
     { onConflict: "user_id,session_token_hash" },
   );
+
+  await supabase
+    .from("profiles")
+    .update({ last_login_at: new Date().toISOString() })
+    .eq("id", userId);
+
+  const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+  if (admin) {
+    await admin.from("security_events").insert({
+      user_id: userId,
+      event_type: "login_success",
+      ip_hash: meta.ip_address.slice(0, 64),
+      user_agent: meta.user_agent.slice(0, 512),
+    });
+  }
 }
 
 export async function syncPrivacyToProfileSettings(userId: string, prefs: Partial<AccountPreferences>) {

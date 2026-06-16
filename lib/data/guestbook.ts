@@ -28,10 +28,17 @@ export async function getGuestbookEntries(profileId: string, options?: { ownerVi
     .select("*")
     .in("entry_id", entryIds);
 
-  return entries.map((entry) => ({
-    ...entry,
-    reactions: (reactions ?? []).filter((r) => r.entry_id === entry.id),
-  })) as GuestbookEntry[];
+  return entries
+    .map((entry) => ({
+      ...entry,
+      is_pinned: entry.is_pinned === true,
+      pinned_at: entry.pinned_at ?? null,
+      reactions: (reactions ?? []).filter((r) => r.entry_id === entry.id),
+    }))
+    .sort((a, b) => {
+      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }) as GuestbookEntry[];
 }
 
 export async function isGuestbookBanned(profileId: string, userId: string) {

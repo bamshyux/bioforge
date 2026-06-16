@@ -6,7 +6,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { getProfileByUserId } from "@/lib/data/profiles";
-import { isSuperAdminEmail } from "@/lib/auth/super-admin";
+import { getAdminAccess } from "@/lib/auth/admin-access";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -27,7 +27,8 @@ export default async function DashboardLayout({
   const { touchUserSession } = await import("@/lib/data/account-settings");
   await touchUserSession(userId, sessionId);
   const profile = await getProfileByUserId(userId);
-  const showManageAccounts = await isSuperAdminEmail(email);
+  const adminAccess = await getAdminAccess();
+  const showAdminPanel = !!adminAccess;
 
   return (
     <div className="min-h-screen bg-[#090909] text-neutral-100">
@@ -48,7 +49,8 @@ export default async function DashboardLayout({
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-8 lg:flex-row lg:items-start lg:px-8">
           <DashboardSidebar
             username={profile?.username}
-            showManageAccounts={showManageAccounts}
+            showAdminPanel={showAdminPanel}
+            adminRole={adminAccess?.role}
           />
           <main className="min-w-0 flex-1">{children}</main>
         </div>

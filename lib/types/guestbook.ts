@@ -4,6 +4,8 @@ export type GuestbookEntry = {
   author_id: string;
   message: string;
   is_approved: boolean;
+  is_pinned: boolean;
+  pinned_at: string | null;
   created_at: string;
   author?: {
     username: string | null;

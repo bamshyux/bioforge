@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { GlobalSiteBanner } from "@/components/admin/global-site-banner";
 import { SchemaErrorBanner } from "@/components/dev/schema-error-banner";
 import { getProfileSettingsSchemaValidation } from "@/lib/db/validate-schema";
 import { siteMetadata } from "@/lib/metadata";
@@ -33,6 +34,7 @@ export default async function RootLayout({
         {!schema.ok && (
           <SchemaErrorBanner message={schema.message} missing={schema.missing} />
         )}
+        <GlobalSiteBanner />
         {children}
       </body>
     </html>

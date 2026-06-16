@@ -294,8 +294,8 @@ export function AdminAccountsEditor({ accounts }: { accounts: AdminAccountSummar
                         active ? "bg-[#fafafa]/[0.06]" : ""
                       }`}
                     >
-                      <td className="py-3 pr-4 font-mono text-xs text-neutral-400">
-                        {account.uid != null ? `#${account.uid}` : "—"}
+                      <td className="py-3 pr-4" onClick={(e) => e.stopPropagation()}>
+                        <EditableUidCell userId={account.id} uid={account.uid} />
                       </td>
                       <td className="py-3 pr-4">
                         <span className="font-medium text-white">@{account.username ?? "—"}</span>

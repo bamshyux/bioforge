@@ -2,6 +2,7 @@
 
 import { revalidateUserProfile, getAuthenticatedUserId } from "@/lib/actions/auth";
 import { parseEmbedUrl } from "@/lib/embeds/parse";
+import { enrichRobloxProfileEmbed } from "@/lib/embeds/roblox-profile";
 import { logActivity } from "@/lib/data/activity";
 import type { EmbedFormState } from "@/lib/types/embed";
 import { createClient } from "@/lib/supabase/server";
@@ -11,8 +12,10 @@ export async function createEmbedAction(_prev: EmbedFormState, formData: FormDat
   if (!userId) return { error: "You must be logged in." };
 
   const url = String(formData.get("url") ?? "").trim();
-  const parsed = parseEmbedUrl(url);
-  if (!parsed) return { error: "Unsupported or invalid embed URL." };
+  const parsedRaw = parseEmbedUrl(url);
+  if (!parsedRaw) return { error: "Unsupported or invalid embed URL." };
+
+  const parsed = await enrichRobloxProfileEmbed(parsedRaw);
 
   const supabase = await createClient();
   const { count } = await supabase

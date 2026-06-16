@@ -143,10 +143,12 @@ function NavGroupSection({
 
 export function DashboardSidebar({
   username,
-  showManageAccounts = false,
+  showAdminPanel = false,
+  adminRole,
 }: {
   username?: string | null;
-  showManageAccounts?: boolean;
+  showAdminPanel?: boolean;
+  adminRole?: "owner" | "admin";
 }) {
   const pathname = usePathname();
 
@@ -207,20 +209,24 @@ export function DashboardSidebar({
           />
         </div>
 
-        {showManageAccounts ? (
+        {showAdminPanel ? (
           <div className="bf-dash-nav-group space-y-1 border-t border-white/[0.06] pt-3">
-            <NavLink
-              href="/dashboard/accounts"
-              label="Manage Accounts"
-              Icon={IconProfile}
-              active={pathname.startsWith("/dashboard/accounts")}
-            />
-            <NavLink
-              href="/admin/moderation"
-              label="Moderation"
-              Icon={IconSettings}
-              active={pathname.startsWith("/admin/moderation")}
-            />
+            <p className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Admin
+            </p>
+            <NavLink href="/dashboard/admin" label="Dashboard" Icon={IconAnalytics} active={pathname === "/dashboard/admin"} />
+            <NavLink href="/dashboard/admin/users" label="Users" Icon={IconProfile} active={pathname.startsWith("/dashboard/admin/users")} />
+            <NavLink href="/dashboard/admin/badges" label="Badges" Icon={IconBadges} active={pathname.startsWith("/dashboard/admin/badges")} />
+            <NavLink href="/dashboard/admin/moderation" label="Moderation" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/moderation")} />
+            <NavLink href="/dashboard/admin/announcements" label="Announcements" Icon={IconEffects} active={pathname.startsWith("/dashboard/admin/announcements")} />
+            <NavLink href="/dashboard/admin/notifications" label="Notifications" Icon={IconLinks} active={pathname.startsWith("/dashboard/admin/notifications")} />
+            <NavLink href="/dashboard/admin/security" label="Security" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/security")} />
+            <NavLink href="/dashboard/admin/premium" label="Premium" Icon={IconBadges} active={pathname.startsWith("/dashboard/admin/premium")} />
+            <NavLink href="/dashboard/admin/analytics" label="Analytics" Icon={IconAnalytics} active={pathname.startsWith("/dashboard/admin/analytics")} />
+            <NavLink href="/dashboard/admin/audit" label="Audit Logs" Icon={IconOverview} active={pathname.startsWith("/dashboard/admin/audit")} />
+            {adminRole === "owner" ? (
+              <NavLink href="/dashboard/admin/owner" label="Owner Tools" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/owner")} />
+            ) : null}
           </div>
         ) : null}
       </nav>
