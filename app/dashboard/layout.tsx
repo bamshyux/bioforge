@@ -40,14 +40,14 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-[#090909] text-neutral-100">
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#090909]/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-            <Link href="/dashboard" className="shrink-0">
-              <CriedLogo size={28} />
-            </Link>
+          <Link href="/dashboard" className="shrink-0">
+            <CriedLogo size={28} />
+          </Link>
+
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <ViewLiveProfileButton username={profile?.username} />
-          </div>
-          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
-            <span className="hidden max-w-[200px] truncate text-[13px] text-neutral-500 lg:inline">
+            <span className="hidden h-4 w-px bg-white/[0.08] md:block" aria-hidden />
+            <span className="hidden max-w-[180px] truncate text-[13px] text-neutral-500 lg:inline">
               {email}
             </span>
             <LogoutButton />
