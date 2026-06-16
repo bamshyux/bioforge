@@ -135,20 +135,43 @@ export function BadgeGlyph({ slug, color }: { slug: string; color: string }): Re
 
     case "og":
       return (
-        <text x="12" y="16.5" textAnchor="middle" fill={c} fontSize="10.5" fontWeight="900" fontFamily="system-ui,sans-serif" letterSpacing="-0.5">
-          OG
-        </text>
+        <>
+          <path
+            d="M12 2.8 14.3 9h6.7l-5.4 3.9 2.1 6.4L12 15.2 6.3 19.3l2.1-6.4L3 9h6.7L12 2.8z"
+            fill={c}
+            opacity="0.28"
+          />
+          <circle cx="12" cy="12.5" r="7.5" fill={c} />
+          <circle cx="12" cy="12.5" r="6.1" fill="none" stroke={hi} strokeWidth="1.1" opacity="0.55" />
+          <path
+            fill="#000"
+            fillOpacity="0.32"
+            fillRule="evenodd"
+            d="M8.6 12.5a2.65 2.65 0 1 1 5.3 0 2.65 2.65 0 1 1-5.3 0Zm1.15 0a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0Z"
+          />
+          <path
+            fill="#000"
+            fillOpacity="0.32"
+            d="M13.9 10.1a2.65 2.65 0 1 0 0 4.8H16v-1.35h-1.25a1.3 1.3 0 1 1 0-2.1H16v-1.35h-2.1z"
+          />
+          <path d="M8.5 9.2a4.8 4.8 0 0 1 7 0" fill="none" stroke={hi} strokeWidth="0.9" opacity="0.55" />
+        </>
       );
 
     case "year-one":
       return (
         <>
-          <path d="M9 6.5v2M15 6.5v2" stroke={c} strokeWidth="2.4" strokeLinecap="round" />
-          <rect x="5.5" y="8" width="13" height="13.5" rx="2" stroke={c} strokeWidth="2.4" fill="none" />
-          <path d="M5.5 11.5h13" stroke={c} strokeWidth="2" strokeLinecap="round" />
-          <text x="12" y="18.5" textAnchor="middle" fill={c} fontSize="10" fontWeight="900" fontFamily="system-ui,sans-serif">
-            1
-          </text>
+          <path d="M12 3.2 9.5 6.6h5L12 3.2z" fill={c} />
+          <rect x="8.8" y="6.6" width="6.4" height="2.1" rx="0.6" fill={c} opacity="0.9" />
+          <circle cx="12" cy="14.2" r="7.3" fill={c} />
+          <circle cx="12" cy="14.2" r="5.9" fill="none" stroke={hi} strokeWidth="1" opacity="0.45" />
+          <rect x="10.2" y="10" width="3.6" height="8.5" rx="1.1" fill="#000" fillOpacity="0.3" />
+          <rect x="10.2" y="10" width="3.6" height="2.3" rx="0.7" fill={hi} opacity="0.5" />
+          <path d="M5 14.2c1.3-2 3-3.1 4.8-3.5" stroke={c} strokeWidth="1.7" strokeLinecap="round" fill="none" opacity="0.75" />
+          <path d="M19 14.2c-1.3-2-3-3.1-4.8-3.5" stroke={c} strokeWidth="1.7" strokeLinecap="round" fill="none" opacity="0.75" />
+          <path d="M9.2 20 7.8 22.2l2.4-1.3M14.8 20l1.4 2.2-2.4-1.3" fill={c} opacity="0.85" />
+          <circle cx="18" cy="6.5" r="0.9" fill={hi} opacity="0.8" />
+          <circle cx="6" cy="7" r="0.6" fill={hi} opacity="0.6" />
         </>
       );
 

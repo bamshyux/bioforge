@@ -38,9 +38,11 @@ export function BadgeMedallion({
         isFeatured ? "bf-badge-medallion--featured" : "",
         active ? "bf-badge-medallion--active" : "",
         glowEnabled ? "" : "bf-badge-medallion--no-glow",
+        badge.slug === "og" || badge.slug === "year-one" ? "bf-badge-medallion--milestone" : "",
       ]
         .filter(Boolean)
         .join(" ")}
+      data-badge-slug={badge.slug}
       style={{
         width: size,
         height: size,

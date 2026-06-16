@@ -45,6 +45,48 @@ export function ProfileHandle({ profile, className = "" }: { profile: Profile; c
   );
 }
 
+function ProfileStatEyeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M2.5 12s3.8-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.8 6.5-9.5 6.5S2.5 12 2.5 12z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function ProfileStatLocationIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="11" r="2.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function ProfileMeta({
   profile,
   settings,
@@ -60,10 +102,38 @@ export function ProfileMeta({
     month: "short",
     year: "numeric",
   });
+  const showViews = settings.show_view_count;
+  const location = profile.location?.trim() ?? "";
+  const showLocation = location.length > 0;
+  const showJoin = settings.show_join_date;
+  const showStatsRow = showViews || showLocation;
+
   return (
-    <div className={`mb-5 bf-profile-row flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral-400 ${className}`.trim()}>
-      {settings.show_view_count && <span>{viewCount.toLocaleString()} views</span>}
-      {settings.show_join_date && <span>Joined {joinDate}</span>}
+    <div
+      className={`mb-5 bf-profile-row flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-neutral-400 ${className}`.trim()}
+    >
+      {showStatsRow && (
+        <div className="bf-profile-stats inline-flex flex-wrap items-center gap-2">
+          {showViews && (
+            <span className="inline-flex items-center gap-1.5">
+              <ProfileStatEyeIcon className="shrink-0 opacity-80" />
+              <span className="tabular-nums text-neutral-300">{viewCount.toLocaleString()}</span>
+            </span>
+          )}
+          {showViews && showLocation && (
+            <span className="text-neutral-600" aria-hidden>
+              |
+            </span>
+          )}
+          {showLocation && (
+            <span className="inline-flex items-center gap-1.5">
+              <ProfileStatLocationIcon className="shrink-0 opacity-80" />
+              <span className="text-neutral-300">{location}</span>
+            </span>
+          )}
+        </div>
+      )}
+      {showJoin && <span>Joined {joinDate}</span>}
     </div>
   );
 }

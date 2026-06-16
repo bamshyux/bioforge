@@ -13,6 +13,7 @@ import {
   getBadgeIdBySlug,
   getBadgesByProfileId,
 } from "@/lib/data/badges";
+import { resolveUniqueBadgeSlug } from "@/lib/badges/slug";
 import { createNotification } from "@/lib/data/notifications";
 import { formatSchemaError } from "@/lib/db/schema";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
@@ -308,30 +309,33 @@ export async function createCustomBadgeAction(
   if (!(await isAdmin(userId))) return { error: "Admin access required." };
 
   const name = String(formData.get("name") ?? "").trim();
-  const slug = String(formData.get("slug") ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
   const description = String(formData.get("description") ?? "").trim();
   const color = String(formData.get("color") ?? "#fafafa").trim();
   const rarity = String(formData.get("rarity") ?? "rare");
 
-  if (!name || !slug) return { error: "Name and slug are required." };
+  if (!name) return { error: "Badge name is required." };
 
-  let iconUrl: string | null = null;
   const iconFile = formData.get("icon_image");
-  if (iconFile instanceof File && iconFile.size > 0) {
-    try {
-      iconUrl = await uploadBadgeIcon(slug, iconFile);
-    } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : "Badge image upload failed.",
-      };
-    }
+  if (!(iconFile instanceof File) || iconFile.size === 0) {
+    return { error: "Upload a badge image — that image is what shows on profiles." };
   }
 
   const supabase = await createClient();
+  const slug = await resolveUniqueBadgeSlug(supabase, name);
+
+  let iconUrl: string | null = null;
+  try {
+    iconUrl = await uploadBadgeIcon(slug, iconFile);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Badge image upload failed.",
+    };
+  }
+
   const { error } = await supabase.from("badges").insert({
     slug,
     name,
-    icon: iconUrl ? slug : "custom",
+    icon: slug,
     icon_url: iconUrl,
     color,
     description,

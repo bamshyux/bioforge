@@ -194,6 +194,24 @@ export function ProfileEditor({
         />
       </div>
 
+      <div>
+        <label htmlFor="location" className={labelClassName}>
+          Location <span className="font-normal text-neutral-500">(optional)</span>
+        </label>
+        <input
+          id="location"
+          name="location"
+          type="text"
+          maxLength={64}
+          defaultValue={profile?.location ?? ""}
+          placeholder="Los Angeles, CA"
+          className={inputClassName}
+        />
+        <p className="mt-1.5 text-xs text-neutral-500">
+          Shown next to your view count on your public profile. Leave blank to hide.
+        </p>
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor="avatar" className={labelClassName}>Avatar Image</label>

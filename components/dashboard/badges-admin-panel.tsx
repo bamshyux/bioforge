@@ -183,15 +183,23 @@ export function BadgesAdminPanel({ catalog }: { catalog: Badge[] }) {
             Create custom badge
           </summary>
           <form action={createAction} encType="multipart/form-data" className="mt-4 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label htmlFor="badge-name" className={labelClassName}>Name</label>
-                <input id="badge-name" name="name" required className={inputClassName} placeholder="VIP Member" />
-              </div>
-              <div>
-                <label htmlFor="badge-slug" className={labelClassName}>Slug</label>
-                <input id="badge-slug" name="slug" required className={inputClassName} placeholder="vip-member" />
-              </div>
+            <div>
+              <label htmlFor="badge-name" className={labelClassName}>Name</label>
+              <input id="badge-name" name="name" required className={inputClassName} placeholder="VIP Member" />
+            </div>
+            <div>
+              <label htmlFor="badge-icon" className={labelClassName}>Badge image</label>
+              <input
+                id="badge-icon"
+                name="icon_image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                required
+                className="block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]"
+              />
+              <p className="mt-1.5 text-xs text-neutral-600">
+                This image is the badge on profiles. PNG, WebP, or SVG recommended. Max 2 MB.
+              </p>
             </div>
             <div>
               <label htmlFor="badge-description" className={labelClassName}>Description</label>
@@ -210,17 +218,6 @@ export function BadgesAdminPanel({ catalog }: { catalog: Badge[] }) {
                   ))}
                 </select>
               </div>
-            </div>
-            <div>
-              <label htmlFor="badge-icon" className={labelClassName}>Badge image (optional)</label>
-              <input
-                id="badge-icon"
-                name="icon_image"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                className="block w-full text-sm text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#fafafa] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#090909]"
-              />
-              <p className="mt-1.5 text-xs text-neutral-600">PNG, WebP, or SVG recommended. Max 2 MB.</p>
             </div>
             <FormFeedback error={createState.error} success={createState.success} />
             <button type="submit" disabled={createPending} className={buttonSecondaryClassName}>

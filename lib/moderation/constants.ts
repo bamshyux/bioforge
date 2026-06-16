@@ -4,6 +4,7 @@ export type ModerationContentType =
   | "username"
   | "display_name"
   | "bio"
+  | "location"
   | "guestbook_message"
   | "link_title"
   | "link_url"

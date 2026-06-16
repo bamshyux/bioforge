@@ -6,13 +6,14 @@ import { CARD_LAYOUT_MIN_HEIGHT } from "@/lib/settings";
 type ScaleMetrics = {
   scale: number;
   boxHeight: number | undefined;
+  naturalHeight: number;
 };
 
 function computeScaleMetrics(naturalHeight: number, maxHeight: number): ScaleMetrics {
   const natural = Math.max(naturalHeight, CARD_LAYOUT_MIN_HEIGHT);
 
   if (maxHeight <= 0) {
-    return { scale: 1, boxHeight: undefined };
+    return { scale: 1, boxHeight: undefined, naturalHeight: natural };
   }
 
   const target = Math.max(CARD_LAYOUT_MIN_HEIGHT, maxHeight);
@@ -21,26 +22,44 @@ function computeScaleMetrics(naturalHeight: number, maxHeight: number): ScaleMet
   return {
     scale,
     boxHeight: target,
+    naturalHeight: natural,
   };
 }
 
-function measureNaturalContentHeight(el: HTMLElement) {
-  const prevTransform = el.style.transform;
-  const prevWidth = el.style.width;
-  const prevMargin = el.style.marginInline;
-  const prevOrigin = el.style.transformOrigin;
+function measureNaturalContentHeight(content: HTMLElement) {
+  const scaler = content.parentElement;
 
-  el.style.transform = "none";
-  el.style.transformOrigin = "top center";
-  el.style.width = "100%";
-  el.style.marginInline = "";
+  const saved = {
+    transform: content.style.transform,
+    transformOrigin: content.style.transformOrigin,
+    width: content.style.width,
+    marginInline: content.style.marginInline,
+    scalerHeight: scaler?.style.height ?? "",
+    scalerOverflow: scaler?.style.overflow ?? "",
+  };
 
-  const natural = Math.max(el.scrollHeight, CARD_LAYOUT_MIN_HEIGHT);
+  // Measure at full natural size — parent height/overflow would otherwise under-report scrollHeight.
+  if (scaler) {
+    scaler.style.height = "auto";
+    scaler.style.overflow = "visible";
+  }
 
-  el.style.transform = prevTransform;
-  el.style.transformOrigin = prevOrigin;
-  el.style.width = prevWidth;
-  el.style.marginInline = prevMargin;
+  content.style.transform = "none";
+  content.style.transformOrigin = "top left";
+  content.style.width = "100%";
+  content.style.marginInline = "";
+
+  const natural = Math.max(content.scrollHeight, CARD_LAYOUT_MIN_HEIGHT);
+
+  content.style.transform = saved.transform;
+  content.style.transformOrigin = saved.transformOrigin;
+  content.style.width = saved.width;
+  content.style.marginInline = saved.marginInline;
+
+  if (scaler) {
+    scaler.style.height = saved.scalerHeight;
+    scaler.style.overflow = saved.scalerOverflow;
+  }
 
   return natural;
 }
@@ -53,7 +72,9 @@ export function ProfileCardHeightScaler({
   children: React.ReactNode;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const [metrics, setMetrics] = useState<ScaleMetrics>({ scale: 1, boxHeight: undefined });
+  const [metrics, setMetrics] = useState<ScaleMetrics>(() =>
+    computeScaleMetrics(CARD_LAYOUT_MIN_HEIGHT, maxHeight),
+  );
 
   useLayoutEffect(() => {
     const el = contentRef.current;
@@ -72,12 +93,20 @@ export function ProfileCardHeightScaler({
     return () => observer.disconnect();
   }, [maxHeight, children]);
 
-  const constrained = metrics.scale < 1 && metrics.boxHeight !== undefined;
+  const constrained = maxHeight > 0 && metrics.boxHeight !== undefined && metrics.scale < 1;
 
   return (
     <div
       className="profile-card-height-scaler"
-      style={constrained ? { height: metrics.boxHeight, overflow: "hidden" } : undefined}
+      style={
+        constrained
+          ? {
+              height: metrics.boxHeight,
+              overflow: "hidden",
+              position: "relative",
+            }
+          : undefined
+      }
     >
       <div
         ref={contentRef}
@@ -86,9 +115,8 @@ export function ProfileCardHeightScaler({
           constrained
             ? {
                 transform: `scale(${metrics.scale})`,
-                transformOrigin: "top center",
+                transformOrigin: "top left",
                 width: `${100 / metrics.scale}%`,
-                marginInline: "auto",
               }
             : undefined
         }

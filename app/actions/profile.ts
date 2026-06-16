@@ -111,6 +111,7 @@ export async function updateProfileAction(
   const username = normalizeUsername(String(formData.get("username") ?? ""));
   const displayName = String(formData.get("displayName") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim().slice(0, 64);
 
   if (!username) {
     return { error: "Username is required." };
@@ -131,6 +132,9 @@ export async function updateProfileAction(
 
   const bioError = await rejectIfModerated(bio, "bio", userId);
   if (bioError) return { error: bioError };
+
+  const locationError = await rejectIfModerated(location, "location", userId);
+  if (locationError) return { error: locationError };
 
   const supabase = await createClient();
 
@@ -159,6 +163,7 @@ export async function updateProfileAction(
     username,
     display_name: displayName,
     bio,
+    location,
     avatar_url: avatarUrl,
     banner_url: bannerUrl,
   };

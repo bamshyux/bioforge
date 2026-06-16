@@ -290,11 +290,21 @@ export function ProfileCardLayoutEditor({
       card_width: layout.width,
       card_max_height: layout.maxHeight,
     }),
+    ...(layout.maxHeight > 0
+      ? { height: layout.maxHeight, overflow: "hidden" as const }
+      : undefined),
   };
 
   if (!isOwner) {
+    const viewStyle = {
+      ...getCardLayoutStyle(settings),
+      ...(settings.card_max_height > 0
+        ? { height: settings.card_max_height, overflow: "hidden" as const }
+        : undefined),
+    };
+
     return (
-      <div className="mx-auto w-full" style={getCardLayoutStyle(settings)}>
+      <div className="mx-auto w-full" style={viewStyle}>
         <ProfileCardHeightScaler maxHeight={settings.card_max_height}>
           <ProfileParallaxCard enabled={!!parallaxEnabled}>{children}</ProfileParallaxCard>
         </ProfileCardHeightScaler>
@@ -337,7 +347,7 @@ export function ProfileCardLayoutEditor({
         {editMode && (
           <>
             <div
-              className="pointer-events-none absolute inset-0 z-10 rounded-[inherit] border-2 border-dashed border-[var(--bf-accent)]/60"
+              className="pointer-events-none absolute inset-0 z-10 box-border rounded-[inherit] border-2 border-dashed border-[var(--bf-accent)]/60"
               style={{ borderRadius: settings.border_radius }}
             />
             <div

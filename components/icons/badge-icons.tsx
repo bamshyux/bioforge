@@ -129,54 +129,40 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
   ),
   og: (p) => (
     <Svg {...p}>
-      <circle
-        cx="12"
-        cy="12"
-        r="8.5"
+      <path
+        d="M12 2.8 14.3 9h6.7l-5.4 3.9 2.1 6.4L12 15.2 6.3 19.3l2.1-6.4L3 9h6.7L12 2.8z"
         fill="currentColor"
-        fillOpacity={p.premium ? 0.28 : 0.14}
-        stroke="currentColor"
-        strokeWidth={p.premium ? 1.85 : 2}
+        opacity="0.28"
       />
-      <text x="12" y="15.2" textAnchor="middle" fill="currentColor" fontSize="7.2" fontWeight="900" fontFamily="system-ui, sans-serif">
-        OG
-      </text>
+      <circle cx="12" cy="12.5" r="7.5" fill="currentColor" fillOpacity={p.premium ? 0.95 : 0.85} />
+      <circle cx="12" cy="12.5" r="6.1" fill="none" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.35" />
+      <path
+        fill="currentColor"
+        fillOpacity="0.45"
+        fillRule="evenodd"
+        d="M8.6 12.5a2.65 2.65 0 1 1 5.3 0 2.65 2.65 0 1 1-5.3 0Zm1.15 0a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0Z"
+      />
+      <path
+        fill="currentColor"
+        fillOpacity="0.45"
+        d="M13.9 10.1a2.65 2.65 0 1 0 0 4.8H16v-1.35h-1.25a1.3 1.3 0 1 1 0-2.1H16v-1.35h-2.1z"
+      />
+      <path d="M8.5 9.2a4.8 4.8 0 0 1 7 0" fill="none" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.35" />
     </Svg>
   ),
   "year-one": (p) => (
     <Svg {...p}>
-      <circle
-        cx="12"
-        cy="12"
-        r="8.25"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="currentColor"
-        fillOpacity="0.14"
-      />
-      <path
-        d="M5.6 10.4c.9-1.7 2.4-2.8 4.2-3.2M18.4 10.4c-.9-1.7-2.4-2.8-4.2-3.2"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6 17.1c1.7 1 3.6 1.3 6 1.3s4.3-.3 6-1.3"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <text
-        x="12"
-        y="16.4"
-        textAnchor="middle"
-        fill="currentColor"
-        fontSize="10"
-        fontWeight="800"
-        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-      >
-        1
-      </text>
+      <path d="M12 3.2 9.5 6.6h5L12 3.2z" fill="currentColor" />
+      <rect x="8.8" y="6.6" width="6.4" height="2.1" rx="0.6" fill="currentColor" opacity="0.9" />
+      <circle cx="12" cy="14.2" r="7.3" fill="currentColor" fillOpacity={p.premium ? 0.95 : 0.85} />
+      <circle cx="12" cy="14.2" r="5.9" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.35" />
+      <rect x="10.2" y="10" width="3.6" height="8.5" rx="1.1" fill="currentColor" fillOpacity="0.45" />
+      <rect x="10.2" y="10" width="3.6" height="2.3" rx="0.7" fill="currentColor" fillOpacity="0.25" />
+      <path d="M5 14.2c1.3-2 3-3.1 4.8-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" fill="none" opacity="0.75" />
+      <path d="M19 14.2c-1.3-2-3-3.1-4.8-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" fill="none" opacity="0.75" />
+      <path d="M9.2 20 7.8 22.2l2.4-1.3M14.8 20l1.4 2.2-2.4-1.3" fill="currentColor" opacity="0.85" />
+      <circle cx="18" cy="6.5" r="0.9" fill="currentColor" opacity="0.55" />
+      <circle cx="6" cy="7" r="0.6" fill="currentColor" opacity="0.4" />
     </Svg>
   ),
   "followers-100": (p) => (
