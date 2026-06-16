@@ -1,6 +1,7 @@
 "use server";
 
 import { sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
+import { getResendClient } from "@/lib/email/client";
 import { syncSignupBadges } from "@/lib/badges/signup-badges";
 import { getProfileByUserId } from "@/lib/data/profiles";
 import { getSiteUrl } from "@/lib/site";
@@ -231,26 +232,56 @@ export async function requestPasswordResetAction(
     return { error: "Email is required." };
   }
 
-  const admin = createAdminClient();
-  if (!admin) {
-    return { error: "Password reset is temporarily unavailable." };
-  }
-
   const siteUrl = getSiteUrl();
-  const { data, error } = await admin.auth.admin.generateLink({
-    type: "recovery",
-    email,
-    options: {
-      redirectTo: `${siteUrl}/auth/confirm?next=/auth/update-password`,
-    },
-  });
+  const nextPath = "/auth/update-password";
+  const redirectTo = `${siteUrl}/auth/confirm?next=${encodeURIComponent(nextPath)}`;
 
-  if (error) {
-    console.error("[auth] password reset link failed:", error.message);
+  let sent = false;
+  const admin = createAdminClient();
+
+  if (admin && getResendClient()) {
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: { redirectTo },
+    });
+
+    if (!error && data.properties.hashed_token) {
+      const resetUrl = `${siteUrl}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery&next=${encodeURIComponent(nextPath)}`;
+      const emailResult = await sendPasswordResetEmail({ to: email, resetUrl });
+      if (emailResult.ok) {
+        sent = true;
+      } else {
+        console.error("[auth] Resend password reset failed:", emailResult.error);
+      }
+    } else if (error) {
+      console.error("[auth] password reset link failed:", error.message);
+    }
   }
 
-  if (!error && data.properties.action_link) {
-    void sendPasswordResetEmail({ to: email, resetUrl: data.properties.action_link });
+  if (!sent) {
+    const supabase = await createClient();
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (resetError) {
+      console.error("[auth] resetPasswordForEmail failed:", resetError.message);
+      if (isEmailDeliveryError(resetError.message)) {
+        return {
+          error:
+            "We couldn't send a reset email right now. Check Supabase Auth email settings or contact support.",
+        };
+      }
+    } else {
+      sent = true;
+    }
+  }
+
+  if (!sent) {
+    return {
+      error: "Password reset is temporarily unavailable. Please try again later.",
+    };
   }
 
   return {
