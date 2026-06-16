@@ -9,9 +9,9 @@ import {
   inputClassName,
   labelClassName,
 } from "@/components/dashboard/form-fields";
-import type { AdminNotification } from "@/lib/types/admin";
+import type { AdminFormState, AdminNotification } from "@/lib/types/admin";
 
-const initial = {};
+const initial: AdminFormState = {};
 
 export function AdminNotificationsPanel({ notifications }: { notifications: AdminNotification[] }) {
   const [state, action, pending] = useActionState(sendAdminNotificationAction, initial);

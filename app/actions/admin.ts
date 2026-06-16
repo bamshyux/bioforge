@@ -154,7 +154,10 @@ export async function adminDisableUserAction(userId: string): Promise<AdminFormS
   return adminUpdateUserAction(userId, { is_disabled: true });
 }
 
-export async function createAnnouncementAction(formData: FormData): Promise<AdminFormState> {
+export async function createAnnouncementAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
   const gate = await guard();
   if ("error" in gate) return { error: gate.error };
 
@@ -198,7 +201,10 @@ export async function deleteAnnouncementAction(id: string): Promise<AdminFormSta
   return { success: "Announcement deleted." };
 }
 
-export async function sendAdminNotificationAction(formData: FormData): Promise<AdminFormState> {
+export async function sendAdminNotificationAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
   const gate = await guard();
   if ("error" in gate) return { error: gate.error };
 
@@ -233,7 +239,10 @@ export async function sendAdminNotificationAction(formData: FormData): Promise<A
   return { success: userId ? "Notification sent to user." : "Broadcast notification sent." };
 }
 
-export async function updatePlatformSettingsAction(formData: FormData): Promise<AdminFormState> {
+export async function updatePlatformSettingsAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
   const gate = await guard("owner");
   if ("error" in gate) return { error: gate.error };
 
@@ -262,7 +271,10 @@ export async function updatePlatformSettingsAction(formData: FormData): Promise<
   return { success: "Platform settings saved." };
 }
 
-export async function addReservedUsernameAction(formData: FormData): Promise<AdminFormState> {
+export async function addReservedUsernameAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
   const gate = await guard("owner");
   if ("error" in gate) return { error: gate.error };
 
@@ -334,7 +346,10 @@ export async function deleteBadgeAdminAction(badgeId: string): Promise<AdminForm
   return { success: "Badge deleted." };
 }
 
-export async function adminForceLogoutAllAction(): Promise<AdminFormState> {
+export async function adminForceLogoutAllAction(
+  _prev: AdminFormState,
+  _formData: FormData,
+): Promise<AdminFormState> {
   const gate = await guard("owner");
   if ("error" in gate) return { error: gate.error };
 

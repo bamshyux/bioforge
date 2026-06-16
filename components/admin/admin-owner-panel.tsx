@@ -20,9 +20,9 @@ import {
   labelClassName,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { ANNOUNCEMENT_TYPE_OPTIONS, type PlatformSettings, type ReservedUsername } from "@/lib/types/admin";
+import { ANNOUNCEMENT_TYPE_OPTIONS, type AdminFormState, type PlatformSettings, type ReservedUsername } from "@/lib/types/admin";
 
-const initial = {};
+const initial: AdminFormState = {};
 
 export function AdminOwnerPanel({
   settings,

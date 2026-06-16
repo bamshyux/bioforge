@@ -16,9 +16,9 @@ import {
   labelClassName,
   ToggleField,
 } from "@/components/dashboard/form-fields";
-import { ANNOUNCEMENT_TYPE_OPTIONS, type Announcement } from "@/lib/types/admin";
+import { ANNOUNCEMENT_TYPE_OPTIONS, type AdminFormState, type Announcement } from "@/lib/types/admin";
 
-const initial = {};
+const initial: AdminFormState = {};
 
 export function AdminAnnouncementsPanel({ announcements }: { announcements: Announcement[] }) {
   const [state, action, pending] = useActionState(createAnnouncementAction, initial);
