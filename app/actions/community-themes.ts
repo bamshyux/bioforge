@@ -4,6 +4,7 @@ import { applyCustomThemeAction } from "@/app/actions/custom-themes";
 import { revalidateUserProfile, getAuthenticatedUserId } from "@/lib/actions/auth";
 import { getCommunityThemeListingById } from "@/lib/data/community-themes";
 import { rejectIfModerated } from "@/lib/moderation/validate";
+import { guardSensitiveAction } from "@/lib/security/guard-action";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateCssInput } from "@/lib/themes/sanitize-css";
 import type {
@@ -51,6 +52,9 @@ export async function publishCommunityThemeAction(input: {
 }): Promise<CommunityThemeFormState> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in." };
+
+  const guardError = await guardSensitiveAction({ scope: "theme_publish", userId });
+  if (guardError) return { error: guardError };
 
   const title = input.title.trim().slice(0, 80);
   const description = input.description.trim().slice(0, 500);

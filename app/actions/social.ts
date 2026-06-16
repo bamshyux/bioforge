@@ -7,6 +7,7 @@ import { logActivity } from "@/lib/data/activity";
 import { syncAllMilestoneBadges } from "@/lib/badges/sync-milestones";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
 import { formatSchemaError } from "@/lib/db/schema";
+import { guardSensitiveAction } from "@/lib/security/guard-action";
 import type { SocialFormState } from "@/lib/types/social";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,9 @@ export async function followUserAction(targetId: string): Promise<SocialFormStat
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in." };
   if (userId === targetId) return { error: "You cannot follow yourself." };
+
+  const guardError = await guardSensitiveAction({ scope: "follow", userId });
+  if (guardError) return { error: guardError };
 
   const supabase = await createClient();
   const { error } = await supabase.from("follows").insert({

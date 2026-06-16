@@ -1,6 +1,7 @@
 import { getDiscordAvatarUrl } from "@/lib/discord/config";
 import { pickActivityImageUrl, resolveActivityAssetUrl } from "@/lib/discord/activity-images";
 import { resolveDetectableGameIconUrl } from "@/lib/discord/detectable-apps";
+import { parseDiscordProfileBadges } from "@/lib/discord/profile-badges";
 import type { DiscordActivity, DiscordPresence, DiscordPresenceStatus } from "@/lib/discord/types";
 
 type LanyardActivity = {
@@ -22,6 +23,20 @@ type LanyardResponse = {
       id: string;
       username: string;
       avatar?: string | null;
+      public_flags?: number | null;
+      premium_type?: number | null;
+      primary_guild?: {
+        tag?: string | null;
+        badge?: string | null;
+        identity_guild_id?: string | null;
+        identity_enabled?: boolean | null;
+      } | null;
+      clan?: {
+        tag?: string | null;
+        badge?: string | null;
+        identity_guild_id?: string | null;
+        identity_enabled?: boolean | null;
+      } | null;
     };
     discord_status?: string;
     activities?: LanyardActivity[];
@@ -119,5 +134,6 @@ export async function fetchLanyardPresence(discordUserId: string): Promise<Disco
           albumArtUrl: spotify.album_art_url,
         }
       : null,
+    profileBadges: parseDiscordProfileBadges(user),
   };
 }

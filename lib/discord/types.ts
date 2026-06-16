@@ -1,5 +1,19 @@
 export type DiscordPresenceStatus = "online" | "idle" | "dnd" | "offline";
 
+export type HypeSquadHouse = "bravery" | "brilliance" | "balance";
+
+export type DiscordGuildTag = {
+  tag: string;
+  guildId: string;
+  badgeUrl: string;
+};
+
+export type DiscordProfileBadges = {
+  guildTag: DiscordGuildTag | null;
+  nitro: boolean;
+  hypesquad: HypeSquadHouse | null;
+};
+
 export type DiscordActivity = {
   name: string;
   details?: string;
@@ -23,6 +37,7 @@ export type DiscordPresence = {
   status: DiscordPresenceStatus;
   activity: DiscordActivity | null;
   spotify: DiscordSpotify | null;
+  profileBadges: DiscordProfileBadges;
 };
 
 export type DiscordOAuthUser = {

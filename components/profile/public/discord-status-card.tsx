@@ -6,6 +6,7 @@ import { getDiscordStatusColor, getDiscordStatusLabel } from "@/lib/discord/stat
 import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
 import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
 import { DISCORD_LANYARD_INVITE_URL } from "@/lib/discord/messages";
+import { DiscordProfileBadges } from "@/components/profile/public/discord-profile-badges";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
@@ -228,12 +229,15 @@ export function DiscordStatusCard({
           </div>
         ) : null}
         <div className={appearance.headerTextClass}>
-          <p
-            className={`truncate font-semibold leading-tight ${appearance.textPrimaryClass}`}
-            style={{ ...appearance.primaryTextStyle, ...appearance.nameStyle }}
-          >
-            {displayName}
-          </p>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <p
+              className={`min-w-0 truncate font-semibold leading-tight ${appearance.textPrimaryClass}`}
+              style={{ ...appearance.primaryTextStyle, ...appearance.nameStyle }}
+            >
+              {displayName}
+            </p>
+            <DiscordProfileBadges badges={presence.profileBadges} />
+          </div>
           {config.show_status_text ? (
             <p
               className={`truncate leading-snug ${appearance.textSecondaryClass}`}

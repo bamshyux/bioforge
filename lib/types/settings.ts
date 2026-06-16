@@ -64,7 +64,31 @@ export type ParticleEffect =
   | "bubbles"
   | "starfield";
 
-export type CursorEffect = "none" | "trail" | "glow" | "particles" | "sparkles";
+export type CursorEffect =
+  | "none"
+  | "trail"
+  | "glow"
+  | "particles"
+  | "sparkles"
+  | "neon"
+  | "comet"
+  | "ripple"
+  | "flame"
+  | "snow"
+  | "hearts"
+  | "stars"
+  | "bubbles"
+  | "rainbow"
+  | "orbit"
+  | "crosshair"
+  | "magnetic"
+  | "paint"
+  | "spotlight"
+  | "glitch"
+  | "confetti"
+  | "laser"
+  | "smoke"
+  | "electric";
 
 export type UsernameEffect =
   | "none"
@@ -135,6 +159,7 @@ export type ProfileSettings = {
   music_loop: boolean;
   music_volume: number;
   cursor_effect: CursorEffect;
+  cursor_image_url: string | null;
   typing_bio: boolean;
   bio_color: string;
   bio_font_family: string;

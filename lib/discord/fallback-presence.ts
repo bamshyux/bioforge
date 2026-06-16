@@ -1,5 +1,6 @@
 import { isValidDiscordUserId } from "@/lib/discord/connection";
 import { getDiscordAvatarUrl } from "@/lib/discord/config";
+import { EMPTY_DISCORD_PROFILE_BADGES } from "@/lib/discord/profile-badges";
 import { getEffectiveDiscordUsername } from "@/lib/discord/resolve-profile";
 import type { DiscordPresence } from "@/lib/discord/types";
 import type { ProfileSettings } from "@/lib/types/settings";
@@ -17,6 +18,7 @@ export function buildFallbackDiscordPresence(settings: ProfileSettings): Discord
     status: "offline",
     activity: null,
     spotify: null,
+    profileBadges: EMPTY_DISCORD_PROFILE_BADGES,
   };
 }
 

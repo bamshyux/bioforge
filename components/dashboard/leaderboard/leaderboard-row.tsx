@@ -3,9 +3,10 @@
 import Link from "next/link";
 import type { LeaderboardEntry, LeaderboardTab } from "@/lib/types/leaderboard";
 import { SITE_HOST } from "@/lib/site";
-import { LeaderboardAvatar, formatStat, rankMedalClass } from "./leaderboard-shared";
+import { LeaderboardAvatar, formatStat } from "./leaderboard-shared";
 import { LeaderboardFollowButton } from "./leaderboard-follow-button";
 import { LeaderboardHoverPreview } from "./leaderboard-hover-preview";
+import { LeaderboardRankBadge } from "./leaderboard-rank-badge";
 
 export function LeaderboardRow({
   entry,
@@ -18,19 +19,31 @@ export function LeaderboardRow({
   currentUserId: string;
   index: number;
 }) {
-  const medalClass = rankMedalClass(entry.rank);
+  const isTopThree = entry.rank <= 3;
 
   return (
     <div
-      className="bf-leaderboard-row group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#111]/80 backdrop-blur-sm transition-all hover:border-white/[0.14] hover:bg-[#161616]/90"
+      className={`bf-leaderboard-row group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+        isTopThree
+          ? "border-white/[0.1] bg-gradient-to-r from-white/[0.04] to-transparent hover:border-white/[0.16]"
+          : "border-white/[0.06] bg-[#0d0d0d]/90 hover:border-white/[0.12] hover:bg-[#121212]"
+      }`}
       style={{ animationDelay: `${index * 45}ms` }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      {isTopThree ? (
+        <div
+          className={`pointer-events-none absolute inset-y-0 left-0 w-1 ${
+            entry.rank === 1
+              ? "bg-gradient-to-b from-amber-400/80 to-amber-600/20"
+              : entry.rank === 2
+                ? "bg-gradient-to-b from-neutral-200/70 to-neutral-500/20"
+                : "bg-gradient-to-b from-orange-400/70 to-orange-700/20"
+          }`}
+        />
+      ) : null}
 
       <div className="relative flex flex-wrap items-center gap-4 p-4 sm:gap-5 sm:p-5">
-        <div className={`bf-leaderboard-rank flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold tabular-nums ${medalClass}`}>
-          {entry.rank}
-        </div>
+        <LeaderboardRankBadge rank={entry.rank} size={isTopThree ? "md" : "sm"} />
 
         <LeaderboardHoverPreview entry={entry} tab={tab}>
           <Link
@@ -39,7 +52,7 @@ export function LeaderboardRow({
             rel="noreferrer"
             className="flex min-w-0 flex-1 items-center gap-4"
           >
-            <LeaderboardAvatar entry={entry} size={52} className="transition-transform group-hover:scale-105" />
+            <LeaderboardAvatar entry={entry} size={50} className="transition-transform duration-300 group-hover:scale-105" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white group-hover:text-[#fafafa]">
                 {entry.display_name}
@@ -51,26 +64,14 @@ export function LeaderboardRow({
           </Link>
         </LeaderboardHoverPreview>
 
-        <div className="flex w-full flex-wrap items-center gap-3 sm:ml-auto sm:w-auto sm:gap-6">
+        <div className="flex w-full flex-wrap items-center gap-3 sm:ml-auto sm:w-auto sm:gap-5">
           <div className="flex flex-wrap gap-4 text-xs text-neutral-400">
             {tab === "views" ? (
-              <span className="inline-flex items-center gap-1.5">
-                <EyeIcon />
-                <span className="font-semibold text-neutral-200">{formatStat(entry.views)}</span>
-                views
-              </span>
+              <StatPill icon={<EyeIcon />} value={formatStat(entry.views)} label="views" />
             ) : (
               <>
-                <span className="inline-flex items-center gap-1.5">
-                  <UsersIcon />
-                  <span className="font-semibold text-neutral-200">{formatStat(entry.followers)}</span>
-                  followers
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <EyeIcon />
-                  <span className="font-semibold text-neutral-200">{formatStat(entry.views)}</span>
-                  views
-                </span>
+                <StatPill icon={<UsersIcon />} value={formatStat(entry.followers)} label="followers" />
+                <StatPill icon={<EyeIcon />} value={formatStat(entry.views)} label="views" muted />
               </>
             )}
           </div>
@@ -86,7 +87,7 @@ export function LeaderboardRow({
               href={`/${entry.username}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-300 transition hover:border-white/[0.16] hover:text-white"
+              className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-300 transition hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
             >
               View profile
             </Link>
@@ -94,6 +95,32 @@ export function LeaderboardRow({
         </div>
       </div>
     </div>
+  );
+}
+
+function StatPill({
+  icon,
+  value,
+  label,
+  muted = false,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+  muted?: boolean;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 ${
+        muted
+          ? "border-white/[0.04] bg-transparent text-neutral-500"
+          : "border-white/[0.06] bg-white/[0.02] text-neutral-400"
+      }`}
+    >
+      {icon}
+      <span className="font-semibold text-neutral-200">{value}</span>
+      {label}
+    </span>
   );
 }
 

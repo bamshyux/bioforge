@@ -9,6 +9,7 @@ import {
   HomePrimaryCta,
   HomeSecondaryCta,
 } from "@/components/home/home-hero-actions";
+import { HomeNavLinks } from "@/components/home/home-nav-links";
 import { HomeNav } from "@/components/home/home-nav";
 import { HomeOurUsers, HomeStatsSection } from "@/components/home/home-our-users";
 import { HomePreview } from "@/components/home/home-preview";
@@ -68,13 +69,7 @@ export default async function Home() {
           <CriedLogo />
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm text-neutral-500 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="transition-colors hover:text-white">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <HomeNavLinks links={NAV_LINKS} />
 
         <HomeNav isLoggedIn={isLoggedIn} username={profile?.username ?? null} />
       </header>

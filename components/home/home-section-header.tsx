@@ -41,7 +41,7 @@ export function HomeSection({
   return (
     <section
       id={id}
-      className={`relative mx-auto max-w-6xl px-6 py-20 sm:py-28 ${withBorder ? "border-t border-white/[0.04]" : ""} ${className}`}
+      className={`relative mx-auto max-w-6xl scroll-mt-24 px-6 py-20 sm:py-28 ${withBorder ? "border-t border-white/[0.04]" : ""} ${className}`}
     >
       {children}
     </section>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { Reveal } from "@/components/home/reveal";
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
@@ -206,81 +205,72 @@ export function LeaderboardShell({
   const statLabel = tab === "views" ? "profile views" : "followers";
 
   return (
-    <div className={`bf-leaderboard-page bf-explore-page mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-6 ${rankFlash ? "bf-leaderboard-rank-flash" : ""}`}>
-      <Reveal>
-        <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/[0.06] bg-[#0f0f0f] p-8 sm:p-10">
-          <div className="pointer-events-none absolute inset-0 bf-explore-hero-glow" />
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-500/[0.04] blur-3xl" />
-          <div className="relative">
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-neutral-500">Explore</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Leaderboard</h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-400">
-              Discover the most viewed and most followed creators on cried.bio. Climb the ranks, get discovered, and compete for the top spot.
-            </p>
-          </div>
-        </div>
-      </Reveal>
+    <div className={`bf-leaderboard-page mx-auto max-w-5xl px-4 pb-16 pt-2 sm:px-6 ${rankFlash ? "bf-leaderboard-rank-flash" : ""}`}>
+      <div className="bf-leaderboard-toolbar sticky top-0 z-20 -mx-4 mb-5 border-b border-white/[0.06] bg-[#050505]/90 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bf-leaderboard-tabs inline-flex shrink-0 rounded-xl border border-white/[0.08] bg-[#111]/80 p-0.5">
+              {(
+                [
+                  { id: "views" as const, label: "Most Viewed" },
+                  { id: "followers" as const, label: "Most Followed" },
+                ] as const
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => onTabChange(item.id)}
+                  className={`rounded-[0.65rem] px-3.5 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm ${
+                    tab === item.id
+                      ? "bg-white/[0.12] text-white shadow-[0_0_20px_rgba(255,255,255,0.06)]"
+                      : "text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
 
-      <Reveal delay={80}>
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="bf-leaderboard-tabs inline-flex rounded-2xl border border-white/[0.08] bg-[#111] p-1">
-            {(
-              [
-                { id: "views" as const, label: "Most Viewed" },
-                { id: "followers" as const, label: "Most Followed" },
-              ] as const
-            ).map((item) => (
+            <div className="bf-explore-search flex min-w-[180px] flex-1 items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#111]/80 px-3.5 py-2 transition-colors focus-within:border-white/[0.14] sm:ml-auto sm:max-w-xs">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="shrink-0 text-neutral-500" aria-hidden>
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3-3" />
+              </svg>
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Search creators…"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {LEADERBOARD_PERIODS.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 disabled={isPending}
-                onClick={() => onTabChange(item.id)}
-                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                  tab === item.id
-                    ? "bg-white/[0.1] text-white shadow-lg shadow-black/20"
-                    : "text-neutral-500 hover:text-neutral-300"
+                onClick={() => onPeriodChange(item.id)}
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition sm:text-xs ${
+                  period === item.id
+                    ? "bg-white text-black shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+                    : "border border-white/[0.08] bg-transparent text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
                 }`}
               >
                 {item.label}
               </button>
             ))}
-          </div>
-
-          <div className="bf-explore-search flex flex-1 items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#111] px-4 py-2.5 transition lg:max-w-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="shrink-0 text-neutral-500" aria-hidden>
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3-3" />
-            </svg>
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search creators…"
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
-            />
+            {list.total > 0 ? (
+              <span className="ml-auto hidden text-[11px] text-neutral-600 sm:inline">
+                {list.total.toLocaleString()} ranked by {statLabel}
+              </span>
+            ) : null}
           </div>
         </div>
-      </Reveal>
-
-      <Reveal delay={120}>
-        <div className="mb-8 flex flex-wrap gap-2">
-          {LEADERBOARD_PERIODS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              disabled={isPending}
-              onClick={() => onPeriodChange(item.id)}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                period === item.id
-                  ? "border-[var(--bf-accent)]/40 bg-[var(--bf-accent)]/10 text-white"
-                  : "border-white/[0.08] bg-[#111] text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </Reveal>
+      </div>
 
       {isPending && !hasResults ? (
         <LoadingRows />
@@ -289,28 +279,20 @@ export function LeaderboardShell({
       ) : (
         <>
           {podium.length > 0 ? (
-            <Reveal delay={160}>
-              <LeaderboardPodium entries={podium} tab={tab} currentUserId={currentUserId} />
-            </Reveal>
+            <LeaderboardPodium entries={podium} tab={tab} currentUserId={currentUserId} />
           ) : null}
 
-          <Reveal delay={200}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
-                Rankings
-              </h2>
-              {list.total > 0 ? (
-                <p className="text-xs text-neutral-600">
-                  {list.total.toLocaleString()} creators ranked by {statLabel}
-                </p>
-              ) : null}
-            </div>
-          </Reveal>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-neutral-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--bf-accent)]/80" />
+              Full rankings
+            </h2>
+          </div>
 
           {isPending ? (
             <LoadingRows />
           ) : list.entries.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {list.entries.map((entry, index) => (
                 <LeaderboardRow
                   key={entry.id}
@@ -323,7 +305,7 @@ export function LeaderboardShell({
             </div>
           ) : list.total <= 3 ? (
             <p className="rounded-2xl border border-white/[0.06] bg-[#111]/50 px-5 py-8 text-center text-sm text-neutral-500">
-              The top 3 take the podium — no more rankings on this page yet.
+              The top 3 take the stage — more rankings coming soon.
             </p>
           ) : null}
 

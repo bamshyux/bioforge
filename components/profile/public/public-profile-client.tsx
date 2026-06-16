@@ -17,7 +17,7 @@ import { BadgeRow } from "@/components/badges/badge-ui";
 import { MusicPlayer } from "./music-player";
 import { ParticleCanvas } from "./particle-canvas";
 import { ProfileBackground } from "./profile-background";
-import { CursorEffectCanvas } from "./profile-effects";
+import { CursorEffectCanvas, CustomProfileCursor } from "./profile-effects";
 import { ProfileBio } from "./profile-bio";
 import { ProfileEnterGate } from "./profile-enter-gate";
 import type { DiscordPresence } from "@/lib/discord/types";
@@ -886,10 +886,13 @@ export function PublicProfileClient({
       {entered ? (
         <CursorEffectCanvas effect={settings.cursor_effect} color={settings.accent_color} />
       ) : null}
+      {entered && settings.cursor_image_url ? (
+        <CustomProfileCursor imageUrl={settings.cursor_image_url} />
+      ) : null}
 
       {entered ? (
         <div
-          className="relative z-10 flex min-h-screen flex-col"
+          className={`relative z-10 flex min-h-screen flex-col ${settings.cursor_image_url ? "bf-custom-cursor-active" : ""}`}
           style={{ color: settings.text_color, fontFamily: fontCss, "--bf-accent": settings.accent_color } as React.CSSProperties}
         >
           <header className="absolute inset-x-0 top-0 z-20 flex w-full items-center justify-between px-5 py-4 sm:px-8 sm:py-5">

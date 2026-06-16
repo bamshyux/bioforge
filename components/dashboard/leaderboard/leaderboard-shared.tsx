@@ -36,20 +36,6 @@ export function LeaderboardAvatar({
   );
 }
 
-export function rankMedalClass(rank: number): string {
-  if (rank === 1) return "bf-leaderboard-rank-gold";
-  if (rank === 2) return "bf-leaderboard-rank-silver";
-  if (rank === 3) return "bf-leaderboard-rank-bronze";
-  return "bf-leaderboard-rank-default";
-}
-
-export function rankEmoji(rank: number): string | null {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
-  return null;
-}
-
 export function formatStat(n: number): string {
   return n.toLocaleString();
 }

@@ -43,6 +43,7 @@ export const DEFAULT_SETTINGS: Omit<
   music_loop: true,
   music_volume: 50,
   cursor_effect: "none",
+  cursor_image_url: null,
   typing_bio: false,
   bio_color: "",
   bio_font_family: "",
@@ -251,9 +252,35 @@ export const CURSOR_EFFECT_OPTIONS: { value: CursorEffect; label: string }[] = [
   { value: "none", label: "None" },
   { value: "trail", label: "Trail" },
   { value: "glow", label: "Glow" },
-  { value: "particles", label: "Particles" },
+  { value: "neon", label: "Neon" },
   { value: "sparkles", label: "Sparkles" },
+  { value: "particles", label: "Particles" },
+  { value: "comet", label: "Comet" },
+  { value: "laser", label: "Laser" },
+  { value: "ripple", label: "Ripple" },
+  { value: "orbit", label: "Orbit" },
+  { value: "crosshair", label: "Crosshair" },
+  { value: "magnetic", label: "Magnetic" },
+  { value: "spotlight", label: "Spotlight" },
+  { value: "rainbow", label: "Rainbow" },
+  { value: "flame", label: "Flame" },
+  { value: "snow", label: "Snow" },
+  { value: "hearts", label: "Hearts" },
+  { value: "stars", label: "Stars" },
+  { value: "bubbles", label: "Bubbles" },
+  { value: "confetti", label: "Confetti" },
+  { value: "paint", label: "Paint Splatter" },
+  { value: "smoke", label: "Smoke" },
+  { value: "electric", label: "Electric" },
+  { value: "glitch", label: "Glitch" },
 ];
+
+const CURSOR_EFFECT_VALUES = new Set<string>(CURSOR_EFFECT_OPTIONS.map((o) => o.value));
+
+export function parseCursorEffect(value: unknown, fallback: CursorEffect = "none"): CursorEffect {
+  const key = String(value ?? "");
+  return CURSOR_EFFECT_VALUES.has(key) ? (key as CursorEffect) : fallback;
+}
 
 export const USERNAME_EFFECT_OPTIONS: { value: UsernameEffect; label: string }[] = [
   { value: "none", label: "None" },
@@ -345,7 +372,8 @@ export function mergeSettings(
     music_autoplay: row?.music_autoplay ?? DEFAULT_SETTINGS.music_autoplay,
     music_loop: row?.music_loop ?? DEFAULT_SETTINGS.music_loop,
     music_volume: row?.music_volume ?? DEFAULT_SETTINGS.music_volume,
-    cursor_effect: (row?.cursor_effect ?? legacyCursor ?? DEFAULT_SETTINGS.cursor_effect) as CursorEffect,
+    cursor_effect: parseCursorEffect(row?.cursor_effect ?? legacyCursor, DEFAULT_SETTINGS.cursor_effect),
+    cursor_image_url: row?.cursor_image_url ?? null,
     typing_bio: row?.typing_bio ?? DEFAULT_SETTINGS.typing_bio,
     bio_color: row?.bio_color ?? DEFAULT_SETTINGS.bio_color,
     bio_font_family: row?.bio_font_family ?? DEFAULT_SETTINGS.bio_font_family,

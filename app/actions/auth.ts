@@ -6,6 +6,7 @@ import { deliverPasswordResetEmail } from "@/lib/auth/send-password-reset";
 import { sendWelcomeEmail } from "@/lib/email";
 import { syncSignupBadges } from "@/lib/badges/signup-badges";
 import { getProfileByUserId } from "@/lib/data/profiles";
+import { guardSensitiveAction } from "@/lib/security/guard-action";
 import { getSiteUrl } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -157,6 +158,9 @@ export async function signUpAction(
     return { error: "Password must be at least 6 characters." };
   }
 
+  const guardError = await guardSensitiveAction({ scope: "signup" });
+  if (guardError) return { error: guardError };
+
   try {
     const adminResult = await signUpWithAdmin(email, password);
     if (adminResult === "ok") {
@@ -210,6 +214,9 @@ export async function signInAction(
     return { error: "Email and password are required." };
   }
 
+  const guardError = await guardSensitiveAction({ scope: "login" });
+  if (guardError) return { error: guardError };
+
   try {
     const supabase = await createClient();
     const { error, data } = await supabase.auth.signInWithPassword({
@@ -258,6 +265,9 @@ export async function requestPasswordResetAction(
   if (!email) {
     return { error: "Email is required." };
   }
+
+  const guardError = await guardSensitiveAction({ scope: "password_reset", email });
+  if (guardError) return { error: guardError };
 
   const result = await deliverPasswordResetEmail(email);
 

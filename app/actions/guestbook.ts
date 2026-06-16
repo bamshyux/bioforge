@@ -6,6 +6,7 @@ import { rejectIfModerated } from "@/lib/moderation/validate";
 import { createNotification } from "@/lib/data/notifications";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
 import { formatSchemaError } from "@/lib/db/schema";
+import { guardSensitiveAction } from "@/lib/security/guard-action";
 import type { GuestbookFormState } from "@/lib/types/guestbook";
 import { createClient } from "@/lib/supabase/server";
 
@@ -40,6 +41,9 @@ export async function postGuestbookEntryAction(
 ): Promise<GuestbookFormState> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in to sign the guestbook." };
+
+  const guardError = await guardSensitiveAction({ scope: "guestbook", userId });
+  if (guardError) return { error: guardError };
 
   const profileId = String(formData.get("profile_id") ?? "");
   const message = String(formData.get("message") ?? "").trim();

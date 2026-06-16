@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { clampCardLayout, mergeSettings } from "@/lib/settings";
+import { clampCardLayout, mergeSettings, parseCursorEffect } from "@/lib/settings";
 import { clampLinksIconSize } from "@/lib/links";
 import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 import { formatSchemaError } from "@/lib/db/schema";
@@ -10,7 +10,6 @@ import { rejectIfModerated } from "@/lib/moderation/validate";
 import type { SettingsFormState, SettingsSection } from "@/lib/types/settings";
 import type {
   BackgroundType,
-  CursorEffect,
   EnterGateAnimation,
   EnterGateBackgroundType,
   EnterGateButtonStyle,
@@ -219,7 +218,7 @@ function parseSectionUpdates(
       };
     case "effects":
       return {
-        cursor_effect: String(formData.get("cursor_effect") ?? existing.cursor_effect) as CursorEffect,
+        cursor_effect: parseCursorEffect(formData.get("cursor_effect"), existing.cursor_effect),
         typing_bio: parseBool(formData.get("typing_bio")),
         username_effect: String(formData.get("username_effect") ?? existing.username_effect) as UsernameEffect,
         hover_animations: parseBool(formData.get("hover_animations")),
@@ -390,7 +389,7 @@ async function uploadFile(
 
 async function deleteStoragePrefix(
   userId: string,
-  bucket: "backgrounds" | "music",
+  bucket: "backgrounds" | "music" | "profiles",
   namePrefix: string,
 ) {
   const supabase = await createClient();
@@ -590,4 +589,32 @@ export async function removeMusicAction(): Promise<SettingsFormState> {
 
   await revalidateProfile(userId);
   return { success: "Music removed." };
+}
+
+export async function saveCursorImageAction(imageUrl: string): Promise<SettingsFormState> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  if (!imageUrl.trim()) return { error: "Invalid cursor image URL." };
+
+  await ensureSettingsRow(userId);
+
+  const { error } = await patchProfileSettings(userId, { cursor_image_url: imageUrl });
+  if (error) return { error };
+
+  await revalidateProfile(userId);
+  return { success: "Custom cursor uploaded." };
+}
+
+export async function removeCursorImageAction(): Promise<SettingsFormState> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  const { error } = await patchProfileSettings(userId, { cursor_image_url: null });
+  if (error) return { error };
+
+  await deleteStoragePrefix(userId, "profiles", "cursor.");
+
+  await revalidateProfile(userId);
+  return { success: "Custom cursor removed." };
 }
