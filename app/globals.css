@@ -1129,9 +1129,13 @@ body {
   scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 }
 
+.bf-dash-nav-section + .bf-dash-nav-section {
+  margin-top: 0.125rem;
+}
+
 .bf-dash-nav-link {
   color: var(--bf-text-muted);
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .bf-dash-nav-link:hover {
@@ -1142,11 +1146,14 @@ body {
 .bf-dash-nav-link--active {
   background: rgba(255, 255, 255, 0.08);
   color: var(--bf-text);
-  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.55);
 }
 
-.bf-dash-nav-group + .bf-dash-nav-group {
-  padding-top: 0.25rem;
+.bf-dash-hub-card {
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.bf-dash-hub-card:hover {
+  transform: translateY(-1px);
 }
 
 .bf-dash-hero {
@@ -1670,6 +1677,25 @@ body {
   .bf-home-reveal-pending {
     opacity: 1;
     transform: none;
+  }
+}
+
+.bf-home-float-card {
+  animation: bf-home-float 8s ease-in-out infinite;
+}
+
+.bf-home-activity-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.bf-home-activity-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-home-float-card {
+    animation: none !important;
   }
 }
 

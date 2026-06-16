@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { rangeClassName, rangeFillStyle } from "@/lib/ui/range";
 
 export const inputClassName = "bf-input";
 export const labelClassName = "mb-1.5 block text-[13px] font-medium text-neutral-400";
-export const cardClassName = "bf-card p-6";
+export const cardClassName = "bf-card p-6 sm:p-8";
 export const buttonPrimaryClassName = "bf-btn-primary disabled:cursor-not-allowed";
 export const buttonSecondaryClassName = "bf-btn-secondary";
 export { rangeClassName, rangeFillStyle } from "@/lib/ui/range";
@@ -201,9 +202,51 @@ export function FormFeedback({ error, success }: { error?: string; success?: str
 
 export function PageHeader({ title, description }: { title: string; description: string }) {
   return (
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-      <p className="mt-1.5 text-sm text-neutral-500">{description}</p>
+    <div className="mb-10">
+      <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h1>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-500">{description}</p>
+    </div>
+  );
+}
+
+export function CollapsibleSection({
+  title,
+  description,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0c0c0c]">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.02]"
+        aria-expanded={open}
+      >
+        <span>
+          <span className="block text-sm font-medium text-white">{title}</span>
+          {description ? (
+            <span className="mt-0.5 block text-xs text-neutral-500">{description}</span>
+          ) : null}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 12 12"
+          fill="none"
+          className={`shrink-0 text-neutral-500 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+        </svg>
+      </button>
+      {open ? <div className="border-t border-white/[0.06] p-5">{children}</div> : null}
     </div>
   );
 }

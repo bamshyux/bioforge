@@ -393,3 +393,105 @@ export async function adminForceLogoutAllAction(
       "Logout request logged. Configure Supabase Auth session revocation via dashboard or extend this action with auth.admin.signOut.",
   };
 }
+
+export async function addLandingFeaturedProfileAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
+  const gate = await guard();
+  if ("error" in gate) return { error: gate.error };
+
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
+  if (!username) return { error: "Username is required." };
+
+  const supabase = await db();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (!profile) return { error: "Profile not found or not published." };
+
+  const sortOrder = Number(formData.get("sort_order") ?? 0);
+  const { error } = await supabase.from("landing_featured_profiles").upsert(
+    {
+      profile_id: profile.id,
+      sort_order: Number.isFinite(sortOrder) ? sortOrder : 0,
+      is_active: true,
+    },
+    { onConflict: "profile_id" },
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/admin/landing");
+  revalidatePath("/");
+  return { success: `@${username} added to featured profiles.` };
+}
+
+export async function removeLandingFeaturedProfileAction(id: string, _formData?: FormData): Promise<void> {
+  const gate = await guard();
+  if ("error" in gate) throw new Error(gate.error);
+
+  const supabase = await db();
+  const { error } = await supabase.from("landing_featured_profiles").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard/admin/landing");
+  revalidatePath("/");
+}
+
+export async function addLandingTestimonialAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
+  const gate = await guard();
+  if ("error" in gate) return { error: gate.error };
+
+  const quote = String(formData.get("quote") ?? "").trim();
+  const authorName = String(formData.get("author_name") ?? "").trim();
+  if (!quote || !authorName) return { error: "Quote and author name are required." };
+
+  const supabase = await db();
+  const { error } = await supabase.from("landing_testimonials").insert({
+    quote,
+    author_name: authorName,
+    author_title: String(formData.get("author_title") ?? "").trim(),
+    author_username: String(formData.get("author_username") ?? "").trim().toLowerCase() || null,
+    author_avatar_url: String(formData.get("author_avatar_url") ?? "").trim() || null,
+    sort_order: Number(formData.get("sort_order") ?? 0) || 0,
+    is_active: formData.get("is_active") !== "false",
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/admin/landing");
+  revalidatePath("/");
+  return { success: "Testimonial added." };
+}
+
+export async function deleteLandingTestimonialAction(id: string): Promise<void> {
+  const gate = await guard();
+  if ("error" in gate) throw new Error(gate.error);
+
+  const supabase = await db();
+  const { error } = await supabase.from("landing_testimonials").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard/admin/landing");
+  revalidatePath("/");
+}
+
+export async function toggleLandingTestimonialAction(id: string, isActive: boolean): Promise<AdminFormState> {
+  const gate = await guard();
+  if ("error" in gate) return { error: gate.error };
+
+  const supabase = await db();
+  const { error } = await supabase.from("landing_testimonials").update({ is_active: isActive }).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/admin/landing");
+  revalidatePath("/");
+  return { success: "Testimonial updated." };
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GlobalSiteBanner } from "@/components/admin/global-site-banner";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { SchemaErrorBanner } from "@/components/dev/schema-error-banner";
 import { getProfileSettingsSchemaValidation } from "@/lib/db/validate-schema";
 import { siteMetadata } from "@/lib/metadata";
@@ -36,6 +37,7 @@ export default async function RootLayout({
         )}
         <GlobalSiteBanner />
         {children}
+        <CookieConsentBanner />
       </body>
     </html>
   );

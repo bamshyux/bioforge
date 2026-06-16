@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { syncMilestoneBadges } from "@/app/actions/badges";
+import { DashboardSearchHint } from "@/components/dashboard/dashboard-search";
 import {
   IconAnalytics,
-  IconBackground,
   IconCustomize,
-  IconEffects,
   IconLinks,
-  IconOverview,
+  IconProfile,
 } from "@/components/icons/dashboard-icons";
+import { DASHBOARD_SECTIONS } from "@/lib/dashboard/navigation";
 import { getTotalAnalytics } from "@/lib/data/analytics";
 import { getLinksByProfileId } from "@/lib/data/links";
 import { getProfileByUserId } from "@/lib/data/profiles";
@@ -16,7 +16,13 @@ import { getSettingsByProfileId } from "@/lib/data/settings";
 import { formatProfileUid } from "@/lib/profile";
 import { SITE_HOST } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
-import { cardClassName } from "@/components/dashboard/form-fields";
+
+const QUICK_ACTIONS = [
+  { href: "/dashboard/profile", label: "Edit profile", Icon: IconProfile },
+  { href: "/dashboard/customize", label: "Customize profile", Icon: IconCustomize },
+  { href: "/dashboard/links", label: "Manage links", Icon: IconLinks },
+  { href: "/dashboard/analytics", label: "View analytics", Icon: IconAnalytics },
+];
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient();
@@ -35,136 +41,109 @@ export default async function DashboardOverviewPage() {
   const isLive = !!profile?.username;
   const displayName = profile?.display_name || profile?.username || "there";
 
-  const stats = [
-    {
-      label: "UID",
-      value: profile?.uid != null ? formatProfileUid(profile.uid) : "—",
-      sub: profile?.uid != null ? "Your account number" : "Run v6_profile_uid.sql",
-    },
-    {
-      label: "Status",
-      value: isLive ? "Live" : "Draft",
-      sub: isLive ? `/${profile!.username}` : "Set username",
-      highlight: isLive,
-    },
-    {
-      label: "Unique visitors",
-      value: analytics.uniqueVisitors.toLocaleString(),
-      sub: `${analytics.totalViews} total views`,
-    },
-    {
-      label: "Link clicks",
-      value: analytics.totalClicks.toLocaleString(),
-      sub: `${links.length} links`,
-    },
-    {
-      label: "Layout",
-      value: settings.layout,
-      sub: "Active theme",
-    },
+  const statCards = [
+    { label: "Views", value: analytics.totalViews.toLocaleString() },
+    { label: "Visitors", value: analytics.uniqueVisitors.toLocaleString() },
+    { label: "Clicks", value: analytics.totalClicks.toLocaleString() },
+    { label: "Links", value: String(links.length) },
   ];
 
-  const shortcuts = [
-    {
-      href: "/dashboard/customize",
-      title: "Customize",
-      desc: "Colors, fonts, card styling",
-      Icon: IconCustomize,
-    },
-    {
-      href: "/dashboard/background",
-      title: "Background",
-      desc: "Gradients, video, particles",
-      Icon: IconBackground,
-    },
-    {
-      href: "/dashboard/links",
-      title: "Links",
-      desc: "Drag, drop, animate",
-      Icon: IconLinks,
-    },
-    {
-      href: "/dashboard/effects",
-      title: "Effects",
-      desc: "Cursor, username, bio",
-      Icon: IconEffects,
-    },
-    {
-      href: "/dashboard/analytics",
-      title: "Analytics",
-      desc: "Views, clicks, countries",
-      Icon: IconAnalytics,
-    },
-  ];
+  const hubSections = DASHBOARD_SECTIONS.filter((s) => s.id !== "overview");
 
   return (
-    <div className="space-y-8">
-      <div className="bf-dash-hero relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111] p-6 sm:p-8">
+    <div className="space-y-12">
+      <div className="bf-dash-hero relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111] p-8 sm:p-10">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_0%,rgba(255,255,255,0.06),transparent_55%)]" />
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="relative space-y-6">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">Dashboard</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Welcome back, {displayName}
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Overview</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Hey, {displayName}
             </h1>
-            <p className="mt-2 max-w-lg text-sm leading-relaxed text-neutral-500">
+            <p className="mt-3 max-w-lg text-base leading-relaxed text-neutral-500">
               {isLive
-                ? "Your page is live. Tweak your design, add links, or check who's visiting."
-                : "Finish your profile setup and publish your page when you're ready."}
+                ? "Your page is live. Jump in below or search for any setting."
+                : "Finish your profile and publish when you're ready."}
             </p>
             {isLive ? (
-              <p className="mt-3 font-mono text-xs text-neutral-600">
+              <p className="mt-4 font-mono text-sm text-neutral-600">
                 {SITE_HOST}/{profile!.username}
+                {profile?.uid != null ? (
+                  <span className="ml-3 text-neutral-700">· UID {formatProfileUid(profile.uid)}</span>
+                ) : null}
               </p>
             ) : null}
           </div>
+
+          <div className="flex flex-wrap gap-3">
+            {QUICK_ACTIONS.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="inline-flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3 text-sm font-medium text-white transition-all hover:border-white/[0.14] hover:bg-[#141414]"
+              >
+                <action.Icon size={16} className="text-neutral-400" />
+                {action.label}
+              </Link>
+            ))}
+          </div>
+
+          <DashboardSearchHint />
         </div>
       </div>
 
-      <div>
-        <div className="mb-4 flex items-center gap-2">
-          <IconOverview size={16} className="text-neutral-500" />
-          <h2 className="text-sm font-semibold text-white">At a glance</h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className={`${cardClassName} bf-dash-stat-card ${"highlight" in s && s.highlight ? "bf-dash-stat-card--live" : ""}`}
-            >
-              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">{s.label}</p>
-              <p className="mt-2 text-2xl font-semibold capitalize text-white">{s.value}</p>
-              <p className="mt-1 text-xs text-neutral-500">{s.sub}</p>
-            </div>
-          ))}
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {statCards.map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-white/[0.06] bg-[#111] p-6"
+          >
+            <p className="text-sm text-neutral-500">{stat.label}</p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums text-white">{stat.value}</p>
+          </div>
+        ))}
       </div>
 
       <div>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-white">Quick actions</h2>
-          <Link href="/dashboard/profile" className="text-xs font-medium text-neutral-500 hover:text-white">
-            All settings →
-          </Link>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {shortcuts.map((item) => (
+        <h2 className="mb-6 text-lg font-semibold text-white">Explore your dashboard</h2>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {hubSections.map((section) => (
             <Link
-              key={item.href}
-              href={item.href}
-              className={`${cardClassName} group flex items-start gap-4 transition-all hover:border-white/15 hover:bg-[#161616]`}
+              key={section.id}
+              href={section.href}
+              className="bf-dash-hub-card group flex flex-col rounded-2xl border border-white/[0.06] bg-[#111] p-6 transition-all hover:border-white/[0.12] hover:bg-[#161616]"
             >
-              <span className="inline-flex rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-2.5 text-neutral-400 transition-colors group-hover:border-white/10 group-hover:text-white">
-                <item.Icon size={18} />
+              <span className="inline-flex w-fit rounded-xl border border-white/[0.06] bg-[#0a0a0a] p-3 text-neutral-400 transition-colors group-hover:text-white">
+                <section.Icon size={24} />
               </span>
-              <span className="min-w-0">
-                <p className="text-sm font-medium text-white">{item.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-neutral-500">{item.desc}</p>
-              </span>
+              <p className="mt-5 text-lg font-medium text-white">{section.label}</p>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-500">{section.description}</p>
+              <p className="mt-4 text-xs font-medium text-neutral-600 group-hover:text-neutral-400">
+                {section.items.length} tools →
+              </p>
             </Link>
           ))}
         </div>
       </div>
+
+      {isLive ? (
+        <div className="rounded-2xl border border-white/[0.06] bg-[#111] p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-white">Current layout</p>
+              <p className="mt-1 capitalize text-neutral-500">{settings.layout}</p>
+            </div>
+            <Link
+              href={`/${profile!.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl border border-white/[0.08] px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:border-white/[0.14] hover:text-white"
+            >
+              View live page
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,137 +1,85 @@
 "use client";
 
-import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
-  IconAnalytics,
-  IconBackground,
-  IconBadges,
-  IconCustomize,
-  IconEffects,
-  IconLayout,
-  IconLinks,
-  IconMusic,
-  IconOverview,
-  IconProfile,
-  IconSettings,
-} from "@/components/icons/dashboard-icons";
+  DASHBOARD_SECTIONS,
+  getSectionForPath,
+  isNavActive,
+} from "@/lib/dashboard/navigation";
 
-type NavItem = {
-  href: string;
-  label: string;
-  Icon: ComponentType<{ size?: number; className?: string }>;
-};
-
-type NavGroup = {
-  id: string;
-  label: string;
-  items: NavItem[];
-};
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    id: "design",
-    label: "Design",
-    items: [
-      { href: "/dashboard/profile", label: "Profile", Icon: IconProfile },
-      { href: "/dashboard/customize", label: "Customize", Icon: IconCustomize },
-      { href: "/dashboard/background", label: "Background", Icon: IconBackground },
-      { href: "/dashboard/themes", label: "Layouts", Icon: IconLayout },
-      { href: "/dashboard/custom-theme", label: "Custom Theme", Icon: IconEffects },
-      { href: "/dashboard/effects", label: "Effects", Icon: IconEffects },
-    ],
-  },
-  {
-    id: "content",
-    label: "Content",
-    items: [
-      { href: "/dashboard/links", label: "Links", Icon: IconLinks },
-      { href: "/dashboard/embeds", label: "Embeds", Icon: IconLayout },
-      { href: "/dashboard/widgets", label: "Widgets", Icon: IconEffects },
-      { href: "/dashboard/featured", label: "Featured", Icon: IconBadges },
-      { href: "/dashboard/music", label: "Music", Icon: IconMusic },
-      { href: "/dashboard/guestbook", label: "Guestbook", Icon: IconProfile },
-    ],
-  },
-  {
-    id: "grow",
-    label: "Grow",
-    items: [
-      { href: "/dashboard/social", label: "Social", Icon: IconLinks },
-      { href: "/dashboard/badges", label: "Badges", Icon: IconBadges },
-      { href: "/dashboard/premium", label: "Premium", Icon: IconBadges },
-      { href: "/dashboard/analytics", label: "Analytics", Icon: IconAnalytics },
-    ],
-  },
-];
-
-function isActive(pathname: string, href: string) {
-  return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
-}
-
-function NavLink({ href, label, Icon, active }: NavItem & { active: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`bf-dash-nav-link flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium ${
-        active ? "bf-dash-nav-link--active" : ""
-      }`}
-    >
-      <Icon size={15} className={active ? "text-white" : "text-neutral-500"} />
-      <span className="truncate">{label}</span>
-    </Link>
-  );
-}
-
-function NavGroupSection({
-  group,
+function SectionBlock({
+  section,
   pathname,
-  open,
+  expanded,
   onToggle,
+  isAdminRoute,
 }: {
-  group: NavGroup;
+  section: (typeof DASHBOARD_SECTIONS)[number];
   pathname: string;
-  open: boolean;
+  expanded: boolean;
   onToggle: () => void;
+  isAdminRoute: boolean;
 }) {
-  const hasActive = group.items.some((item) => isActive(pathname, item.href));
+  const active = isNavActive(pathname, section.href);
+  const hasItems = section.items.length > 0;
+
+  if (isAdminRoute && section.id !== "overview") return null;
 
   return (
-    <div className="bf-dash-nav-group">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-600 transition-colors hover:text-neutral-400"
-        aria-expanded={open}
-      >
-        {group.label}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-          aria-hidden
+    <div className="bf-dash-nav-section">
+      <div className="flex items-center gap-1">
+        <Link
+          href={section.href}
+          className={`bf-dash-nav-link flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium ${
+            active && !hasItems ? "bf-dash-nav-link--active" : active ? "text-white" : ""
+          }`}
         >
-          <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-        </svg>
-      </button>
+          <span className={`inline-flex rounded-lg p-1.5 ${active ? "bg-white/[0.08] text-white" : "text-neutral-500"}`}>
+            <section.Icon size={18} />
+          </span>
+          <span className="truncate">{section.label}</span>
+        </Link>
+        {hasItems ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="shrink-0 rounded-lg p-2 text-neutral-600 transition-colors hover:bg-white/[0.04] hover:text-neutral-400"
+            aria-expanded={expanded}
+            aria-label={`${expanded ? "Collapse" : "Expand"} ${section.label}`}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 12 12"
+              fill="none"
+              className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+            >
+              <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+            </svg>
+          </button>
+        ) : null}
+      </div>
 
-      {open ? (
-        <div className="mt-0.5 space-y-0.5 pl-1">
-          {group.items.map((item) => (
-            <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
-          ))}
-        </div>
-      ) : hasActive ? (
-        <div className="mt-1 px-2.5">
-          {group.items
-            .filter((item) => isActive(pathname, item.href))
-            .map((item) => (
-              <NavLink key={item.href} {...item} active />
-            ))}
+      {hasItems && expanded ? (
+        <div className="mt-1 space-y-0.5 border-l border-white/[0.06] pl-2 ml-5">
+          {section.items.map((item) => {
+            const itemActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={`${item.href}-${item.label}`}
+                href={item.href}
+                className={`block rounded-lg px-3 py-2 text-[13px] transition-colors ${
+                  itemActive
+                    ? "bg-white/[0.06] font-medium text-white"
+                    : "text-neutral-500 hover:bg-white/[0.03] hover:text-neutral-300"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
       ) : null}
     </div>
@@ -140,84 +88,82 @@ function NavGroupSection({
 
 export function DashboardSidebar({
   showAdminPanel = false,
-  adminRole,
 }: {
   showAdminPanel?: boolean;
   adminRole?: "owner" | "admin";
 }) {
   const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/dashboard/admin");
+  const activeSection = getSectionForPath(pathname);
 
-  const defaultOpen = useMemo(() => {
-    const open: Record<string, boolean> = {};
-    for (const group of NAV_GROUPS) {
-      open[group.id] = group.items.some((item) => isActive(pathname, item.href));
+  const defaultExpanded = useMemo(() => {
+    const ids: Record<string, boolean> = {};
+    for (const section of DASHBOARD_SECTIONS) {
+      ids[section.id] = activeSection?.id === section.id;
     }
-    if (!Object.values(open).some(Boolean)) {
-      open.design = true;
-    }
-    return open;
-  }, [pathname]);
+    if (!activeSection) ids.appearance = true;
+    return ids;
+  }, [activeSection]);
 
-  const [openGroups, setOpenGroups] = useState(defaultOpen);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   useEffect(() => {
-    setOpenGroups((prev) => {
-      const next = { ...prev };
-      for (const group of NAV_GROUPS) {
-        if (group.items.some((item) => isActive(pathname, item.href))) {
-          next[group.id] = true;
-        }
-      }
-      return next;
-    });
-  }, [pathname]);
+    if (activeSection) {
+      setExpanded((prev) => ({ ...prev, [activeSection.id]: true }));
+    }
+  }, [activeSection]);
 
-  function toggleGroup(id: string) {
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+  function toggle(id: string) {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   return (
-    <aside className="bf-dash-sidebar flex w-full flex-col lg:sticky lg:top-[4.25rem] lg:max-h-[calc(100vh-4.25rem)] lg:w-[240px] lg:shrink-0">
-      <nav className="bf-dash-nav flex min-h-0 flex-1 flex-col gap-3 lg:overflow-y-auto lg:pr-1">
-        <NavLink href="/dashboard" label="Overview" Icon={IconOverview} active={pathname === "/dashboard"} />
+    <aside className="bf-dash-sidebar flex w-full flex-col lg:sticky lg:top-[4.25rem] lg:max-h-[calc(100vh-4.25rem)] lg:w-[260px] lg:shrink-0">
+      <nav className="bf-dash-nav flex min-h-0 flex-1 flex-col gap-1 lg:overflow-y-auto lg:pr-2">
+        {isAdminRoute ? (
+          <div className="mb-3 space-y-1">
+            <Link
+              href="/dashboard"
+              className="bf-dash-nav-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-neutral-400"
+            >
+              <span className="inline-flex rounded-lg p-1.5 text-neutral-500">←</span>
+              Back to dashboard
+            </Link>
+          </div>
+        ) : null}
 
-        {NAV_GROUPS.map((group) => (
-          <NavGroupSection
-            key={group.id}
-            group={group}
+        {DASHBOARD_SECTIONS.map((section) => (
+          <SectionBlock
+            key={section.id}
+            section={section}
             pathname={pathname}
-            open={!!openGroups[group.id]}
-            onToggle={() => toggleGroup(group.id)}
+            expanded={!!expanded[section.id]}
+            onToggle={() => toggle(section.id)}
+            isAdminRoute={isAdminRoute}
           />
         ))}
 
-        <div className="bf-dash-nav-group border-t border-white/[0.06] pt-3">
-          <NavLink
-            href="/dashboard/settings"
-            label="Settings"
-            Icon={IconSettings}
-            active={pathname.startsWith("/dashboard/settings")}
-          />
-        </div>
-
         {showAdminPanel ? (
-          <div className="bf-dash-nav-group space-y-1 border-t border-white/[0.06] pt-3">
-            <p className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-600">
-              Admin
-            </p>
-            <NavLink href="/dashboard/admin" label="Dashboard" Icon={IconAnalytics} active={pathname === "/dashboard/admin"} />
-            <NavLink href="/dashboard/admin/users" label="Users" Icon={IconProfile} active={pathname.startsWith("/dashboard/admin/users")} />
-            <NavLink href="/dashboard/admin/badges" label="Badges" Icon={IconBadges} active={pathname.startsWith("/dashboard/admin/badges")} />
-            <NavLink href="/dashboard/admin/moderation" label="Moderation" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/moderation")} />
-            <NavLink href="/dashboard/admin/announcements" label="Announcements" Icon={IconEffects} active={pathname.startsWith("/dashboard/admin/announcements")} />
-            <NavLink href="/dashboard/admin/notifications" label="Notifications" Icon={IconLinks} active={pathname.startsWith("/dashboard/admin/notifications")} />
-            <NavLink href="/dashboard/admin/security" label="Security" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/security")} />
-            <NavLink href="/dashboard/admin/premium" label="Premium" Icon={IconBadges} active={pathname.startsWith("/dashboard/admin/premium")} />
-            <NavLink href="/dashboard/admin/analytics" label="Analytics" Icon={IconAnalytics} active={pathname.startsWith("/dashboard/admin/analytics")} />
-            <NavLink href="/dashboard/admin/audit" label="Audit Logs" Icon={IconOverview} active={pathname.startsWith("/dashboard/admin/audit")} />
-            {adminRole === "owner" ? (
-              <NavLink href="/dashboard/admin/owner" label="Owner Tools" Icon={IconSettings} active={pathname.startsWith("/dashboard/admin/owner")} />
-            ) : null}
+          <div className="mt-4 border-t border-white/[0.06] pt-4">
+            <Link
+              href="/dashboard/admin"
+              className={`bf-dash-admin-link flex items-center gap-3 rounded-xl border px-3 py-3 text-[14px] font-medium transition-all ${
+                isAdminRoute
+                  ? "border-violet-500/30 bg-violet-500/10 text-violet-200"
+                  : "border-white/[0.06] bg-[#111] text-neutral-400 hover:border-violet-500/20 hover:text-violet-200"
+              }`}
+            >
+              <span className="inline-flex rounded-lg bg-violet-500/15 p-1.5 text-violet-300">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <path d="M12 3 4 7v6c0 5 3.5 8 8 8s8-3 8-8V7l-8-4Z" strokeLinejoin="round" />
+                  <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span>
+                <span className="block text-white">Admin Panel</span>
+                <span className="mt-0.5 block text-[11px] font-normal text-neutral-500">Platform management</span>
+              </span>
+            </Link>
           </div>
         ) : null}
       </nav>
