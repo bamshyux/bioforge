@@ -285,11 +285,28 @@ export function parseCursorEffect(value: unknown, fallback: CursorEffect = "none
 export const USERNAME_EFFECT_OPTIONS: { value: UsernameEffect; label: string }[] = [
   { value: "none", label: "None" },
   { value: "glow", label: "Glow" },
+  { value: "neon", label: "Neon" },
   { value: "rainbow", label: "Rainbow" },
-  { value: "wave", label: "Wave" },
-  { value: "pulse", label: "Pulse" },
   { value: "gradient", label: "Gradient Text" },
+  { value: "shimmer", label: "Shimmer" },
+  { value: "chrome", label: "Chrome" },
+  { value: "fire", label: "Fire" },
+  { value: "ice", label: "Ice" },
+  { value: "wave", label: "Wave" },
+  { value: "bounce", label: "Bounce" },
+  { value: "pulse", label: "Pulse" },
+  { value: "flicker", label: "Flicker" },
+  { value: "glitch", label: "Glitch" },
+  { value: "outline", label: "Outline" },
+  { value: "shadow", label: "Shadow" },
 ];
+
+const USERNAME_EFFECT_VALUES = new Set<string>(USERNAME_EFFECT_OPTIONS.map((o) => o.value));
+
+export function parseUsernameEffect(value: unknown, fallback: UsernameEffect = "none"): UsernameEffect {
+  const key = String(value ?? "");
+  return USERNAME_EFFECT_VALUES.has(key) ? (key as UsernameEffect) : fallback;
+}
 
 export const BIO_FONT_WEIGHT_OPTIONS = [
   { value: 400, label: "Regular" },
@@ -383,7 +400,7 @@ export function mergeSettings(
     bio_glow: row?.bio_glow ?? DEFAULT_SETTINGS.bio_glow,
     bio_letter_spacing:
       (row?.bio_letter_spacing ?? DEFAULT_SETTINGS.bio_letter_spacing) as import("@/lib/types/settings").BioLetterSpacing,
-    username_effect: (row?.username_effect ?? legacyUsername ?? DEFAULT_SETTINGS.username_effect) as UsernameEffect,
+    username_effect: parseUsernameEffect(row?.username_effect ?? legacyUsername, DEFAULT_SETTINGS.username_effect),
     hover_animations: row?.hover_animations ?? DEFAULT_SETTINGS.hover_animations,
     page_entrance: row?.page_entrance ?? DEFAULT_SETTINGS.page_entrance,
     link_animation: row?.link_animation ?? DEFAULT_SETTINGS.link_animation,
@@ -533,12 +550,38 @@ export { getLinkAnimationClass } from "@/lib/link-animation";
 
 export function getUsernameEffectClass(effect: UsernameEffect) {
   switch (effect) {
-    case "glow": return "bf-username-glow";
-    case "rainbow": return "bf-username-rainbow";
-    case "wave": return "bf-username-wave";
-    case "pulse": return "bf-username-pulse";
-    case "gradient": return "bf-username-gradient";
-    default: return "";
+    case "glow":
+      return "bf-username-glow";
+    case "neon":
+      return "bf-username-neon";
+    case "rainbow":
+      return "bf-username-rainbow";
+    case "wave":
+      return "bf-username-wave";
+    case "bounce":
+      return "bf-username-bounce";
+    case "pulse":
+      return "bf-username-pulse";
+    case "flicker":
+      return "bf-username-flicker";
+    case "gradient":
+      return "bf-username-gradient";
+    case "shimmer":
+      return "bf-username-shimmer";
+    case "chrome":
+      return "bf-username-chrome";
+    case "fire":
+      return "bf-username-fire";
+    case "ice":
+      return "bf-username-ice";
+    case "glitch":
+      return "bf-username-glitch";
+    case "outline":
+      return "bf-username-outline";
+    case "shadow":
+      return "bf-username-shadow";
+    default:
+      return "";
   }
 }
 

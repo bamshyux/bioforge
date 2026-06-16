@@ -45,7 +45,7 @@ export function HomeOurUsers({
       <Reveal className="mb-10 text-center">
         <p className="text-sm text-neutral-500">
           Join{" "}
-          <AnimatedCounter value={totalUsers} className="font-semibold text-white" />
+          <AnimatedCounter value={totalUsers} className="font-semibold text-white no-underline" />
           {" "}creators on the platform
         </p>
       </Reveal>
@@ -105,8 +105,8 @@ export function HomeStatsSection({ stats }: { stats: LandingStats }) {
         {items.map((item, index) => (
           <Reveal key={item.label} delay={index * 60}>
             <div className="rounded-xl border border-white/[0.06] bg-[#141414] p-6">
-              <p className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                <AnimatedCounter value={item.value} />
+              <p className="text-3xl font-semibold tracking-tight text-white no-underline sm:text-4xl">
+                <AnimatedCounter value={item.value} className="no-underline" />
               </p>
               <p className="mt-2 text-sm text-neutral-500">{item.label}</p>
             </div>

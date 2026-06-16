@@ -96,7 +96,17 @@ export type UsernameEffect =
   | "rainbow"
   | "wave"
   | "pulse"
-  | "gradient";
+  | "gradient"
+  | "shimmer"
+  | "neon"
+  | "glitch"
+  | "fire"
+  | "ice"
+  | "bounce"
+  | "flicker"
+  | "outline"
+  | "chrome"
+  | "shadow";
 
 export type LinkAnimation = "none" | "pulse" | "bounce" | "glow" | "slide";
 

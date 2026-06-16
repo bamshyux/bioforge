@@ -27,6 +27,13 @@ export function LeaderboardPodium({
       <div className="bf-leaderboard-stage-bg pointer-events-none absolute inset-0" aria-hidden />
       <div className="bf-leaderboard-stage-grid pointer-events-none absolute inset-0 opacity-[0.35]" aria-hidden />
 
+      <p
+        className="bf-leaderboard-watermark pointer-events-none absolute bottom-3 right-4 select-none font-mono text-[10px] tracking-[0.18em] text-white/[0.06] sm:bottom-4 sm:right-6 sm:text-[11px]"
+        aria-hidden
+      >
+        cried.bio
+      </p>
+
       <div className="relative px-4 pb-2 pt-5 sm:px-8 sm:pb-4 sm:pt-7">
         <div className="mb-2 flex items-center justify-center gap-2 sm:mb-4">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-white/20" />
@@ -77,7 +84,7 @@ function PodiumSlot({
       } ${entry.rank === 2 ? "order-1" : entry.rank === 1 ? "order-2" : "order-3"}`}
     >
       {isFirst ? (
-        <LeaderboardPodiumCrown className="mb-1 h-6 w-10 text-amber-300/80 sm:mb-2 sm:h-7 sm:w-12" />
+        <LeaderboardPodiumCrown className="mb-1 sm:mb-2" />
       ) : (
         <div className="mb-1 h-6 sm:mb-2 sm:h-7" aria-hidden />
       )}

@@ -208,31 +208,29 @@ export function LeaderboardShell({
     <div className={`bf-leaderboard-page mx-auto max-w-5xl px-4 pb-16 pt-2 sm:px-6 ${rankFlash ? "bf-leaderboard-rank-flash" : ""}`}>
       <div className="bf-leaderboard-toolbar sticky top-0 z-20 -mx-4 mb-5 border-b border-white/[0.06] bg-[#050505]/90 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="bf-leaderboard-tabs inline-flex shrink-0 rounded-xl border border-white/[0.08] bg-[#111]/80 p-0.5">
-              {(
-                [
-                  { id: "views" as const, label: "Most Viewed" },
-                  { id: "followers" as const, label: "Most Followed" },
-                ] as const
-              ).map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => onTabChange(item.id)}
-                  className={`rounded-[0.65rem] px-3.5 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm ${
-                    tab === item.id
-                      ? "bg-white/[0.12] text-white shadow-[0_0_20px_rgba(255,255,255,0.06)]"
-                      : "text-neutral-500 hover:text-neutral-300"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {(
+              [
+                { id: "views" as const, label: "Most Viewed" },
+                { id: "followers" as const, label: "Most Followed" },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                disabled={isPending}
+                onClick={() => onTabChange(item.id)}
+                className={`rounded-full px-4 py-2 text-xs font-semibold transition-all sm:text-sm ${
+                  tab === item.id
+                    ? "border border-amber-400/25 bg-amber-400/[0.1] text-amber-50 shadow-[0_0_20px_rgba(251,191,36,0.08)]"
+                    : "border border-white/[0.08] bg-transparent text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
 
-            <div className="bf-explore-search flex min-w-[180px] flex-1 items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#111]/80 px-3.5 py-2 transition-colors focus-within:border-white/[0.14] sm:ml-auto sm:max-w-xs">
+            <div className="bf-explore-search flex min-w-[180px] flex-1 items-center gap-2.5 rounded-full border border-white/[0.08] bg-[#111]/80 px-3.5 py-2 transition-colors focus-within:border-white/[0.14] sm:ml-auto sm:max-w-xs">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="shrink-0 text-neutral-500" aria-hidden>
                 <circle cx="11" cy="11" r="7" />
                 <path d="m20 20-3-3" />
@@ -256,7 +254,7 @@ export function LeaderboardShell({
                 onClick={() => onPeriodChange(item.id)}
                 className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition sm:text-xs ${
                   period === item.id
-                    ? "bg-white text-black shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+                    ? "border border-amber-400/20 bg-amber-400/[0.08] text-amber-50 shadow-[0_0_18px_rgba(251,191,36,0.06)]"
                     : "border border-white/[0.08] bg-transparent text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
                 }`}
               >

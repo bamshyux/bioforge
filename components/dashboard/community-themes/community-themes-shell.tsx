@@ -346,9 +346,9 @@ export function CommunityThemesShell({
           </div>
 
           <section className="space-y-5">
-            <Reveal>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                <div className="bf-explore-search flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3 transition-colors focus-within:border-white/[0.16]">
+            <Reveal className="w-full">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-stretch">
+                <div className="bf-explore-search flex min-w-0 items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3 transition-colors focus-within:border-white/[0.16]">
                   <svg
                     className="h-5 w-5 shrink-0 text-neutral-500"
                     fill="none"
@@ -365,13 +365,13 @@ export function CommunityThemesShell({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search themes..."
-                    className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
+                    className="min-w-0 w-full flex-1 bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
                   />
                 </div>
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as CommunityThemeSort)}
-                  className={`${inputClassName} shrink-0 sm:w-48`}
+                  className="bf-explore-sort w-full rounded-2xl border border-white/[0.08] bg-[#0a0a0a] px-3 py-3 text-sm text-white outline-none transition-colors hover:border-white/[0.12] focus:border-white/[0.16] sm:w-auto sm:min-w-[9.5rem]"
                   aria-label="Sort themes"
                 >
                   {COMMUNITY_THEME_SORTS.map((item) => (

@@ -39,27 +39,32 @@ export function LeaderboardRankBadge({
 
 export function LeaderboardPodiumCrown({ className = "" }: { className?: string }) {
   return (
-    <svg
-      className={`bf-leaderboard-crown ${className}`}
-      viewBox="0 0 48 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <span
+      className={`bf-leaderboard-crown-wrap relative inline-flex h-7 w-10 items-center justify-center sm:h-8 sm:w-11 ${className}`}
       aria-hidden
     >
-      <path
-        d="M4 26h40l-2-14-9 7-7-12-7 12-9-7-2 14Z"
-        fill="currentColor"
-        fillOpacity="0.15"
-      />
-      <path
-        d="M4 26h40M6 12l8 6 6-10 6 10 8-6 2 14H4l2-14Z"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-      />
-      <circle cx="24" cy="8" r="2" fill="currentColor" />
-      <circle cx="8" cy="16" r="1.5" fill="currentColor" />
-      <circle cx="40" cy="16" r="1.5" fill="currentColor" />
-    </svg>
+      <svg
+        className="bf-leaderboard-crown relative z-[1] h-full w-full text-amber-300/90"
+        viewBox="0 0 40 28"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 23h28L25 11l-5 4-5-9-5 9-5-4-3 12Z"
+          fill="currentColor"
+          fillOpacity="0.16"
+        />
+        <path
+          d="M6 23h28M9 12l5 4 5-9 5 9 5-4 3 11"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <circle cx="20" cy="8" r="1.4" fill="currentColor" />
+        <circle cx="10" cy="14" r="1.1" fill="currentColor" />
+        <circle cx="30" cy="14" r="1.1" fill="currentColor" />
+      </svg>
+    </span>
   );
 }

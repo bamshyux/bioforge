@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { clampCardLayout, mergeSettings, parseCursorEffect } from "@/lib/settings";
+import { clampCardLayout, mergeSettings, parseCursorEffect, parseUsernameEffect } from "@/lib/settings";
 import { clampLinksIconSize } from "@/lib/links";
 import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 import { formatSchemaError } from "@/lib/db/schema";
@@ -18,7 +18,6 @@ import type {
   ParticleEffect,
   ProfileLayout,
   ProfileSettings,
-  UsernameEffect,
 } from "@/lib/types/settings";
 import { revalidatePath } from "next/cache";
 
@@ -220,7 +219,7 @@ function parseSectionUpdates(
       return {
         cursor_effect: parseCursorEffect(formData.get("cursor_effect"), existing.cursor_effect),
         typing_bio: parseBool(formData.get("typing_bio")),
-        username_effect: String(formData.get("username_effect") ?? existing.username_effect) as UsernameEffect,
+        username_effect: parseUsernameEffect(formData.get("username_effect"), existing.username_effect),
         hover_animations: parseBool(formData.get("hover_animations")),
         page_entrance: parseBool(formData.get("page_entrance")),
         enter_gate_title: String(formData.get("enter_gate_title") ?? existing.enter_gate_title).trim().slice(0, 80),

@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { resolveBioStyle } from "@/lib/bio-style";
 import { BRAND } from "@/lib/design/tokens";
 import type { CursorEffect, ProfileSettings } from "@/lib/types/settings";
+import { CUSTOM_CURSOR_MAX_PX } from "@/lib/profile/custom-cursor";
 
 type Particle = {
   x: number;
@@ -473,10 +474,10 @@ export function CursorEffectCanvas({
 
 export function CustomProfileCursor({
   imageUrl,
-  size = 48,
+  maxSize = CUSTOM_CURSOR_MAX_PX,
 }: {
   imageUrl: string | null;
-  size?: number;
+  maxSize?: number;
 }) {
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [visible, setVisible] = useState(false);
@@ -511,8 +512,10 @@ export function CustomProfileCursor({
       style={{
         left: pos.x,
         top: pos.y,
-        width: size,
-        height: size,
+        maxWidth: maxSize,
+        maxHeight: maxSize,
+        width: "auto",
+        height: "auto",
         transform: "translate(-50%, -50%)",
         opacity: visible ? 1 : 0,
       }}

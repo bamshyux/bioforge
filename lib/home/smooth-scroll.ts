@@ -11,7 +11,7 @@ function highlightSection(element: HTMLElement) {
   // Reflow so re-adding the class retriggers the animation
   void element.offsetWidth;
   element.classList.add("bf-home-section-focus");
-  window.setTimeout(() => element.classList.remove("bf-home-section-focus"), 1400);
+  window.setTimeout(() => element.classList.remove("bf-home-section-focus"), 1000);
 }
 
 export function smoothScrollToSection(

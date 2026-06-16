@@ -23,7 +23,9 @@ type LanyardResponse = {
       id: string;
       username: string;
       avatar?: string | null;
+      banner?: string | null;
       public_flags?: number | null;
+      flags?: number | null;
       premium_type?: number | null;
       primary_guild?: {
         tag?: string | null;

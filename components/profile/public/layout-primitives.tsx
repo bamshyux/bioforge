@@ -207,7 +207,7 @@ export function Username({
 }) {
   const effectClass = getUsernameEffectClass(settings.username_effect);
   const glowStyle: CSSProperties =
-    settings.username_effect === "glow"
+    settings.username_effect === "glow" || settings.username_effect === "neon"
       ? { textShadow: `0 0 24px ${settings.accent_color}` }
       : settings.neon_glow
         ? { textShadow: `0 0 20px ${settings.accent_color}80` }

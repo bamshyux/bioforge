@@ -21,6 +21,7 @@ import {
 } from "@/components/dashboard/form-fields";
 import { removeCursorImageAction, saveCursorImageAction } from "@/app/actions/settings";
 import { uploadCursorImageToStorage } from "@/lib/uploads/cursor-client";
+import { CUSTOM_CURSOR_MAX_PX } from "@/lib/profile/custom-cursor";
 import { CURSOR_EFFECT_OPTIONS, USERNAME_EFFECT_OPTIONS } from "@/lib/settings";
 import type { CursorEffect, ProfileSettings, UsernameEffect } from "@/lib/types/settings";
 import type { Profile } from "@/lib/types/profile";
@@ -157,7 +158,7 @@ export function EffectsEditor({
             <p className={labelClassName}>Custom cursor image</p>
             <p className="mt-1 text-xs text-neutral-500">
               Upload an image visitors will see as their cursor on your profile. Works alongside cursor effects.
-              Square PNG or GIF around 32–64px works best.
+              Displayed at about {CUSTOM_CURSOR_MAX_PX}px. Square PNG or GIF works best.
             </p>
 
             {displayCursorUrl ? (
@@ -167,7 +168,8 @@ export function EffectsEditor({
                   <img
                     src={displayCursorUrl}
                     alt="Custom cursor preview"
-                    className="max-h-12 max-w-12 object-contain"
+                    className="max-h-7 max-w-7 object-contain"
+                    style={{ maxWidth: CUSTOM_CURSOR_MAX_PX, maxHeight: CUSTOM_CURSOR_MAX_PX }}
                   />
                 </div>
                 <RemoveMediaButton

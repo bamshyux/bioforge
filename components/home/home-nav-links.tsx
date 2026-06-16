@@ -82,17 +82,11 @@ export function HomeNavLinks({ links }: { links: HomeNavLink[] }) {
             key={link.href}
             href={link.href}
             onClick={(event) => handleClick(event, link.href)}
-            className={`bf-home-nav-link relative transition-colors ${
+            className={`bf-home-nav-link no-underline transition-colors ${
               isActive ? "text-white" : "text-neutral-500 hover:text-white"
             } ${isAnimating ? "bf-home-nav-link--scroll" : ""}`}
           >
             {link.label}
-            <span
-              className={`bf-home-nav-link__indicator absolute -bottom-1 left-0 h-px bg-white transition-all duration-500 ${
-                isActive ? "w-full opacity-80" : "w-0 opacity-0"
-              }`}
-              aria-hidden
-            />
           </a>
         );
       })}
