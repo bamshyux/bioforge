@@ -487,7 +487,10 @@ export function CustomProfileCursor({
 
     const onMove = (event: MouseEvent) => {
       setPos({ x: event.clientX, y: event.clientY });
-      setVisible(true);
+      const target = event.target;
+      const overEditorHandle =
+        target instanceof Element && target.closest(".bf-card-editor-handle") !== null;
+      setVisible(!overEditorHandle);
     };
     const onLeave = () => setVisible(false);
 

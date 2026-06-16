@@ -385,6 +385,46 @@ body {
   cursor: none !important;
 }
 
+.bf-card-editor-handle--ew {
+  cursor: ew-resize;
+}
+
+.bf-card-editor-handle--ns {
+  cursor: ns-resize;
+}
+
+.bf-card-editor-handle--nwse {
+  cursor: nwse-resize;
+}
+
+.bf-card-editor-handle--grab {
+  cursor: grab;
+}
+
+.bf-card-editor-handle--grab:active {
+  cursor: grabbing;
+}
+
+.bf-custom-cursor-active .bf-card-editor-handle--ew {
+  cursor: ew-resize !important;
+}
+
+.bf-custom-cursor-active .bf-card-editor-handle--ns {
+  cursor: ns-resize !important;
+}
+
+.bf-custom-cursor-active .bf-card-editor-handle--nwse {
+  cursor: nwse-resize !important;
+}
+
+.bf-custom-cursor-active .bf-card-editor-handle--grab {
+  cursor: grab !important;
+}
+
+.bf-custom-cursor-active .bf-card-editor-handle--grab:active {
+  cursor: grabbing !important;
+}
+
 .bf-custom-cursor {
   object-fit: contain;
   image-rendering: auto;

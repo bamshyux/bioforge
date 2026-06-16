@@ -32,7 +32,7 @@ export function ProfileEditWidgetsPanel({
   };
 
   return (
-    <div className="pointer-events-auto w-full max-w-md rounded-xl border border-white/10 bg-black/80 p-4 backdrop-blur-md">
+    <div className="pointer-events-auto w-[min(100vw-1.5rem,16rem)] rounded-xl border border-white/10 bg-black/80 p-4 backdrop-blur-md sm:w-64">
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
         Profile widgets
       </p>

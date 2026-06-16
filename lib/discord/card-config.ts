@@ -137,10 +137,11 @@ export function parseDiscordCardConfig(raw: unknown): DiscordCardConfig {
 
 export function resolveDiscordHeaderLayout(
   layout: DiscordHeaderLayout,
-  profileAlignment: ContentAlignment,
+  resolvedTextAlign: Exclude<DiscordTextAlign, "inherit">,
 ): Exclude<DiscordHeaderLayout, "inherit"> {
   if (layout !== "inherit") return layout;
-  switch (profileAlignment) {
+
+  switch (resolvedTextAlign) {
     case "center":
       return "centered";
     case "right":
@@ -175,12 +176,14 @@ export type ResolvedDiscordCardConfig = DiscordCardConfig & {
 export function resolveDiscordCardConfig(settings: ProfileSettings): ResolvedDiscordCardConfig {
   const config = configFromProfileSettings(settings);
   const profileAlignment = settings.content_alignment ?? "left";
+  const text_align = resolveDiscordTextAlign(config.text_align, profileAlignment);
+  const card_align = resolveDiscordCardAlign(config.card_align, profileAlignment);
 
   return {
     ...config,
-    header_layout: resolveDiscordHeaderLayout(config.header_layout, profileAlignment),
-    text_align: resolveDiscordTextAlign(config.text_align, profileAlignment),
-    card_align: resolveDiscordCardAlign(config.card_align, profileAlignment),
+    text_align,
+    card_align,
+    header_layout: resolveDiscordHeaderLayout(config.header_layout, text_align),
   };
 }
 

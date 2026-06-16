@@ -333,10 +333,13 @@ export function ProfileCardLayoutEditor({
             Drag to move · right edge for width · bottom edge for height
           </p>
         )}
-        {editMode && (
-          <ProfileEditWidgetsPanel settings={settings} embeds={embeds} username={username} />
-        )}
       </div>
+
+      {editMode && (
+        <div className="pointer-events-none fixed right-3 top-20 z-40 sm:right-6 sm:top-24">
+          <ProfileEditWidgetsPanel settings={settings} embeds={embeds} username={username} />
+        </div>
+      )}
 
       <div
         ref={containerRef}
@@ -355,7 +358,7 @@ export function ProfileCardLayoutEditor({
               onPointerMove={onDragMove}
               onPointerUp={onDragEnd}
               onPointerCancel={onDragEnd}
-              className="absolute -bottom-10 left-1/2 z-20 flex -translate-x-1/2 cursor-grab touch-none items-center gap-2 rounded-full border border-white/15 bg-black/70 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-300 backdrop-blur-md active:cursor-grabbing"
+              className="bf-card-editor-handle bf-card-editor-handle--grab absolute -bottom-10 left-1/2 z-20 flex -translate-x-1/2 touch-none items-center gap-2 rounded-full border border-white/15 bg-black/70 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-300 backdrop-blur-md"
             >
               <span className="inline-flex gap-0.5" aria-hidden>
                 <span className="h-1 w-1 rounded-full bg-neutral-500" />
@@ -376,8 +379,7 @@ export function ProfileCardLayoutEditor({
                 };
                 startPointerResize(e, (ev) => handleHorizontalResize(ev, start));
               }}
-              className="absolute -right-1 top-1/2 z-20 h-10 w-2 -translate-y-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
-              style={{ cursor: "ew-resize" }}
+              className="bf-card-editor-handle bf-card-editor-handle--ew absolute -right-1 top-1/2 z-20 h-16 w-3 -translate-y-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
             />
             <div
               role="presentation"
@@ -391,8 +393,7 @@ export function ProfileCardLayoutEditor({
                 };
                 startPointerResize(e, (ev) => handleVerticalResize(ev, start));
               }}
-              className="absolute -bottom-1 left-1/2 z-20 h-2 w-10 -translate-x-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
-              style={{ cursor: "ns-resize" }}
+              className="bf-card-editor-handle bf-card-editor-handle--ns absolute -bottom-1 left-1/2 z-20 h-3 w-16 -translate-x-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
             />
             <div
               role="presentation"
@@ -411,8 +412,7 @@ export function ProfileCardLayoutEditor({
                 };
                 startPointerResize(e, (ev) => handleCornerResize(ev, start));
               }}
-              className="absolute -bottom-1 -right-1 z-20 h-4 w-4 touch-none rounded-sm bg-[var(--bf-accent)]/80"
-              style={{ cursor: "nwse-resize" }}
+              className="bf-card-editor-handle bf-card-editor-handle--nwse absolute -bottom-1 -right-1 z-20 h-5 w-5 touch-none rounded-sm bg-[var(--bf-accent)]/80"
             />
           </>
         )}
