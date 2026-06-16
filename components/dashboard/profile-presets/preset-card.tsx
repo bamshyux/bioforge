@@ -10,7 +10,9 @@ import {
   updateProfilePresetSnapshotAction,
 } from "@/app/actions/profile-presets";
 import { PresetProfilePreview } from "@/components/dashboard/profile-presets/preset-profile-preview";
+import { PublishPresetModal } from "@/components/dashboard/profile-presets/publish-preset-modal";
 import { FormFeedback } from "@/components/dashboard/form-fields";
+import type { CommunityThemeListing } from "@/lib/types/community-theme";
 import type { ProfilePreset } from "@/lib/types/profile-preset";
 
 function formatPresetDate(value: string) {
@@ -38,12 +40,17 @@ function downloadJson(filename: string, json: string) {
 export function PresetCard({
   preset,
   isActive,
+  existingListing,
   onApplied,
   onMutated,
   checkUnsavedBeforeApply,
 }: {
   preset: ProfilePreset;
   isActive: boolean;
+  existingListing?: Pick<
+    CommunityThemeListing,
+    "id" | "title" | "description" | "tags" | "category" | "visibility" | "preview_image_url"
+  > | null;
   onApplied: (presetId: string) => void;
   onMutated: () => void;
   checkUnsavedBeforeApply: () => boolean;
@@ -51,7 +58,10 @@ export function PresetCard({
   const [feedback, setFeedback] = useState<{ error?: string; success?: string }>({});
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(preset.name);
+  const [shareOpen, setShareOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const isShared = existingListing && existingListing.visibility !== "private";
 
   function runAction(action: () => Promise<{ error?: string; success?: string }>) {
     startTransition(async () => {
@@ -81,6 +91,13 @@ export function PresetCard({
               title="This preset was last applied to your live profile"
             >
               Applied
+            </span>
+          ) : isShared ? (
+            <span
+              className="shrink-0 rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300"
+              title="Shared in Community Themes"
+            >
+              Shared
             </span>
           ) : null}
         </div>
@@ -149,15 +166,32 @@ export function PresetCard({
           <button
             type="button"
             disabled={isPending}
+            onClick={() => setShareOpen(true)}
+            className="col-span-2 rounded-lg border border-violet-500/20 px-3 py-2 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/10 disabled:opacity-50"
+          >
+            {existingListing ? "Manage sharing" : "Share to Community"}
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
             onClick={() => {
               if (!window.confirm(`Delete "${preset.name}"? This cannot be undone.`)) return;
               runAction(() => deleteProfilePresetAction(preset.id));
             }}
-            className="rounded-lg border border-red-500/20 px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            className="col-span-2 rounded-lg border border-red-500/20 px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
           >
             Delete
           </button>
         </div>
+
+        {shareOpen ? (
+          <PublishPresetModal
+            preset={preset}
+            existingListing={existingListing}
+            onClose={() => setShareOpen(false)}
+            onPublished={onMutated}
+          />
+        ) : null}
 
         {renameOpen ? (
           <form

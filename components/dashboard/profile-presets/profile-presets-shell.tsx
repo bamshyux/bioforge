@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { saveCurrentProfilePresetAction } from "@/app/actions/profile-presets";
@@ -11,15 +12,24 @@ import {
   PageHeader,
 } from "@/components/dashboard/form-fields";
 import { useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
+import type { CommunityThemeListing } from "@/lib/types/community-theme";
 import type { ProfilePreset } from "@/lib/types/profile-preset";
 import { MAX_PROFILE_PRESETS } from "@/lib/types/profile-preset";
 
 export function ProfilePresetsShell({
   presets: initialPresets,
   activePresetId,
+  presetListings = {},
 }: {
   presets: ProfilePreset[];
   activePresetId: string | null;
+  presetListings?: Record<
+    string,
+    Pick<
+      CommunityThemeListing,
+      "id" | "title" | "description" | "tags" | "category" | "visibility" | "preview_image_url"
+    >
+  >;
 }) {
   const router = useRouter();
   const unsaved = useUnsavedChangesOptional();
@@ -77,29 +87,46 @@ export function ProfilePresetsShell({
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Profile Presets"
+        title="My Presets"
         description="Save complete profile styles — layout, colors, links, widgets, music, and more — then switch between them instantly."
       />
 
-      <div className={`${cardClassName} flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between`}>
-        <div>
-          <h2 className="text-base font-semibold text-white">Save current profile</h2>
-          <p className="mt-1 max-w-xl text-sm text-neutral-500">
-            Capture everything that affects how your profile looks right now. Presets are separate
-            from Custom Themes, which only store CSS.
-          </p>
-          <p className="mt-2 text-xs text-neutral-600">
-            {initialPresets.length}/{MAX_PROFILE_PRESETS} presets saved
-          </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className={`${cardClassName} flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between`}>
+          <div>
+            <h2 className="text-base font-semibold text-white">Save current profile</h2>
+            <p className="mt-1 max-w-xl text-sm text-neutral-500">
+              Capture everything that affects how your profile looks right now. Presets are separate
+              from Custom Themes, which only store CSS.
+            </p>
+            <p className="mt-2 text-xs text-neutral-600">
+              {initialPresets.length}/{MAX_PROFILE_PRESETS} presets saved
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isPending || initialPresets.length >= MAX_PROFILE_PRESETS}
+            onClick={handleSaveCurrentProfile}
+            className={buttonPrimaryClassName}
+          >
+            {isPending ? "Saving..." : "Save Current Profile"}
+          </button>
         </div>
-        <button
-          type="button"
-          disabled={isPending || initialPresets.length >= MAX_PROFILE_PRESETS}
-          onClick={handleSaveCurrentProfile}
-          className={buttonPrimaryClassName}
-        >
-          {isPending ? "Saving..." : "Save Current Profile"}
-        </button>
+
+        <div className={`${cardClassName} flex flex-col justify-between gap-3`}>
+          <div>
+            <h2 className="text-base font-semibold text-white">Community presets</h2>
+            <p className="mt-1 text-sm text-neutral-500">
+              Browse full profile looks shared by other creators, or share your own presets publicly.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/explore/themes?type=profile_preset"
+            className="inline-flex w-fit rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-neutral-300 transition hover:border-white/[0.14] hover:text-white"
+          >
+            Browse community presets →
+          </Link>
+        </div>
       </div>
 
       <FormFeedback error={feedback.error} success={feedback.success} />
@@ -118,6 +145,7 @@ export function ProfilePresetsShell({
               key={preset.id}
               preset={preset}
               isActive={activeId === preset.id}
+              existingListing={presetListings[preset.id] ?? null}
               onApplied={handleApplied}
               onMutated={refresh}
               checkUnsavedBeforeApply={checkUnsavedBeforeApply}

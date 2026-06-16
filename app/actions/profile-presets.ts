@@ -16,6 +16,7 @@ import { MAX_PROFILE_PRESETS } from "@/lib/types/profile-preset";
 import { createClient } from "@/lib/supabase/server";
 
 const REVALIDATE_PATHS = [
+  "/dashboard/presets",
   "/dashboard/profile-presets",
   "/dashboard/customize",
   "/dashboard/background",

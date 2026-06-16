@@ -1,6 +1,8 @@
 "use server";
 
 import { applyCustomThemeAction } from "@/app/actions/custom-themes";
+import { applyProfilePresetSnapshot } from "@/lib/profile-presets/snapshot";
+import { setActivePresetId } from "@/lib/data/profile-presets";
 import { revalidateUserProfile, getAuthenticatedUserId } from "@/lib/actions/auth";
 import { getCommunityThemeListingById } from "@/lib/data/community-themes";
 import { rejectIfModerated } from "@/lib/moderation/validate";
@@ -14,6 +16,9 @@ import type {
   CommunityThemeVisibility,
 } from "@/lib/types/community-theme";
 import { MAX_CUSTOM_THEMES } from "@/lib/types/custom-theme";
+import { MAX_PROFILE_PRESETS } from "@/lib/types/profile-preset";
+import { resolvePresetThumbnailUrl } from "@/lib/profile-presets/snapshot";
+import { parsePresetData } from "@/lib/profile-presets/snapshot";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -21,6 +26,8 @@ const REVALIDATE_PATHS = [
   "/dashboard/explore",
   "/dashboard/explore/themes",
   "/dashboard/custom-theme",
+  "/dashboard/profile-presets",
+  "/dashboard/presets",
 ];
 
 function parseTags(raw: string): string[] {
@@ -80,7 +87,9 @@ export async function publishCommunityThemeAction(input: {
   if (!cssCheck.ok) return { error: cssCheck.error };
 
   const payload = {
+    listing_type: "theme" as const,
     theme_id: input.themeId,
+    profile_preset_id: null,
     author_id: userId,
     title,
     description,
@@ -130,6 +139,104 @@ export async function publishCommunityThemeAction(input: {
   };
 }
 
+export async function publishCommunityProfilePresetAction(input: {
+  presetId: string;
+  title: string;
+  description: string;
+  tags: string;
+  category: CommunityThemeCategory;
+  visibility: CommunityThemeVisibility;
+  previewImageUrl?: string;
+  previewStyle?: string;
+}): Promise<CommunityThemeFormState> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return { error: "You must be logged in." };
+
+  const guardError = await guardSensitiveAction({ scope: "theme_publish", userId });
+  if (guardError) return { error: guardError };
+
+  const title = input.title.trim().slice(0, 80);
+  const description = input.description.trim().slice(0, 500);
+  if (!title) return { error: "Preset name is required." };
+
+  const titleError = await rejectIfModerated(title, "theme_name", userId);
+  if (titleError) return { error: titleError };
+
+  const descError = await rejectIfModerated(description, "bio", userId);
+  if (descError) return { error: descError };
+
+  const supabase = await createClient();
+  const { data: preset } = await supabase
+    .from("profile_presets")
+    .select("id, preset_data, thumbnail_url")
+    .eq("id", input.presetId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!preset) return { error: "Preset not found." };
+
+  const presetData = parsePresetData(preset.preset_data);
+  if (!presetData) return { error: "Invalid preset data." };
+
+  const visibility = input.visibility === "open_source" ? "public" : input.visibility;
+  const thumbnail =
+    input.previewImageUrl?.trim() ||
+    preset.thumbnail_url ||
+    resolvePresetThumbnailUrl(presetData);
+
+  const payload = {
+    listing_type: "profile_preset" as const,
+    theme_id: null,
+    profile_preset_id: input.presetId,
+    author_id: userId,
+    title,
+    description,
+    tags: parseTags(input.tags),
+    category: input.category,
+    visibility,
+    preview_image_url: thumbnail || null,
+    preview_style:
+      input.previewStyle?.trim() ||
+      "linear-gradient(135deg, #1a1a1a 0%, #333 50%, #111 100%)",
+    published_at: publishedAtForVisibility(visibility),
+  };
+
+  const { data: existing } = await supabase
+    .from("community_theme_listings")
+    .select("id")
+    .eq("profile_preset_id", input.presetId)
+    .maybeSingle();
+
+  let listingId: string;
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from("community_theme_listings")
+      .update(payload)
+      .eq("id", existing.id)
+      .eq("author_id", userId);
+    if (error) return { error: error.message };
+    listingId = existing.id;
+  } else {
+    const { data, error } = await supabase
+      .from("community_theme_listings")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) return { error: error.message };
+    listingId = data.id;
+  }
+
+  await revalidateCommunity(userId);
+  return {
+    success:
+      visibility === "private"
+        ? "Preset saved as private."
+        : "Preset published to Community Themes.",
+    listingId,
+  };
+}
+
 export async function unpublishCommunityThemeAction(listingId: string): Promise<CommunityThemeFormState> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in." };
@@ -175,6 +282,12 @@ export async function installCommunityThemeAction(
   if (!listing || (listing.visibility !== "public" && listing.visibility !== "open_source")) {
     return { error: "Theme is not available to install." };
   }
+
+  if (listing.listing_type === "profile_preset") {
+    return installCommunityProfilePresetListing(listing, userId, applyAfter);
+  }
+
+  if (!listing.theme_id) return { error: "Theme source not found." };
 
   if (listing.author_id === userId) {
     const applyResult = await applyCustomThemeAction(listing.theme_id);
@@ -262,9 +375,118 @@ export async function installCommunityThemeAction(
   };
 }
 
+async function installCommunityProfilePresetListing(
+  listing: Awaited<ReturnType<typeof getCommunityThemeListingById>> & {
+    profile_preset_id: string | null;
+  },
+  userId: string,
+  applyAfter: boolean,
+): Promise<CommunityThemeFormState> {
+  if (!listing?.profile_preset_id) return { error: "Preset source not found." };
+
+  if (listing.author_id === userId) {
+    const { applyProfilePresetAction } = await import("@/app/actions/profile-presets");
+    const result = await applyProfilePresetAction(listing.profile_preset_id);
+    return result.error
+      ? { error: result.error }
+      : { success: "Your preset has been applied to your profile." };
+  }
+
+  const admin = createAdminClient();
+  const client = admin ?? (await createClient());
+
+  const { data: existingInstall } = await client
+    .from("community_theme_installs")
+    .select("installed_preset_id")
+    .eq("listing_id", listing.id)
+    .eq("installer_id", userId)
+    .maybeSingle();
+
+  if (existingInstall?.installed_preset_id) {
+    if (applyAfter) {
+      const result = await applyProfilePresetSnapshot(userId, (
+        await client
+          .from("profile_presets")
+          .select("preset_data")
+          .eq("id", existingInstall.installed_preset_id)
+          .maybeSingle()
+      ).data?.preset_data);
+      if (result.error) return { error: result.error };
+      await setActivePresetId(userId, existingInstall.installed_preset_id);
+    }
+    return {
+      success: "Preset already in your library.",
+      presetId: existingInstall.installed_preset_id,
+    };
+  }
+
+  const { data: sourcePreset } = await client
+    .from("profile_presets")
+    .select("preset_data, thumbnail_url")
+    .eq("id", listing.profile_preset_id)
+    .maybeSingle();
+
+  if (!sourcePreset?.preset_data) return { error: "Preset source not found." };
+
+  const { count } = await client
+    .from("profile_presets")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if ((count ?? 0) >= MAX_PROFILE_PRESETS) {
+    return { error: `Maximum ${MAX_PROFILE_PRESETS} presets allowed.` };
+  }
+
+  const copyName = `${listing.title}`.slice(0, 60);
+  const nameError = await rejectIfModerated(copyName, "theme_name", userId);
+  if (nameError) return { error: nameError };
+
+  const { data: installedPreset, error: insertError } = await client
+    .from("profile_presets")
+    .insert({
+      user_id: userId,
+      name: copyName,
+      thumbnail_url: listing.preview_image_url ?? sourcePreset.thumbnail_url ?? null,
+      preset_data: sourcePreset.preset_data,
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !installedPreset) {
+    return { error: insertError?.message ?? "Failed to copy preset." };
+  }
+
+  const { error: installError } = await client.from("community_theme_installs").insert({
+    listing_id: listing.id,
+    installer_id: userId,
+    installed_preset_id: installedPreset.id,
+  });
+
+  if (installError) return { error: installError.message };
+
+  if (applyAfter) {
+    const applyResult = await applyProfilePresetSnapshot(userId, sourcePreset.preset_data);
+    if (applyResult.error) {
+      return {
+        success: "Preset saved to your library, but could not apply automatically.",
+        presetId: installedPreset.id,
+      };
+    }
+    await setActivePresetId(userId, installedPreset.id);
+  }
+
+  await revalidateCommunity(userId);
+  return {
+    success: applyAfter
+      ? "Preset installed and applied to your profile."
+      : "Preset installed to your library.",
+    presetId: installedPreset.id,
+  };
+}
+
 export async function cloneCommunityThemeAction(listingId: string): Promise<CommunityThemeFormState> {
   const listing = await getCommunityThemeListingById(listingId);
-  if (!listing || listing.visibility !== "open_source") {
+  if (!listing || listing.visibility !== "open_source" || listing.listing_type !== "theme") {
     return { error: "Only open source themes can be cloned." };
   }
   return installCommunityThemeAction(listingId, false);
@@ -331,13 +553,31 @@ export async function reportCommunityThemeAction(input: {
 
 export async function getCommunityThemePreviewAction(listingId: string): Promise<{
   css: string | null;
+  presetData?: unknown;
+  presetName?: string;
+  listingType?: "theme" | "profile_preset";
   error?: string;
 }> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { css: null, error: "Unauthorized" };
 
+  const listing = await getCommunityThemeListingById(listingId, userId);
+  if (!listing) return { css: null, error: "Preview unavailable." };
+
+  if (listing.listing_type === "profile_preset") {
+    const { getPresetPreviewData } = await import("@/lib/data/community-themes");
+    const preset = await getPresetPreviewData(listingId, userId);
+    if (!preset) return { css: null, error: "Preview unavailable." };
+    return {
+      css: null,
+      presetData: preset.preset_data,
+      presetName: preset.name,
+      listingType: "profile_preset",
+    };
+  }
+
   const { getThemePreviewCss } = await import("@/lib/data/community-themes");
   const css = await getThemePreviewCss(listingId, userId);
   if (!css) return { css: null, error: "Preview unavailable." };
-  return { css };
+  return { css, listingType: "theme" };
 }

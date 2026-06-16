@@ -12,6 +12,7 @@ import {
   IconProfile,
   IconExplore,
   IconSettings,
+  IconPresets,
 } from "@/components/icons/dashboard-icons";
 
 export type DashboardNavItem = {
@@ -119,12 +120,28 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         keywords: ["css", "custom", "code"],
         Icon: IconEffects,
       },
+    ],
+  },
+  {
+    id: "presets",
+    label: "Presets",
+    href: "/dashboard/presets",
+    description: "Save and share complete profile looks",
+    Icon: IconPresets,
+    items: [
       {
         href: "/dashboard/profile-presets",
-        label: "Profile Presets",
+        label: "My presets",
         description: "Save and switch full profile styles",
         keywords: ["preset", "saved", "profile", "switch", "scene"],
-        Icon: IconLayout,
+        Icon: IconPresets,
+      },
+      {
+        href: "/dashboard/explore/themes?type=profile_preset",
+        label: "Community presets",
+        description: "Browse presets shared by others",
+        keywords: ["community", "preset", "share", "install"],
+        Icon: IconExplore,
       },
     ],
   },
@@ -375,7 +392,10 @@ export function getSectionForPath(pathname: string): DashboardSection | undefine
 export function isNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/dashboard/appearance") {
-    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme", "/dashboard/profile-presets"].some((p) => pathname.startsWith(p));
+    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme"].some((p) => pathname.startsWith(p));
+  }
+  if (href === "/dashboard/presets") {
+    return ["/dashboard/presets", "/dashboard/profile-presets"].some((p) => pathname.startsWith(p));
   }
   if (href === "/dashboard/content") {
     return ["/dashboard/content", "/dashboard/links", "/dashboard/embeds", "/dashboard/widgets", "/dashboard/music"].some((p) => pathname.startsWith(p));

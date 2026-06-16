@@ -1,3 +1,5 @@
+export type CommunityThemeListingType = "theme" | "profile_preset";
+
 export type CommunityThemeVisibility = "private" | "public" | "open_source";
 
 export type CommunityThemeCategory =
@@ -27,7 +29,9 @@ export type CommunityThemeReportReason =
 
 export type CommunityThemeListing = {
   id: string;
-  theme_id: string;
+  listing_type: CommunityThemeListingType;
+  theme_id: string | null;
+  profile_preset_id: string | null;
   author_id: string;
   title: string;
   description: string;
@@ -58,13 +62,24 @@ export type CommunityThemesResult = {
   query: string;
   category: string;
   sort: CommunityThemeSort;
+  listingType: CommunityThemeListingType | "all";
 };
+
+export const COMMUNITY_LISTING_TYPE_FILTERS: {
+  id: CommunityThemeListingType | "all";
+  label: string;
+}[] = [
+  { id: "all", label: "All" },
+  { id: "theme", label: "CSS Themes" },
+  { id: "profile_preset", label: "Profile Presets" },
+];
 
 export type CommunityThemeFormState = {
   error?: string;
   success?: string;
   listingId?: string;
   installedThemeId?: string;
+  presetId?: string;
 };
 
 export const COMMUNITY_THEME_CATEGORIES: { id: CommunityThemeCategory | "all"; label: string }[] = [

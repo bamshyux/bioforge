@@ -137,6 +137,16 @@ export function IconSettings(p: IconProps) {
   );
 }
 
+export function IconPresets(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <rect x="3" y="5" width="18" height="5" rx="1.5" />
+      <rect x="3" y="12" width="18" height="5" rx="1.5" />
+      <path d="M8 7.5h8M8 14.5h5" />
+    </Icon>
+  );
+}
+
 export function IconExternal(p: IconProps) {
   return (
     <Icon {...p}>

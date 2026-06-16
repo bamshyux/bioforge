@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   CommunityThemeCategory,
   CommunityThemeListing,
+  CommunityThemeListingType,
   CommunityThemeSort,
   CommunityThemesResult,
   CommunityThemeVisibility,
@@ -19,7 +20,9 @@ function sanitizeSearchQuery(raw: string): string {
 
 type ListingRow = {
   id: string;
-  theme_id: string;
+  listing_type: CommunityThemeListingType | null;
+  theme_id: string | null;
+  profile_preset_id: string | null;
   author_id: string;
   title: string;
   description: string;
@@ -56,7 +59,9 @@ function mapListing(row: ListingRow, extras?: Partial<CommunityThemeListing>): C
 
   return {
     id: row.id,
+    listing_type: row.listing_type ?? (row.profile_preset_id ? "profile_preset" : "theme"),
     theme_id: row.theme_id,
+    profile_preset_id: row.profile_preset_id,
     author_id: row.author_id,
     title: row.title,
     description: row.description ?? "",
@@ -98,6 +103,7 @@ export async function searchCommunityThemes(options: {
   query?: string;
   category?: string;
   sort?: CommunityThemeSort;
+  listingType?: CommunityThemeListingType | "all";
   page?: number;
   pageSize?: number;
   userId?: string;
@@ -109,6 +115,7 @@ export async function searchCommunityThemes(options: {
   const query = sanitizeSearchQuery(options.query ?? "");
   const category = options.category ?? "all";
   const sort = options.sort ?? "trending";
+  const listingType = options.listingType ?? "all";
   const page = Math.max(1, options.page ?? 1);
   const pageSize = Math.min(48, Math.max(1, options.pageSize ?? COMMUNITY_THEMES_PAGE_SIZE));
   const from = (page - 1) * pageSize;
@@ -119,7 +126,7 @@ export async function searchCommunityThemes(options: {
     .from("community_theme_listings")
     .select(
       `
-        id, theme_id, author_id, title, description, tags, category, visibility,
+        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
         preview_image_url, preview_style, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
@@ -145,6 +152,10 @@ export async function searchCommunityThemes(options: {
     request = request.eq("category", category);
   }
 
+  if (listingType !== "all") {
+    request = request.eq("listing_type", listingType);
+  }
+
   if (query) {
     const term = `%${query}%`;
     request = request.or(`title.ilike.${term},description.ilike.${term}`);
@@ -162,6 +173,7 @@ export async function searchCommunityThemes(options: {
       query,
       category,
       sort,
+      listingType,
     };
   }
 
@@ -206,6 +218,7 @@ export async function searchCommunityThemes(options: {
     query,
     category,
     sort,
+    listingType,
   };
 }
 
@@ -238,7 +251,7 @@ export async function getMyPublishedThemes(userId: string): Promise<CommunityThe
     .from("community_theme_listings")
     .select(
       `
-        id, theme_id, author_id, title, description, tags, category, visibility,
+        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
         preview_image_url, preview_style, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
@@ -261,7 +274,7 @@ export async function getCommunityThemeListingById(
     .from("community_theme_listings")
     .select(
       `
-        id, theme_id, author_id, title, description, tags, category, visibility,
+        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
         preview_image_url, preview_style, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
@@ -306,16 +319,49 @@ export async function getListingForTheme(themeId: string, userId: string) {
   const supabase = await db();
   const { data } = await supabase
     .from("community_theme_listings")
-    .select("id, visibility, title")
+    .select("id, visibility, title, listing_type")
     .eq("theme_id", themeId)
     .eq("author_id", userId)
     .maybeSingle();
   return data;
 }
 
+export async function getListingForPreset(presetId: string, userId: string) {
+  const supabase = await db();
+  const { data } = await supabase
+    .from("community_theme_listings")
+    .select(
+      "id, visibility, title, description, tags, category, preview_image_url, listing_type",
+    )
+    .eq("profile_preset_id", presetId)
+    .eq("author_id", userId)
+    .maybeSingle();
+  return data;
+}
+
+export async function getPresetPreviewData(
+  listingId: string,
+  userId?: string,
+): Promise<{ name: string; preset_data: unknown } | null> {
+  const listing = await getCommunityThemeListingById(listingId, userId);
+  if (!listing || listing.listing_type !== "profile_preset" || !listing.profile_preset_id) {
+    return null;
+  }
+
+  const supabase = createAdminClient() ?? (await createClient());
+  const { data } = await supabase
+    .from("profile_presets")
+    .select("name, preset_data")
+    .eq("id", listing.profile_preset_id)
+    .maybeSingle();
+
+  if (!data?.preset_data) return null;
+  return { name: String(data.name), preset_data: data.preset_data };
+}
+
 export async function getThemePreviewCss(listingId: string, userId?: string): Promise<string | null> {
   const listing = await getCommunityThemeListingById(listingId, userId);
-  if (!listing) return null;
+  if (!listing || listing.listing_type !== "theme" || !listing.theme_id) return null;
 
   const supabase = createAdminClient() ?? (await createClient());
   const { data: theme } = await supabase

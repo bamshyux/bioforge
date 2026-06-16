@@ -17,11 +17,15 @@ export async function GET(request: Request) {
   const category = searchParams.get("category") ?? "all";
   const sort = (searchParams.get("sort") ?? "trending") as CommunityThemeSort;
   const page = Number(searchParams.get("page") ?? "1");
+  const typeParam = searchParams.get("type");
+  const listingType =
+    typeParam === "profile_preset" || typeParam === "theme" ? typeParam : "all";
 
   const result = await searchCommunityThemes({
     query,
     category,
     sort,
+    listingType,
     page: Number.isFinite(page) ? page : 1,
     pageSize: COMMUNITY_THEMES_PAGE_SIZE,
     userId,

@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Reveal } from "@/components/home/reveal";
+import { PresetProfilePreview } from "@/components/dashboard/profile-presets/preset-profile-preview";
 import type { CommunityThemeListing } from "@/lib/types/community-theme";
 import { COMMUNITY_THEME_CATEGORIES } from "@/lib/types/community-theme";
+import type { ProfilePresetData } from "@/lib/types/profile-preset";
 
 function categoryLabel(category: string): string {
   return COMMUNITY_THEME_CATEGORIES.find((item) => item.id === category)?.label ?? category;
@@ -16,10 +18,27 @@ function formatDate(value: string | null): string {
 
 export function CommunityThemePreviewCard({
   theme,
+  presetData,
+  presetName,
 }: {
   theme: CommunityThemeListing;
   previewCss?: string | null;
+  presetData?: ProfilePresetData | null;
+  presetName?: string;
 }) {
+  if (theme.listing_type === "profile_preset" && presetData) {
+    return <PresetProfilePreview data={presetData} name={presetName ?? theme.title} />;
+  }
+
+  if (theme.listing_type === "profile_preset" && theme.preview_image_url) {
+    return (
+      <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={theme.preview_image_url} alt="" className="aspect-[4/3] w-full object-cover" />
+      </div>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a]">
       <div
@@ -62,6 +81,13 @@ export function CommunityThemeCard({
   onClone?: () => void;
   busy?: boolean;
 }) {
+  const isPreset = theme.listing_type === "profile_preset";
+  const installLabel = theme.installed_by_me
+    ? "Re-apply"
+    : isPreset
+      ? "Install Preset"
+      : "Install Theme";
+
   return (
     <Reveal delay={index * 50}>
       <article
@@ -75,6 +101,11 @@ export function CommunityThemeCard({
         <div className="flex flex-1 flex-col p-4">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-white">{theme.title}</h3>
+            {isPreset ? (
+              <span className="rounded-full border border-violet-400/20 bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-200">
+                Profile Preset
+              </span>
+            ) : null}
             {theme.visibility === "open_source" ? (
               <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-medium text-emerald-200">
                 Open Source
@@ -127,7 +158,7 @@ export function CommunityThemeCard({
               onClick={onInstall}
               className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-neutral-200 disabled:opacity-50"
             >
-              {theme.installed_by_me ? "Re-apply" : "Install Theme"}
+              {installLabel}
             </button>
             <button
               type="button"
