@@ -12,7 +12,7 @@ import type {
   ProfilePresetDiscordWidget,
 } from "@/lib/types/profile-preset";
 import type { ProfileSettings } from "@/lib/types/settings";
-import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
+import { omitUnsupportedSettingsColumns, formatSchemaError } from "@/lib/db/validate-schema";
 import { createClient } from "@/lib/supabase/server";
 
 const SETTINGS_EXCLUDE = new Set([
@@ -26,6 +26,10 @@ const SETTINGS_EXCLUDE = new Set([
   "discord_premium_type",
   "custom_theme_id",
   "active_preset_id",
+  // Merged from profile_widgets at read time — not profile_settings columns
+  "discord_card_config",
+  "discord_card_style",
+  "discord_show_lanyard_hint",
 ]);
 
 function extractPresetSettings(settings: ProfileSettings): Record<string, unknown> {
@@ -130,7 +134,11 @@ export async function captureProfilePresetSnapshot(userId: string): Promise<Prof
 }
 
 export function resolvePresetThumbnailUrl(data: ProfilePresetData): string | null {
-  return data.profile.avatar_url ?? data.profile.banner_url ?? null;
+  const bgImage = data.settings.background_image_url;
+  if (typeof bgImage === "string" && bgImage.trim()) return bgImage;
+  if (data.profile.banner_url) return data.profile.banner_url;
+  if (data.profile.avatar_url) return data.profile.avatar_url;
+  return null;
 }
 
 function parsePresetData(raw: unknown): ProfilePresetData | null {
@@ -219,11 +227,14 @@ export async function applyProfilePresetSnapshot(
 
   if (data.discordWidget) {
     settingsPatch.show_discord_status = data.discordWidget.is_enabled;
-    settingsPatch.discord_card_config = data.discordWidget.config;
   }
 
+  delete settingsPatch.discord_card_config;
+  delete settingsPatch.discord_card_style;
+  delete settingsPatch.discord_show_lanyard_hint;
+  delete settingsPatch.active_preset_id;
+
   const safeSettingsPatch = await omitUnsupportedSettingsColumns(settingsPatch);
-  delete safeSettingsPatch.active_preset_id;
 
   const { error: profileError } = await supabase
     .from("profiles")
@@ -242,7 +253,7 @@ export async function applyProfilePresetSnapshot(
     .update(safeSettingsPatch)
     .eq("profile_id", userId);
 
-  if (settingsError) return { error: settingsError.message };
+  if (settingsError) return { error: formatSchemaError(settingsError.message) };
 
   await supabase.from("links").delete().eq("profile_id", userId);
 

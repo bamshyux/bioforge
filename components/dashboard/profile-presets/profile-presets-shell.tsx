@@ -47,7 +47,8 @@ export function ProfilePresetsShell({
     router.refresh();
   }
 
-  function handleApplied() {
+  function handleApplied(presetId: string) {
+    setActiveId(presetId);
     unsaved?.markClean();
     refresh();
   }

@@ -9,7 +9,7 @@ import {
   renameProfilePresetAction,
   updateProfilePresetSnapshotAction,
 } from "@/app/actions/profile-presets";
-import { PresetThumbnail } from "@/components/dashboard/profile-presets/preset-thumbnail";
+import { PresetProfilePreview } from "@/components/dashboard/profile-presets/preset-profile-preview";
 import { FormFeedback } from "@/components/dashboard/form-fields";
 import type { ProfilePreset } from "@/lib/types/profile-preset";
 
@@ -44,7 +44,7 @@ export function PresetCard({
 }: {
   preset: ProfilePreset;
   isActive: boolean;
-  onApplied: () => void;
+  onApplied: (presetId: string) => void;
   onMutated: () => void;
   checkUnsavedBeforeApply: () => boolean;
 }) {
@@ -59,17 +59,13 @@ export function PresetCard({
       const result = await action();
       setFeedback(result);
       if (result.success) onMutated();
-      if (result.success?.includes("applied")) onApplied();
+      if (result.success?.toLowerCase().includes("applied")) onApplied(preset.id);
     });
   }
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111]">
-      <PresetThumbnail
-        data={preset.preset_data}
-        thumbnailUrl={preset.thumbnail_url}
-        name={preset.name}
-      />
+      <PresetProfilePreview data={preset.preset_data} name={preset.name} />
 
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
