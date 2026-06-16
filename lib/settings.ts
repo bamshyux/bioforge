@@ -181,17 +181,57 @@ export const LAYOUT_OPTIONS: {
   { value: "custom", label: "Custom Theme", description: "Build your own layout with scoped CSS", preview: "custom" },
 ];
 
-export const FONT_OPTIONS = [
-  { value: "inter", label: "Inter", css: "'Inter', sans-serif" },
+export type FontOption = {
+  value: string;
+  label: string;
+  css: string;
+  /** Google Fonts CSS2 family param; omit for system/local fonts */
+  google?: string;
+};
+
+export const FONT_OPTIONS: FontOption[] = [
+  { value: "inter", label: "Inter", css: "'Inter', sans-serif", google: "Inter:wght@400;500;600;700" },
   { value: "geist", label: "Geist", css: "var(--font-geist-sans), sans-serif" },
   { value: "helvetica", label: "Helvetica", css: "Helvetica, 'Helvetica Neue', Arial, sans-serif" },
-  { value: "poppins", label: "Poppins", css: "'Poppins', sans-serif" },
-  { value: "montserrat", label: "Montserrat", css: "'Montserrat', sans-serif" },
-  { value: "roboto", label: "Roboto", css: "'Roboto', sans-serif" },
-  { value: "orbitron", label: "Orbitron", css: "'Orbitron', sans-serif" },
-  { value: "press-start", label: "Press Start 2P", css: "'Press Start 2P', cursive" },
-  { value: "bebas", label: "Bebas Neue", css: "'Bebas Neue', sans-serif" },
-] as const;
+  { value: "poppins", label: "Poppins", css: "'Poppins', sans-serif", google: "Poppins:wght@400;500;600;700" },
+  { value: "montserrat", label: "Montserrat", css: "'Montserrat', sans-serif", google: "Montserrat:wght@400;500;600;700" },
+  { value: "roboto", label: "Roboto", css: "'Roboto', sans-serif", google: "Roboto:wght@400;500;700" },
+  { value: "open-sans", label: "Open Sans", css: "'Open Sans', sans-serif", google: "Open+Sans:wght@400;500;600;700" },
+  { value: "lato", label: "Lato", css: "'Lato', sans-serif", google: "Lato:wght@400;700;900" },
+  { value: "nunito", label: "Nunito", css: "'Nunito', sans-serif", google: "Nunito:wght@400;600;700" },
+  { value: "raleway", label: "Raleway", css: "'Raleway', sans-serif", google: "Raleway:wght@400;500;600;700" },
+  { value: "ubuntu", label: "Ubuntu", css: "'Ubuntu', sans-serif", google: "Ubuntu:wght@400;500;700" },
+  { value: "oswald", label: "Oswald", css: "'Oswald', sans-serif", google: "Oswald:wght@400;500;600;700" },
+  { value: "dm-sans", label: "DM Sans", css: "'DM Sans', sans-serif", google: "DM+Sans:wght@400;500;700" },
+  { value: "space-grotesk", label: "Space Grotesk", css: "'Space Grotesk', sans-serif", google: "Space+Grotesk:wght@400;500;600;700" },
+  { value: "manrope", label: "Manrope", css: "'Manrope', sans-serif", google: "Manrope:wght@400;500;600;700" },
+  { value: "outfit", label: "Outfit", css: "'Outfit', sans-serif", google: "Outfit:wght@400;500;600;700" },
+  { value: "syne", label: "Syne", css: "'Syne', sans-serif", google: "Syne:wght@400;600;700;800" },
+  { value: "plus-jakarta", label: "Plus Jakarta Sans", css: "'Plus Jakarta Sans', sans-serif", google: "Plus+Jakarta+Sans:wght@400;500;600;700" },
+  { value: "figtree", label: "Figtree", css: "'Figtree', sans-serif", google: "Figtree:wght@400;500;600;700" },
+  { value: "sora", label: "Sora", css: "'Sora', sans-serif", google: "Sora:wght@400;500;600;700" },
+  { value: "lexend", label: "Lexend", css: "'Lexend', sans-serif", google: "Lexend:wght@400;500;600;700" },
+  { value: "rubik", label: "Rubik", css: "'Rubik', sans-serif", google: "Rubik:wght@400;500;600;700" },
+  { value: "work-sans", label: "Work Sans", css: "'Work Sans', sans-serif", google: "Work+Sans:wght@400;500;600;700" },
+  { value: "karla", label: "Karla", css: "'Karla', sans-serif", google: "Karla:wght@400;500;600;700" },
+  { value: "source-sans", label: "Source Sans 3", css: "'Source Sans 3', sans-serif", google: "Source+Sans+3:wght@400;500;600;700" },
+  { value: "playfair", label: "Playfair Display", css: "'Playfair Display', serif", google: "Playfair+Display:wght@400;500;600;700" },
+  { value: "merriweather", label: "Merriweather", css: "'Merriweather', serif", google: "Merriweather:wght@400;700" },
+  { value: "lora", label: "Lora", css: "'Lora', serif", google: "Lora:wght@400;500;600;700" },
+  { value: "crimson-pro", label: "Crimson Pro", css: "'Crimson Pro', serif", google: "Crimson+Pro:wght@400;600;700" },
+  { value: "libre-baskerville", label: "Libre Baskerville", css: "'Libre Baskerville', serif", google: "Libre+Baskerville:wght@400;700" },
+  { value: "orbitron", label: "Orbitron", css: "'Orbitron', sans-serif", google: "Orbitron:wght@400;700" },
+  { value: "bebas", label: "Bebas Neue", css: "'Bebas Neue', sans-serif", google: "Bebas+Neue" },
+  { value: "press-start", label: "Press Start 2P", css: "'Press Start 2P', cursive", google: "Press+Start+2P" },
+  { value: "audiowide", label: "Audiowide", css: "'Audiowide', sans-serif", google: "Audiowide" },
+  { value: "russo-one", label: "Russo One", css: "'Russo One', sans-serif", google: "Russo+One" },
+  { value: "black-ops-one", label: "Black Ops One", css: "'Black Ops One', sans-serif", google: "Black+Ops+One" },
+  { value: "permanent-marker", label: "Permanent Marker", css: "'Permanent Marker', cursive", google: "Permanent+Marker" },
+  { value: "jetbrains-mono", label: "JetBrains Mono", css: "'JetBrains Mono', monospace", google: "JetBrains+Mono:wght@400;500;600;700" },
+  { value: "fira-code", label: "Fira Code", css: "'Fira Code', monospace", google: "Fira+Code:wght@400;500;600;700" },
+  { value: "space-mono", label: "Space Mono", css: "'Space Mono', monospace", google: "Space+Mono:wght@400;700" },
+  { value: "ibm-plex-mono", label: "IBM Plex Mono", css: "'IBM Plex Mono', monospace", google: "IBM+Plex+Mono:wght@400;500;600;700" },
+];
 
 export const PARTICLE_OPTIONS: { value: ParticleEffect; label: string }[] = [
   { value: "snow", label: "Snow" },
@@ -257,16 +297,7 @@ export function getFontCss(fontKey: string) {
 }
 
 export function getGoogleFontsUrl(fontKey: string) {
-  const map: Record<string, string> = {
-    inter: "Inter:wght@400;500;600;700",
-    poppins: "Poppins:wght@400;500;600;700",
-    montserrat: "Montserrat:wght@400;500;600;700",
-    roboto: "Roboto:wght@400;500;700",
-    orbitron: "Orbitron:wght@400;700",
-    "press-start": "Press+Start+2P",
-    bebas: "Bebas+Neue",
-  };
-  const family = map[fontKey];
+  const family = FONT_OPTIONS.find((f) => f.value === fontKey)?.google;
   if (!family) return null;
   return `https://fonts.googleapis.com/css2?family=${family}&display=swap`;
 }

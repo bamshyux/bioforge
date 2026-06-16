@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toggleDiscordStatusAction } from "@/app/actions/discord";
+import { ViewLiveProfileButton } from "@/components/dashboard/view-live-profile-button";
 import { isDiscordConnected } from "@/lib/discord/connection";
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { ProfileSettings } from "@/lib/types/settings";
@@ -90,11 +91,9 @@ export function ProfileEditWidgetsPanel({
         </div>
       </div>
 
-      <p className="mt-3 text-center text-[10px] text-neutral-600">
-        <Link href={`/${username}`} className="hover:text-neutral-400">
-          View live profile
-        </Link>
-        {" · "}
+      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] text-neutral-600">
+        <ViewLiveProfileButton username={username} variant="inline" />
+        <span aria-hidden>·</span>
         <Link href="/dashboard/widgets" className="hover:text-neutral-400">
           Widget settings
         </Link>

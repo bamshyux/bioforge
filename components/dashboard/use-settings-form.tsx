@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateSettingsAction } from "@/app/actions/settings";
 import { updateSocialSettingsAction } from "@/app/actions/social";
-import { useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
+import { useUnsavedChangesOptional, DASHBOARD_RESET_EVENT } from "@/components/dashboard/unsaved-changes";
 import type { ProfileSettings, SettingsFormState, SettingsSection } from "@/lib/types/settings";
 
 const initial: SettingsFormState = {};
@@ -127,6 +127,14 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
   const unsaved = useUnsavedChangesOptional();
 
   useEffect(() => {
+    const handleReset = () => {
+      setForm(readForm(settingsRef.current));
+    };
+    window.addEventListener(DASHBOARD_RESET_EVENT, handleReset);
+    return () => window.removeEventListener(DASHBOARD_RESET_EVENT, handleReset);
+  }, [readForm]);
+
+  useEffect(() => {
     if (skipSyncRef.current) {
       skipSyncRef.current = false;
       lastSyncedAt.current = settings.updated_at;
@@ -204,6 +212,14 @@ export function useSocialDashboardSection(
     successMessage,
   );
   const unsaved = useUnsavedChangesOptional();
+
+  useEffect(() => {
+    const handleReset = () => {
+      setForm(readForm(settingsRef.current));
+    };
+    window.addEventListener(DASHBOARD_RESET_EVENT, handleReset);
+    return () => window.removeEventListener(DASHBOARD_RESET_EVENT, handleReset);
+  }, [readForm]);
 
   useEffect(() => {
     if (skipSyncRef.current) {

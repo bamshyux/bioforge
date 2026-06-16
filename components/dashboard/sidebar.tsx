@@ -4,14 +4,12 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { CriedLogo } from "@/components/brand/logo";
 import {
   IconAnalytics,
   IconBackground,
   IconBadges,
   IconCustomize,
   IconEffects,
-  IconExternal,
   IconLayout,
   IconLinks,
   IconMusic,
@@ -19,7 +17,6 @@ import {
   IconProfile,
   IconSettings,
 } from "@/components/icons/dashboard-icons";
-import { SITE_HOST } from "@/lib/site";
 
 type NavItem = {
   href: string;
@@ -142,11 +139,9 @@ function NavGroupSection({
 }
 
 export function DashboardSidebar({
-  username,
   showAdminPanel = false,
   adminRole,
 }: {
-  username?: string | null;
   showAdminPanel?: boolean;
   adminRole?: "owner" | "admin";
 }) {
@@ -183,10 +178,6 @@ export function DashboardSidebar({
 
   return (
     <aside className="bf-dash-sidebar flex w-full flex-col lg:sticky lg:top-[4.25rem] lg:max-h-[calc(100vh-4.25rem)] lg:w-[240px] lg:shrink-0">
-      <div className="mb-5 hidden lg:block">
-        <CriedLogo size={28} />
-      </div>
-
       <nav className="bf-dash-nav flex min-h-0 flex-1 flex-col gap-3 lg:overflow-y-auto lg:pr-1">
         <NavLink href="/dashboard" label="Overview" Icon={IconOverview} active={pathname === "/dashboard"} />
 
@@ -230,41 +221,6 @@ export function DashboardSidebar({
           </div>
         ) : null}
       </nav>
-
-      {username ? (
-        <div className="bf-dash-live-cta mt-4 shrink-0 lg:mt-3 lg:border-t lg:border-white/[0.06] lg:pt-3">
-          <Link
-            href={`/${username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-2 transition-colors hover:border-white/[0.16] hover:bg-white/[0.07]"
-          >
-            <div className="min-w-0 flex-1">
-              <span className="block text-[12px] font-medium text-neutral-200 group-hover:text-white">
-                View live profile
-              </span>
-              <span className="mt-0.5 block truncate font-mono text-[10px] text-neutral-500">
-                {SITE_HOST}/{username}
-              </span>
-            </div>
-            <IconExternal
-              size={13}
-              className="shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-neutral-300"
-            />
-          </Link>
-        </div>
-      ) : (
-        <div className="bf-dash-live-cta mt-4 shrink-0 rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-2.5 py-2.5 lg:mt-3 lg:border-t lg:border-white/[0.06] lg:pt-3">
-          <p className="text-[12px] font-medium text-neutral-200">Profile not live yet</p>
-          <p className="mt-0.5 text-[10px] text-neutral-500">Set a username in Profile to publish.</p>
-          <Link
-            href="/dashboard/profile"
-            className="mt-2 inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-white/15 hover:bg-white/[0.1] hover:text-white"
-          >
-            Set up profile
-          </Link>
-        </div>
-      )}
     </aside>
   );
 }

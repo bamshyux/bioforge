@@ -6,7 +6,6 @@ import {
   IconBackground,
   IconCustomize,
   IconEffects,
-  IconExternal,
   IconLinks,
   IconOverview,
 } from "@/components/icons/dashboard-icons";
@@ -102,7 +101,7 @@ export default async function DashboardOverviewPage() {
     <div className="space-y-8">
       <div className="bf-dash-hero relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111] p-6 sm:p-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_0%,rgba(255,255,255,0.06),transparent_55%)]" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">Dashboard</p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
@@ -113,33 +112,13 @@ export default async function DashboardOverviewPage() {
                 ? "Your page is live. Tweak your design, add links, or check who's visiting."
                 : "Finish your profile setup and publish your page when you're ready."}
             </p>
+            {isLive ? (
+              <p className="mt-3 font-mono text-xs text-neutral-600">
+                {SITE_HOST}/{profile!.username}
+              </p>
+            ) : null}
           </div>
-
-          {isLive ? (
-            <Link
-              href={`/${profile!.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#090909] transition-colors hover:bg-neutral-200"
-            >
-              View live profile
-              <IconExternal size={15} />
-            </Link>
-          ) : (
-            <Link
-              href="/dashboard/profile"
-              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#090909] transition-colors hover:bg-neutral-200"
-            >
-              Finish setup
-            </Link>
-          )}
         </div>
-
-        {isLive ? (
-          <p className="relative mt-4 font-mono text-xs text-neutral-600">
-            {SITE_HOST}/{profile!.username}
-          </p>
-        ) : null}
       </div>
 
       <div>

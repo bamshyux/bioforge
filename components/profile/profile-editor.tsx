@@ -19,7 +19,7 @@ import {
   labelClassName,
   RemoveMediaButton,
 } from "@/components/dashboard/form-fields";
-import { useClearUnsavedOnSuccess, useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
+import { useClearUnsavedOnSuccess, useUnsavedChangesOptional, DASHBOARD_RESET_EVENT } from "@/components/dashboard/unsaved-changes";
 import { SITE_HOST } from "@/lib/site";
 
 const initialState: ProfileFormState = {};
@@ -87,6 +87,15 @@ export function ProfileEditor({
 
   useEffect(() => {
     setBioPreview(profile?.bio ?? "");
+  }, [profile?.bio]);
+
+  useEffect(() => {
+    const handleReset = () => {
+      setBioPreview(profile?.bio ?? "");
+      setState(initialState);
+    };
+    window.addEventListener(DASHBOARD_RESET_EVENT, handleReset);
+    return () => window.removeEventListener(DASHBOARD_RESET_EVENT, handleReset);
   }, [profile?.bio]);
 
   const handleImageUpload = async (type: "avatar" | "banner", file: File | undefined) => {

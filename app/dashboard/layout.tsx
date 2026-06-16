@@ -6,6 +6,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EmailVerificationBanner } from "@/components/dashboard/email-verification-banner";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { ViewLiveProfileButton } from "@/components/dashboard/view-live-profile-button";
 import { getProfileByUserId } from "@/lib/data/profiles";
 import { getAdminAccess } from "@/lib/auth/admin-access";
 import { createClient } from "@/lib/supabase/server";
@@ -37,14 +38,18 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#090909] text-neutral-100">
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#090909]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-          <Link href="/" className="lg:hidden">
-            <CriedLogo size={28} />
-          </Link>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-4">
-            <span className="hidden text-[13px] text-neutral-500 sm:inline">{email}</span>
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#090909]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+            <Link href="/dashboard" className="shrink-0">
+              <CriedLogo size={28} />
+            </Link>
+            <ViewLiveProfileButton username={profile?.username} />
+          </div>
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <span className="hidden max-w-[200px] truncate text-[13px] text-neutral-500 lg:inline">
+              {email}
+            </span>
             <LogoutButton />
           </div>
         </div>
@@ -57,7 +62,6 @@ export default async function DashboardLayout({
       <DashboardShell>
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-8 lg:flex-row lg:items-start lg:px-8">
           <DashboardSidebar
-            username={profile?.username}
             showAdminPanel={showAdminPanel}
             adminRole={adminAccess?.role}
           />

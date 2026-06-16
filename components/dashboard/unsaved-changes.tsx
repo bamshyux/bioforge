@@ -20,7 +20,10 @@ type UnsavedChangesContextValue = {
   clearSaving: () => void;
   setLastDirtyForm: (form: HTMLFormElement | null) => void;
   saveChanges: () => void;
+  resetChanges: () => void;
 };
+
+export const DASHBOARD_RESET_EVENT = "bf-dashboard-reset-changes";
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextValue | null>(null);
 
@@ -105,6 +108,15 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     form.requestSubmit();
   }, [clearSaving, markSaving]);
 
+  const resetChanges = useCallback(() => {
+    const form = findDashboardSaveForm(lastDirtyFormRef.current);
+    if (form) {
+      form.reset();
+      window.dispatchEvent(new CustomEvent(DASHBOARD_RESET_EVENT));
+    }
+    markClean();
+  }, [markClean]);
+
   useEffect(() => {
     if (!isDirty || isSaving) return;
 
@@ -134,8 +146,9 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       clearSaving,
       setLastDirtyForm,
       saveChanges,
+      resetChanges,
     }),
-    [isDirty, isSaving, markDirty, markClean, markSaving, clearSaving, setLastDirtyForm, saveChanges],
+    [isDirty, isSaving, markDirty, markClean, markSaving, clearSaving, setLastDirtyForm, saveChanges, resetChanges],
   );
 
   return (
@@ -160,7 +173,7 @@ export function UnsavedChangesNotice() {
   const context = useUnsavedChangesOptional();
   if (!context?.isDirty) return null;
 
-  const { isSaving, saveChanges } = context;
+  const { isSaving, saveChanges, resetChanges } = context;
 
   return (
     <div
@@ -168,7 +181,7 @@ export function UnsavedChangesNotice() {
       aria-live="polite"
       className="bf-unsaved-notice pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4"
     >
-      <div className="pointer-events-auto flex w-full max-w-lg items-center gap-3 rounded-xl border border-amber-500/25 bg-[#141414]/95 px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
+      <div className="pointer-events-auto flex w-full max-w-xl items-center gap-3 rounded-xl border border-amber-500/25 bg-[#141414]/95 px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs text-amber-300">
           !
         </span>
@@ -178,14 +191,24 @@ export function UnsavedChangesNotice() {
             Save before leaving this page, or your updates will be lost.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={saveChanges}
-          disabled={isSaving}
-          className="shrink-0 rounded-lg bg-amber-400 px-3.5 py-2 text-xs font-semibold text-[#090909] transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSaving ? "Saving…" : "Save changes"}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={resetChanges}
+            disabled={isSaving}
+            className="rounded-lg border border-white/[0.12] bg-[#1a1a1a] px-3.5 py-2 text-xs font-semibold text-neutral-200 transition-colors hover:border-white/20 hover:bg-[#222] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Reset changes
+          </button>
+          <button
+            type="button"
+            onClick={saveChanges}
+            disabled={isSaving}
+            className="rounded-lg bg-amber-400 px-3.5 py-2 text-xs font-semibold text-[#090909] transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSaving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
       </div>
     </div>
   );
