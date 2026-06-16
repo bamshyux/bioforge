@@ -1167,20 +1167,20 @@ body {
 }
 
 .bf-live-profile-cta__pulse {
-  animation: bf-live-pulse 2.4s ease-out infinite;
+  animation: bf-live-pulse 2.2s ease-out infinite;
 }
 
 @keyframes bf-live-pulse {
   0% {
     transform: scale(1);
-    opacity: 0.55;
+    opacity: 0.7;
   }
-  70% {
-    transform: scale(2.2);
+  65% {
+    transform: scale(2.4);
     opacity: 0;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(2.4);
     opacity: 0;
   }
 }

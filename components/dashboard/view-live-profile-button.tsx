@@ -8,6 +8,9 @@ type ViewLiveProfileButtonProps = {
   className?: string;
 };
 
+const headerCtaClassName =
+  "bf-live-profile-cta group inline-flex max-w-full shrink-0 items-center gap-2.5 rounded-full bg-[#fafafa] px-4 py-2 text-[13px] font-semibold text-[#090909] shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_18px_rgba(0,0,0,0.35)] transition-all duration-200 hover:bg-white hover:shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_6px_24px_rgba(255,255,255,0.12),0_4px_18px_rgba(0,0,0,0.35)] active:scale-[0.98]";
+
 export function ViewLiveProfileButton({
   username,
   variant = "header",
@@ -19,7 +22,7 @@ export function ViewLiveProfileButton({
         href="/dashboard/profile"
         className={
           variant === "header"
-            ? `inline-flex shrink-0 items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-[13px] font-medium text-neutral-200 transition-colors hover:border-white/[0.16] hover:bg-white/[0.07] hover:text-white ${className}`
+            ? `${headerCtaClassName} ${className}`
             : `text-[13px] font-medium text-neutral-300 hover:text-white ${className}`
         }
       >
@@ -49,21 +52,21 @@ export function ViewLiveProfileButton({
       href={profilePath}
       target="_blank"
       rel="noopener noreferrer"
-      className={`bf-live-profile-cta group inline-flex max-w-full shrink-0 items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.04] py-1.5 pl-2.5 pr-3 text-[13px] font-medium transition-all hover:border-emerald-500/25 hover:bg-emerald-500/[0.07] ${className}`}
+      className={`${headerCtaClassName} ${className}`}
     >
       <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
-        <span className="bf-live-profile-cta__pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.55)]" />
+        <span className="bf-live-profile-cta__pulse absolute inline-flex h-full w-full rounded-full bg-emerald-500/45" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-[#fafafa] group-hover:ring-white" />
       </span>
-      <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-neutral-100 group-hover:text-white">
-        <span>View profile</span>
-        <span className="hidden font-mono text-[11px] font-normal text-neutral-500 group-hover:text-emerald-200/70 sm:inline">
+      <span className="flex min-w-0 items-baseline gap-1.5 whitespace-nowrap">
+        <span>View live profile</span>
+        <span className="hidden font-mono text-[11px] font-medium text-neutral-500 sm:inline">
           /{username}
         </span>
       </span>
       <IconExternal
         size={13}
-        className="shrink-0 text-neutral-500 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-emerald-300/90"
+        className="shrink-0 text-neutral-400 transition-colors group-hover:text-neutral-700"
       />
     </Link>
   );
