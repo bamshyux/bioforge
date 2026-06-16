@@ -243,8 +243,8 @@ export async function touchUserSession(userId: string, sessionId: string | undef
     await admin.from("security_events").insert({
       user_id: userId,
       event_type: "login_success",
-      ip_hash: meta.ip_address.slice(0, 64),
-      user_agent: meta.user_agent.slice(0, 512),
+      ip_hash: (meta.ip_address ?? "").slice(0, 64),
+      user_agent: (meta.user_agent ?? "").slice(0, 512),
     });
   }
 }

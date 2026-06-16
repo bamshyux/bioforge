@@ -16,6 +16,7 @@ import {
   PageHeader,
   ToggleField,
 } from "@/components/dashboard/form-fields";
+import { EditableUidCell } from "@/components/admin/editable-uid-cell";
 import { formatProfileUid } from "@/lib/profile";
 import type { AdminAccountFormState, AdminAccountSummary } from "@/lib/types/admin-account";
 
