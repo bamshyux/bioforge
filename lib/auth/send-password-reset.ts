@@ -1,5 +1,7 @@
 import {
   buildAuthConfirmUrl,
+  isEmailDeliveryError,
+  isRedirectUrlError,
   PASSWORD_RESET_NEXT,
   type AuthEmailDeliveryResult,
 } from "@/lib/auth/auth-email-shared";
