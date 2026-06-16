@@ -3,6 +3,7 @@ import { ensureDefaultCustomTheme } from "@/app/actions/custom-themes";
 import { CustomThemeEditor } from "@/components/dashboard/custom-theme-editor";
 import { getCustomThemesByProfileId } from "@/lib/data/custom-themes";
 import { getMyPublishedThemes } from "@/lib/data/community-themes";
+import { getProfileByUserId } from "@/lib/data/profiles";
 import { getSettingsByProfileId } from "@/lib/data/settings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,6 +21,7 @@ export default async function DashboardCustomThemePage() {
   }
 
   const settings = await getSettingsByProfileId(userId);
+  const profile = await getProfileByUserId(userId);
   const published = await getMyPublishedThemes(userId);
   const publishedByThemeId = Object.fromEntries(published.map((listing) => [listing.theme_id, listing]));
 
@@ -28,6 +30,8 @@ export default async function DashboardCustomThemePage() {
       themes={themes}
       settings={settings}
       publishedByThemeId={publishedByThemeId}
+      username={profile?.username}
+      displayName={profile?.display_name}
     />
   );
 }

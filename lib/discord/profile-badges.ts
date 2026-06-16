@@ -12,8 +12,6 @@ export const EMPTY_DISCORD_PROFILE_BADGES: DiscordProfileBadges = {
 
 export type DiscordBadgeHints = {
   premiumType?: number | null;
-  avatar?: string | null;
-  banner?: string | null;
 };
 
 type LanyardGuildIdentity = {
@@ -86,49 +84,25 @@ function hasPremiumType(premiumType: number | null | undefined): boolean {
   return Number.isFinite(parsed) && parsed > 0;
 }
 
-function hasAnimatedAvatar(avatar: string | null | undefined): boolean {
-  return Boolean(avatar?.startsWith("a_"));
-}
-
-function hasProfileBanner(banner: string | null | undefined): boolean {
-  return Boolean(banner?.trim());
-}
-
-function hasAvatarDecoration(user: LanyardDiscordUser): boolean {
-  return Boolean(user.avatar_decoration_data?.asset?.trim() || user.avatar_decoration_data?.sku_id);
-}
-
-function hasNameplateCollectible(user: LanyardDiscordUser): boolean {
-  const nameplate = user.collectibles?.nameplate;
-  return Boolean(nameplate?.asset?.trim() || nameplate?.sku_id);
-}
-
 function parseNitro(user: LanyardDiscordUser): boolean {
-  if (hasPremiumType(user.premium_type)) return true;
-  if (hasAnimatedAvatar(user.avatar)) return true;
-  if (hasProfileBanner(user.banner)) return true;
-  if (hasAvatarDecoration(user)) return true;
-  if (hasNameplateCollectible(user)) return true;
-  return false;
+  return hasPremiumType(user.premium_type);
 }
 
 export function hasDiscordNitroFromHints(hints: DiscordBadgeHints | null | undefined): boolean {
   if (!hints) return false;
-  if (hasPremiumType(hints.premiumType)) return true;
-  if (hasAnimatedAvatar(hints.avatar)) return true;
-  if (hasProfileBanner(hints.banner)) return true;
-  return false;
+  return hasPremiumType(hints.premiumType);
 }
 
 export function mergeDiscordProfileBadges(
   badges: DiscordProfileBadges,
   hints?: DiscordBadgeHints,
 ): DiscordProfileBadges {
-  if (badges.nitro || !hints) return badges;
+  const nitro = badges.nitro || hasDiscordNitroFromHints(hints);
+  if (nitro === badges.nitro) return badges;
 
   return {
     ...badges,
-    nitro: hasDiscordNitroFromHints(hints),
+    nitro,
   };
 }
 
@@ -151,12 +125,8 @@ export function hasDiscordProfileBadges(badges: DiscordProfileBadges): boolean {
 
 export function getDiscordBadgeHintsFromSettings(settings: {
   discord_premium_type?: number | null;
-  discord_avatar?: string | null;
-  discord_banner?: string | null;
 }): DiscordBadgeHints {
   return {
     premiumType: settings.discord_premium_type,
-    avatar: settings.discord_avatar,
-    banner: settings.discord_banner,
   };
 }

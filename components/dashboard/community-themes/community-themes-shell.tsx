@@ -72,6 +72,8 @@ export function CommunityThemesShell({
   initial,
   featured,
   myPublished,
+  username,
+  displayName,
 }: {
   userId: string;
   initial: CommunityThemesResult;
@@ -82,6 +84,8 @@ export function CommunityThemesShell({
     weeklyInstalled: CommunityThemeListing[];
   };
   myPublished: CommunityThemeListing[];
+  username?: string | null;
+  displayName?: string | null;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<"browse" | "mine">("browse");
@@ -491,7 +495,7 @@ export function CommunityThemesShell({
               </button>
             </div>
             {previewCss ? (
-              <CustomThemePreview css={previewCss} />
+              <CustomThemePreview css={previewCss} username={username} displayName={displayName} />
             ) : (
               <div className="rounded-xl border border-white/[0.08] bg-[#0a0a0a] p-10 text-center text-sm text-neutral-500">
                 Loading preview...

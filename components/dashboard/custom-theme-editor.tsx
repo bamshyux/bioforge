@@ -32,10 +32,14 @@ export function CustomThemeEditor({
   themes: initialThemes,
   settings,
   publishedByThemeId = {},
+  username,
+  displayName,
 }: {
   themes: CustomTheme[];
   settings: ProfileSettings;
   publishedByThemeId?: Record<string, CommunityThemeListing>;
+  username?: string | null;
+  displayName?: string | null;
 }) {
   const router = useRouter();
   const [themes, setThemes] = useState(initialThemes);
@@ -304,7 +308,7 @@ export function CustomThemeEditor({
               </div>
               <CustomThemeSelectorHelp />
             </div>
-            <CustomThemePreview css={css} />
+            <CustomThemePreview css={css} username={username} displayName={displayName} />
           </div>
 
           <div className={`${cardClassName} flex flex-wrap gap-2`}>

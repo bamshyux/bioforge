@@ -5,8 +5,19 @@ import { DEFAULT_CUSTOM_THEME_CSS, PROFILE_THEME_SELECTORS } from "@/lib/themes/
 import { scopeProfileCss } from "@/lib/themes/scope-css";
 
 /** Static mock profile used for live CSS preview in the theme builder. */
-export function CustomThemePreview({ css }: { css: string }) {
+export function CustomThemePreview({
+  css,
+  username,
+  displayName,
+}: {
+  css: string;
+  username?: string | null;
+  displayName?: string | null;
+}) {
   const { css: scopedCss, errors } = useMemo(() => scopeProfileCss(css), [css]);
+  const previewName = username?.trim() || displayName?.trim() || "yourname";
+  const previewHandle = username?.trim() ? `@${username.trim()}` : "@yourname";
+  const avatarInitial = previewName.charAt(0).toUpperCase() || "Y";
 
   return (
     <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a]">
@@ -29,11 +40,11 @@ export function CustomThemePreview({ css }: { css: string }) {
                 <div
                   className="profile-avatar flex h-14 w-14 items-center justify-center rounded-full bg-neutral-700 text-lg font-bold text-white"
                 >
-                  J
+                  {avatarInitial}
                 </div>
                 <div>
-                  <h1 className="username text-xl font-semibold text-white">johndoe</h1>
-                  <p className="profile-handle text-sm text-neutral-500">@johndoe</p>
+                  <h1 className="username text-xl font-semibold text-white">{previewName}</h1>
+                  <p className="profile-handle text-sm text-neutral-500">{previewHandle}</p>
                 </div>
               </div>
               <div className="profile-meta mb-3 flex gap-3 text-xs text-neutral-400">

@@ -5,6 +5,7 @@ import {
   getMyPublishedThemes,
   searchCommunityThemes,
 } from "@/lib/data/community-themes";
+import { getProfileByUserId } from "@/lib/data/profiles";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function CommunityThemesPage() {
@@ -15,10 +16,11 @@ export default async function CommunityThemesPage() {
 
   const userId = data.claims.sub as string;
 
-  const [initial, featured, myPublished] = await Promise.all([
+  const [initial, featured, myPublished, profile] = await Promise.all([
     searchCommunityThemes({ page: 1, userId }),
     getFeaturedCommunityThemeSections(userId),
     getMyPublishedThemes(userId),
+    getProfileByUserId(userId),
   ]);
 
   return (
@@ -27,6 +29,8 @@ export default async function CommunityThemesPage() {
       initial={initial}
       featured={featured}
       myPublished={myPublished}
+      username={profile?.username}
+      displayName={profile?.display_name}
     />
   );
 }
