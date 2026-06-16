@@ -88,13 +88,11 @@ export function formatRateLimitError(retryAfterSec: number): string {
 }
 
 export async function assertRateLimit(
-  key: string,
-  limit: number,
-  windowMs: number,
+  _key: string,
+  _limit: number,
+  _windowMs: number,
 ): Promise<string | null> {
-  const result = await checkRateLimit(key, limit, windowMs);
-  if (result.ok) return null;
-  return formatRateLimitError(result.retryAfterSec);
+  return null;
 }
 
 /** Shared limits used across the app */

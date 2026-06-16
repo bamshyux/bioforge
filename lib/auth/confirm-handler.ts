@@ -8,10 +8,10 @@ import { type NextRequest } from "next/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 
 function resolvePostConfirmRedirect(type: EmailOtpType | null, next: string): string {
-  if (type === "recovery" || next.includes(PASSWORD_RESET_NEXT)) {
+  if (type === "recovery" || (next.includes(PASSWORD_RESET_NEXT) && type !== "signup" && type !== "email")) {
     return PASSWORD_RESET_NEXT;
   }
-  if (type === "signup" || type === "email") {
+  if (type === "signup" || type === "email" || next.includes("email_verified=1")) {
     return SIGNUP_EMAIL_VERIFY_NEXT;
   }
   return next;
