@@ -935,8 +935,32 @@ body {
   text-align: center;
 }
 
+.profile-discord-status[data-discord-text-align="center"] .profile-discord-status__name-row {
+  justify-content: center;
+}
+
 .profile-discord-status[data-discord-text-align="right"] .profile-discord-status__header-text {
   text-align: right;
+}
+
+.profile-discord-status[data-discord-text-align="right"] .profile-discord-status__name-row {
+  justify-content: flex-end;
+}
+
+.profile-discord-status[data-discord-header-layout="stacked"][data-discord-text-align="center"] .profile-discord-status__header {
+  align-items: center;
+}
+
+.profile-discord-status[data-discord-header-layout="stacked"][data-discord-text-align="right"] .profile-discord-status__header {
+  align-items: flex-end;
+}
+
+.profile-discord-status[data-discord-header-layout="row"][data-discord-text-align="center"] .profile-discord-status__header {
+  justify-content: center;
+}
+
+.profile-discord-status[data-discord-header-layout="row"][data-discord-text-align="right"] .profile-discord-status__header {
+  justify-content: flex-end;
 }
 
 .bf-profile-align--center .profile-discord-status[data-discord-card-align="inherit"] {
@@ -1397,6 +1421,16 @@ body {
 /* Dashboard — Leaderboard */
 .bf-leaderboard-page {
   animation: bf-explore-page-in 0.45s ease;
+}
+
+.bf-leaderboard-hero-glow {
+  background:
+    radial-gradient(ellipse 75% 70% at 12% -15%, rgba(251, 191, 36, 0.14), transparent 58%),
+    radial-gradient(ellipse 50% 45% at 88% 110%, rgba(255, 255, 255, 0.04), transparent 55%);
+}
+
+.bf-leaderboard-toolbar {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .bf-leaderboard-stage-bg {

@@ -32,6 +32,8 @@ export async function getSettingsByProfileId(
     settings.discord_user_id = "";
     settings.discord_username = "";
     settings.discord_avatar = "";
+    settings.discord_banner = "";
+    settings.discord_premium_type = 0;
     settings.show_discord_status = false;
   } else {
     settings.show_discord_status = row?.show_discord_status === true;

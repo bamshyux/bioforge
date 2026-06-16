@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { clampCardLayout, mergeSettings, parseCursorEffect, parseUsernameEffect } from "@/lib/settings";
 import { clampLinksIconSize } from "@/lib/links";
+import { clampCursorImageSize } from "@/lib/profile/custom-cursor";
 import { backgroundUploadSizeError, MAX_BACKGROUND_UPLOAD_BYTES } from "@/lib/uploads/limits";
 import { formatSchemaError } from "@/lib/db/schema";
 import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
@@ -218,6 +219,10 @@ function parseSectionUpdates(
     case "effects":
       return {
         cursor_effect: parseCursorEffect(formData.get("cursor_effect"), existing.cursor_effect),
+        cursor_image_size: clampCursorImageSize(
+          formData.get("cursor_image_size"),
+          existing.cursor_image_size,
+        ),
         typing_bio: parseBool(formData.get("typing_bio")),
         username_effect: parseUsernameEffect(formData.get("username_effect"), existing.username_effect),
         hover_animations: parseBool(formData.get("hover_animations")),

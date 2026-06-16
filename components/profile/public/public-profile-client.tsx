@@ -887,7 +887,10 @@ export function PublicProfileClient({
         <CursorEffectCanvas effect={settings.cursor_effect} color={settings.accent_color} />
       ) : null}
       {entered && settings.cursor_image_url ? (
-        <CustomProfileCursor imageUrl={settings.cursor_image_url} />
+        <CustomProfileCursor
+          imageUrl={settings.cursor_image_url}
+          maxSize={settings.cursor_image_size}
+        />
       ) : null}
 
       {entered ? (

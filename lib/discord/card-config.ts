@@ -11,7 +11,7 @@ import {
   type DiscordHeaderLayout,
   type DiscordTextAlign,
 } from "@/lib/types/discord-widget";
-import type { ProfileSettings } from "@/lib/types/settings";
+import type { ProfileSettings, ContentAlignment } from "@/lib/types/settings";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -52,14 +52,14 @@ function parseWidth(value: unknown): DiscordCardWidth {
 }
 
 function parseHeaderLayout(value: unknown): DiscordHeaderLayout {
-  if (value === "row" || value === "centered" || value === "stacked") {
+  if (value === "inherit" || value === "row" || value === "centered" || value === "stacked") {
     return value;
   }
   return DEFAULT_DISCORD_CARD_CONFIG.header_layout;
 }
 
 function parseTextAlign(value: unknown): DiscordTextAlign {
-  if (value === "left" || value === "center" || value === "right") {
+  if (value === "inherit" || value === "left" || value === "center" || value === "right") {
     return value;
   }
   return DEFAULT_DISCORD_CARD_CONFIG.text_align;
@@ -135,6 +135,55 @@ export function parseDiscordCardConfig(raw: unknown): DiscordCardConfig {
   };
 }
 
+export function resolveDiscordHeaderLayout(
+  layout: DiscordHeaderLayout,
+  profileAlignment: ContentAlignment,
+): Exclude<DiscordHeaderLayout, "inherit"> {
+  if (layout !== "inherit") return layout;
+  switch (profileAlignment) {
+    case "center":
+      return "centered";
+    case "right":
+      return "stacked";
+    default:
+      return "row";
+  }
+}
+
+export function resolveDiscordTextAlign(
+  align: DiscordTextAlign,
+  profileAlignment: ContentAlignment,
+): Exclude<DiscordTextAlign, "inherit"> {
+  if (align !== "inherit") return align;
+  return profileAlignment;
+}
+
+export function resolveDiscordCardAlign(
+  align: DiscordCardAlign,
+  profileAlignment: ContentAlignment,
+): Exclude<DiscordCardAlign, "inherit"> {
+  if (align !== "inherit") return align;
+  return profileAlignment;
+}
+
+export type ResolvedDiscordCardConfig = DiscordCardConfig & {
+  header_layout: Exclude<DiscordHeaderLayout, "inherit">;
+  text_align: Exclude<DiscordTextAlign, "inherit">;
+  card_align: Exclude<DiscordCardAlign, "inherit">;
+};
+
+export function resolveDiscordCardConfig(settings: ProfileSettings): ResolvedDiscordCardConfig {
+  const config = configFromProfileSettings(settings);
+  const profileAlignment = settings.content_alignment ?? "left";
+
+  return {
+    ...config,
+    header_layout: resolveDiscordHeaderLayout(config.header_layout, profileAlignment),
+    text_align: resolveDiscordTextAlign(config.text_align, profileAlignment),
+    card_align: resolveDiscordCardAlign(config.card_align, profileAlignment),
+  };
+}
+
 export function configFromProfileSettings(settings: ProfileSettings): DiscordCardConfig {
   if (settings.discord_card_config) return parseDiscordCardConfig(settings.discord_card_config);
   return parseDiscordCardConfig({
@@ -186,6 +235,8 @@ export function getDiscordCardThemeLabel(theme: DiscordCardTheme): string {
 
 export function getDiscordHeaderLayoutLabel(layout: DiscordHeaderLayout): string {
   switch (layout) {
+    case "inherit":
+      return "Follow profile";
     case "centered":
       return "Avatar on top";
     case "stacked":
@@ -197,6 +248,8 @@ export function getDiscordHeaderLayoutLabel(layout: DiscordHeaderLayout): string
 
 export function getDiscordTextAlignLabel(align: DiscordTextAlign): string {
   switch (align) {
+    case "inherit":
+      return "Follow profile";
     case "center":
       return "Center";
     case "right":

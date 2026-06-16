@@ -10,6 +10,12 @@ export const EMPTY_DISCORD_PROFILE_BADGES: DiscordProfileBadges = {
   hypesquad: null,
 };
 
+export type DiscordBadgeHints = {
+  premiumType?: number | null;
+  avatar?: string | null;
+  banner?: string | null;
+};
+
 type LanyardGuildIdentity = {
   tag?: string | null;
   badge?: string | null;
@@ -17,12 +23,26 @@ type LanyardGuildIdentity = {
   identity_enabled?: boolean | null;
 };
 
-type LanyardDiscordUser = {
+type LanyardAvatarDecoration = {
+  asset?: string | null;
+  sku_id?: string | null;
+};
+
+type LanyardCollectibles = {
+  nameplate?: {
+    asset?: string | null;
+    sku_id?: string | null;
+  } | null;
+};
+
+export type LanyardDiscordUser = {
   avatar?: string | null;
   banner?: string | null;
   public_flags?: number | null;
   flags?: number | null;
   premium_type?: number | null;
+  avatar_decoration_data?: LanyardAvatarDecoration | null;
+  collectibles?: LanyardCollectibles | null;
   primary_guild?: LanyardGuildIdentity | null;
   clan?: LanyardGuildIdentity | null;
 };
@@ -61,12 +81,55 @@ function parseGuildTag(identity: LanyardGuildIdentity | null | undefined): Disco
   };
 }
 
+function hasPremiumType(premiumType: number | null | undefined): boolean {
+  const parsed = Number(premiumType ?? 0);
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
+function hasAnimatedAvatar(avatar: string | null | undefined): boolean {
+  return Boolean(avatar?.startsWith("a_"));
+}
+
+function hasProfileBanner(banner: string | null | undefined): boolean {
+  return Boolean(banner?.trim());
+}
+
+function hasAvatarDecoration(user: LanyardDiscordUser): boolean {
+  return Boolean(user.avatar_decoration_data?.asset?.trim() || user.avatar_decoration_data?.sku_id);
+}
+
+function hasNameplateCollectible(user: LanyardDiscordUser): boolean {
+  const nameplate = user.collectibles?.nameplate;
+  return Boolean(nameplate?.asset?.trim() || nameplate?.sku_id);
+}
+
 function parseNitro(user: LanyardDiscordUser): boolean {
-  const premiumType = Number(user.premium_type ?? 0);
-  if (Number.isFinite(premiumType) && premiumType > 0) return true;
-  if (user.avatar?.startsWith("a_")) return true;
-  if (user.banner?.trim()) return true;
+  if (hasPremiumType(user.premium_type)) return true;
+  if (hasAnimatedAvatar(user.avatar)) return true;
+  if (hasProfileBanner(user.banner)) return true;
+  if (hasAvatarDecoration(user)) return true;
+  if (hasNameplateCollectible(user)) return true;
   return false;
+}
+
+export function hasDiscordNitroFromHints(hints: DiscordBadgeHints | null | undefined): boolean {
+  if (!hints) return false;
+  if (hasPremiumType(hints.premiumType)) return true;
+  if (hasAnimatedAvatar(hints.avatar)) return true;
+  if (hasProfileBanner(hints.banner)) return true;
+  return false;
+}
+
+export function mergeDiscordProfileBadges(
+  badges: DiscordProfileBadges,
+  hints?: DiscordBadgeHints,
+): DiscordProfileBadges {
+  if (badges.nitro || !hints) return badges;
+
+  return {
+    ...badges,
+    nitro: hasDiscordNitroFromHints(hints),
+  };
 }
 
 export function parseDiscordProfileBadges(user: LanyardDiscordUser | null | undefined): DiscordProfileBadges {
@@ -84,4 +147,16 @@ export function parseDiscordProfileBadges(user: LanyardDiscordUser | null | unde
 
 export function hasDiscordProfileBadges(badges: DiscordProfileBadges): boolean {
   return Boolean(badges.guildTag?.tag || badges.nitro || badges.hypesquad);
+}
+
+export function getDiscordBadgeHintsFromSettings(settings: {
+  discord_premium_type?: number | null;
+  discord_avatar?: string | null;
+  discord_banner?: string | null;
+}): DiscordBadgeHints {
+  return {
+    premiumType: settings.discord_premium_type,
+    avatar: settings.discord_avatar,
+    banner: settings.discord_banner,
+  };
 }

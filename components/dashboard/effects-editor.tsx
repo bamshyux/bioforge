@@ -17,11 +17,16 @@ import {
   labelClassName,
   PageHeader,
   RemoveMediaButton,
+  SliderField,
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import { removeCursorImageAction, saveCursorImageAction } from "@/app/actions/settings";
 import { uploadCursorImageToStorage } from "@/lib/uploads/cursor-client";
-import { CUSTOM_CURSOR_MAX_PX } from "@/lib/profile/custom-cursor";
+import {
+  CUSTOM_CURSOR_SIZE_DEFAULT,
+  CUSTOM_CURSOR_SIZE_MAX,
+  CUSTOM_CURSOR_SIZE_MIN,
+} from "@/lib/profile/custom-cursor";
 import { CURSOR_EFFECT_OPTIONS, USERNAME_EFFECT_OPTIONS } from "@/lib/settings";
 import type { CursorEffect, ProfileSettings, UsernameEffect } from "@/lib/types/settings";
 import type { Profile } from "@/lib/types/profile";
@@ -33,6 +38,7 @@ const fileInputClassName =
 
 type EffectsFormState = EnterGateFormFields & {
   cursor_effect: CursorEffect;
+  cursor_image_size: number;
   username_effect: UsernameEffect;
   typing_bio: boolean;
   hover_animations: boolean;
@@ -43,6 +49,7 @@ function readEffectsForm(settings: ProfileSettings): EffectsFormState {
   return {
     ...readEnterGateForm(settings),
     cursor_effect: settings.cursor_effect,
+    cursor_image_size: settings.cursor_image_size,
     username_effect: settings.username_effect,
     typing_bio: settings.typing_bio,
     hover_animations: settings.hover_animations,
@@ -158,18 +165,21 @@ export function EffectsEditor({
             <p className={labelClassName}>Custom cursor image</p>
             <p className="mt-1 text-xs text-neutral-500">
               Upload an image visitors will see as their cursor on your profile. Works alongside cursor effects.
-              Displayed at about {CUSTOM_CURSOR_MAX_PX}px. Square PNG or GIF works best.
+              Square PNG or GIF works best.
             </p>
 
             {displayCursorUrl ? (
               <div className="mt-4 flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-white/[0.08] bg-[#141414]">
+                <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-white/[0.08] bg-[#141414]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={displayCursorUrl}
                     alt="Custom cursor preview"
-                    className="max-h-7 max-w-7 object-contain"
-                    style={{ maxWidth: CUSTOM_CURSOR_MAX_PX, maxHeight: CUSTOM_CURSOR_MAX_PX }}
+                    className="object-contain"
+                    style={{
+                      maxWidth: form.cursor_image_size,
+                      maxHeight: form.cursor_image_size,
+                    }}
                   />
                 </div>
                 <RemoveMediaButton
@@ -181,6 +191,23 @@ export function EffectsEditor({
             ) : (
               <p className="mt-3 text-xs text-neutral-500">No custom cursor uploaded yet.</p>
             )}
+
+            {displayCursorUrl ? (
+              <div className="mt-4">
+                <SliderField
+                  name="cursor_image_size"
+                  label="Cursor size"
+                  min={CUSTOM_CURSOR_SIZE_MIN}
+                  max={CUSTOM_CURSOR_SIZE_MAX}
+                  value={form.cursor_image_size}
+                  onChange={(cursor_image_size) => patchForm({ cursor_image_size })}
+                  unit="px"
+                />
+                <p className="mt-1 text-xs text-neutral-600">
+                  Default is {CUSTOM_CURSOR_SIZE_DEFAULT}px. Drag to make your cursor smaller or larger on your profile.
+                </p>
+              </div>
+            ) : null}
 
             <div className="mt-4">
               <input

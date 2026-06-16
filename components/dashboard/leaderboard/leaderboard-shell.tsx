@@ -205,32 +205,49 @@ export function LeaderboardShell({
   const statLabel = tab === "views" ? "profile views" : "followers";
 
   return (
-    <div className={`bf-leaderboard-page mx-auto max-w-5xl px-4 pb-16 pt-2 sm:px-6 ${rankFlash ? "bf-leaderboard-rank-flash" : ""}`}>
-      <div className="bf-leaderboard-toolbar sticky top-0 z-20 -mx-4 mb-5 border-b border-white/[0.06] bg-[#050505]/90 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {(
-              [
-                { id: "views" as const, label: "Most Viewed" },
-                { id: "followers" as const, label: "Most Followed" },
-              ] as const
-            ).map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                disabled={isPending}
-                onClick={() => onTabChange(item.id)}
-                className={`rounded-full px-4 py-2 text-xs font-semibold transition-all sm:text-sm ${
-                  tab === item.id
-                    ? "border border-amber-400/25 bg-amber-400/[0.1] text-amber-50 shadow-[0_0_20px_rgba(251,191,36,0.08)]"
-                    : "border border-white/[0.08] bg-transparent text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+    <div className={`bf-leaderboard-page bf-explore-page mx-auto max-w-5xl space-y-6 px-4 pb-16 pt-2 sm:px-6 ${rankFlash ? "bf-leaderboard-rank-flash" : ""}`}>
+      <header className="relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[#0a0a0a] p-6 sm:p-8">
+        <div className="bf-explore-hero-glow pointer-events-none absolute inset-0" aria-hidden />
+        <div className="bf-leaderboard-hero-glow pointer-events-none absolute inset-0" aria-hidden />
 
-            <div className="bf-explore-search flex min-w-[180px] flex-1 items-center gap-2.5 rounded-full border border-white/[0.08] bg-[#111]/80 px-3.5 py-2 transition-colors focus-within:border-white/[0.14] sm:ml-auto sm:max-w-xs">
+        <div className="relative">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">Explore</p>
+          <h1 className="mt-2 text-4xl font-bold uppercase tracking-[0.14em] text-white sm:text-5xl">
+            Leaderboard
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
+            See who&apos;s leading the community by profile views and followers. Climb the ranks and get featured on the podium.
+          </p>
+        </div>
+      </header>
+
+      <div className="bf-leaderboard-toolbar sticky top-3 z-20 rounded-[1.25rem] border border-white/[0.08] bg-[#090909]/92 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-5">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="inline-flex w-fit max-w-full rounded-full border border-white/[0.08] bg-[#111] p-1">
+              {(
+                [
+                  { id: "views" as const, label: "Most Viewed" },
+                  { id: "followers" as const, label: "Most Followed" },
+                ] as const
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => onTabChange(item.id)}
+                  className={`rounded-full px-4 py-2 text-xs font-semibold transition-all sm:px-5 sm:text-sm ${
+                    tab === item.id
+                      ? "bg-amber-400/15 text-amber-50 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.22)]"
+                      : "text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="bf-explore-search flex min-w-0 flex-1 items-center gap-2.5 rounded-full border border-white/[0.08] bg-[#111] px-4 py-2.5 transition-colors focus-within:border-amber-400/20 lg:max-w-sm lg:ml-auto">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="shrink-0 text-neutral-500" aria-hidden>
                 <circle cx="11" cy="11" r="7" />
                 <path d="m20 20-3-3" />
@@ -246,23 +263,25 @@ export function LeaderboardShell({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {LEADERBOARD_PERIODS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                disabled={isPending}
-                onClick={() => onPeriodChange(item.id)}
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition sm:text-xs ${
-                  period === item.id
-                    ? "border border-amber-400/20 bg-amber-400/[0.08] text-amber-50 shadow-[0_0_18px_rgba(251,191,36,0.06)]"
-                    : "border border-white/[0.08] bg-transparent text-neutral-500 hover:border-white/[0.14] hover:text-neutral-300"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+            <div className="inline-flex flex-wrap gap-1 rounded-full border border-white/[0.08] bg-[#111] p-1">
+              {LEADERBOARD_PERIODS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => onPeriodChange(item.id)}
+                  className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition sm:text-xs ${
+                    period === item.id
+                      ? "bg-amber-400/15 text-amber-50 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.18)]"
+                      : "text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
             {list.total > 0 ? (
-              <span className="ml-auto hidden text-[11px] text-neutral-600 sm:inline">
+              <span className="ml-auto text-[11px] text-neutral-600 sm:text-xs">
                 {list.total.toLocaleString()} ranked by {statLabel}
               </span>
             ) : null}

@@ -170,6 +170,7 @@ export type ProfileSettings = {
   music_volume: number;
   cursor_effect: CursorEffect;
   cursor_image_url: string | null;
+  cursor_image_size: number;
   typing_bio: boolean;
   bio_color: string;
   bio_font_family: string;
@@ -245,6 +246,8 @@ export type ProfileSettings = {
   discord_user_id: string;
   discord_username: string;
   discord_avatar: string;
+  discord_banner: string;
+  discord_premium_type: number;
   show_discord_status: boolean;
   discord_card_style: import("@/lib/types/discord-widget").DiscordCardStyle;
   discord_show_lanyard_hint: boolean;

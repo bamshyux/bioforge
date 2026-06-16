@@ -44,7 +44,7 @@ export async function GET() {
     client_id: getDiscordClientId(),
     redirect_uri: getDiscordRedirectUri(),
     response_type: "code",
-    scope: "identify",
+    scope: "identify identify.premium",
     state,
   });
 

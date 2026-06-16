@@ -13,6 +13,7 @@ import type {
 } from "@/lib/types/settings";
 import { BRAND } from "@/lib/design/tokens";
 import { clampLinksIconSize } from "@/lib/links";
+import { clampCursorImageSize } from "@/lib/profile/custom-cursor";
 
 export const DEFAULT_SETTINGS: Omit<
   ProfileSettings,
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: Omit<
   music_volume: 50,
   cursor_effect: "none",
   cursor_image_url: null,
+  cursor_image_size: 48,
   typing_bio: false,
   bio_color: "",
   bio_font_family: "",
@@ -119,6 +121,8 @@ export const DEFAULT_SETTINGS: Omit<
   discord_user_id: "",
   discord_username: "",
   discord_avatar: "",
+  discord_banner: "",
+  discord_premium_type: 0,
   show_discord_status: false,
   discord_card_style: "discord",
   discord_show_lanyard_hint: false,
@@ -391,6 +395,7 @@ export function mergeSettings(
     music_volume: row?.music_volume ?? DEFAULT_SETTINGS.music_volume,
     cursor_effect: parseCursorEffect(row?.cursor_effect ?? legacyCursor, DEFAULT_SETTINGS.cursor_effect),
     cursor_image_url: row?.cursor_image_url ?? null,
+    cursor_image_size: clampCursorImageSize(row?.cursor_image_size, DEFAULT_SETTINGS.cursor_image_size),
     typing_bio: row?.typing_bio ?? DEFAULT_SETTINGS.typing_bio,
     bio_color: row?.bio_color ?? DEFAULT_SETTINGS.bio_color,
     bio_font_family: row?.bio_font_family ?? DEFAULT_SETTINGS.bio_font_family,
@@ -477,6 +482,8 @@ export function mergeSettings(
       DEFAULT_SETTINGS.discord_user_id,
     discord_username: row?.discord_username ?? DEFAULT_SETTINGS.discord_username,
     discord_avatar: row?.discord_avatar ?? DEFAULT_SETTINGS.discord_avatar,
+    discord_banner: row?.discord_banner ?? DEFAULT_SETTINGS.discord_banner,
+    discord_premium_type: Number(row?.discord_premium_type ?? DEFAULT_SETTINGS.discord_premium_type) || 0,
     show_discord_status: row?.show_discord_status ?? DEFAULT_SETTINGS.show_discord_status,
     discord_card_style:
       (row as { discord_card_style?: DiscordCardStyle })?.discord_card_style ??

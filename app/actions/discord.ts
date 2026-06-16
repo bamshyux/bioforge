@@ -87,6 +87,8 @@ export async function disconnectDiscordAction(): Promise<{ error?: string }> {
     widgets_discord_user_id: "",
     discord_username: "",
     discord_avatar: "",
+    discord_banner: "",
+    discord_premium_type: 0,
     show_discord_status: false,
   });
   const supabase = await createClient();
@@ -167,6 +169,8 @@ export async function sanitizeDiscordConnectionAction(): Promise<void> {
     widgets_discord_user_id: "",
     discord_username: "",
     discord_avatar: "",
+    discord_banner: "",
+    discord_premium_type: 0,
     show_discord_status: false,
   });
   const supabase = await createClient();

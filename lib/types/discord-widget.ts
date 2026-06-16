@@ -11,9 +11,9 @@ export type DiscordCardRadius = "sharp" | "soft" | "round" | "pill";
 
 export type DiscordCardWidth = "narrow" | "default" | "wide" | "full";
 
-export type DiscordHeaderLayout = "row" | "centered" | "stacked";
+export type DiscordHeaderLayout = "inherit" | "row" | "centered" | "stacked";
 
-export type DiscordTextAlign = "left" | "center" | "right";
+export type DiscordTextAlign = "inherit" | "left" | "center" | "right";
 
 export type DiscordCardAlign = "inherit" | "left" | "center" | "right";
 
@@ -69,8 +69,8 @@ export const DEFAULT_DISCORD_CARD_CONFIG: DiscordCardConfig = {
   show_activity: true,
   glow: false,
   backdrop_blur: false,
-  header_layout: "row",
-  text_align: "left",
+  header_layout: "inherit",
+  text_align: "inherit",
   card_align: "inherit",
   avatar_size: "medium",
   avatar_shape: "circle",

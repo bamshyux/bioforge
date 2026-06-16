@@ -45,4 +45,6 @@ export type DiscordOAuthUser = {
   username: string;
   global_name?: string | null;
   avatar?: string | null;
+  banner?: string | null;
+  premium_type?: number | null;
 };

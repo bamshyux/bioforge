@@ -75,10 +75,13 @@ export async function GET(request: Request) {
   }
 
   const discordUser = (await userRes.json()) as DiscordOAuthUser;
+  const premiumType = Number(discordUser.premium_type ?? 0);
   const patch = await omitUnsupportedSettingsColumns({
     widgets_discord_user_id: discordUser.id,
     discord_username: discordUser.global_name || discordUser.username,
     discord_avatar: discordUser.avatar ?? "",
+    discord_banner: discordUser.banner ?? "",
+    discord_premium_type: Number.isFinite(premiumType) && premiumType > 0 ? premiumType : 0,
     show_discord_status: false,
   });
 

@@ -27,6 +27,16 @@ type LanyardResponse = {
       public_flags?: number | null;
       flags?: number | null;
       premium_type?: number | null;
+      avatar_decoration_data?: {
+        asset?: string | null;
+        sku_id?: string | null;
+      } | null;
+      collectibles?: {
+        nameplate?: {
+          asset?: string | null;
+          sku_id?: string | null;
+        } | null;
+      } | null;
       primary_guild?: {
         tag?: string | null;
         badge?: string | null;

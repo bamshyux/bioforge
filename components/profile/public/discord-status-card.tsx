@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { getActivityTypeLabel, pickActivityImageUrl } from "@/lib/discord/activity-images";
 import { resolveDiscordCardAppearance } from "@/lib/discord/card-appearance";
-import { configFromProfileSettings } from "@/lib/discord/card-config";
+import { resolveDiscordCardConfig } from "@/lib/discord/card-config";
 import { getDiscordStatusColor, getDiscordStatusLabel } from "@/lib/discord/status-colors";
 import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
 import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
@@ -178,7 +178,9 @@ export function DiscordStatusCard({
   live?: boolean;
   previewActivity?: boolean;
 }) {
-  const config = configOverride ?? configFromProfileSettings(settings);
+  const config = configOverride
+    ? resolveDiscordCardConfig({ ...settings, discord_card_config: configOverride })
+    : resolveDiscordCardConfig(settings);
   const customStatusActivity =
     config.show_activity && presence.activity?.type === 4 ? presence.activity : null;
   const panelActivity =
@@ -229,7 +231,7 @@ export function DiscordStatusCard({
           </div>
         ) : null}
         <div className={appearance.headerTextClass}>
-          <div className="flex min-w-0 items-center gap-1.5">
+          <div className="profile-discord-status__name-row flex min-w-0 items-center gap-1.5">
             <p
               className={`min-w-0 truncate font-semibold leading-tight ${appearance.textPrimaryClass}`}
               style={{ ...appearance.primaryTextStyle, ...appearance.nameStyle }}
