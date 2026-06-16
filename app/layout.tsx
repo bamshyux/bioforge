@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GlobalSiteBanner } from "@/components/admin/global-site-banner";
+import { AuthHashRecoveryRedirect } from "@/components/auth/auth-hash-recovery-redirect";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { SchemaErrorBanner } from "@/components/dev/schema-error-banner";
 import { getProfileSettingsSchemaValidation } from "@/lib/db/validate-schema";
@@ -32,6 +33,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <AuthHashRecoveryRedirect />
         {!schema.ok && (
           <SchemaErrorBanner message={schema.message} missing={schema.missing} />
         )}

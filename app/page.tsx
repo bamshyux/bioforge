@@ -4,7 +4,6 @@ import { HomeActivityFeed } from "@/components/home/home-activity-feed";
 import { HomeFeaturedProfiles } from "@/components/home/home-featured-profiles";
 import { HomeFloatingCards } from "@/components/home/home-floating-cards";
 import { EmailVerifiedNotice } from "@/components/home/email-verified-notice";
-import { HomeAuthRedirect } from "@/components/home/home-auth-redirect";
 import { HomeBackground } from "@/components/home/home-background";
 import {
   HomeHeroActions,
@@ -66,7 +65,6 @@ export default async function Home() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#090909] text-white">
       <HomeBackground />
-      <HomeAuthRedirect />
       <EmailVerifiedNotice />
 
       <header className="bf-home-enter bf-home-enter-0 relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">

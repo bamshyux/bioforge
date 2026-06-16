@@ -1,10 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { redirectIncomingAuthRequest } from "@/lib/auth/incoming-auth-redirect";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 
 const authEntryRoutes = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
+  const authRedirect = redirectIncomingAuthRequest(request);
+  if (authRedirect) return authRedirect;
+
   let supabaseResponse = NextResponse.next({ request });
 
   let url: string;
