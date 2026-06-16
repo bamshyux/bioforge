@@ -21,7 +21,7 @@ export function buildProfileViewFromPreset({
   baseProfile: Profile;
   baseBadges: ProfileBadge[];
   presetData: ProfilePresetData;
-  /** Keep the viewer's name, avatar, banner, and bio instead of the preset author's. */
+  /** Keep the viewer's display name instead of the preset author's. */
   preserveViewerIdentity?: boolean;
 }): {
   profile: Profile;
@@ -40,13 +40,9 @@ export function buildProfileViewFromPreset({
     display_name: preserveViewerIdentity
       ? baseProfile.display_name
       : presetData.profile.display_name,
-    bio: preserveViewerIdentity ? baseProfile.bio : presetData.profile.bio,
-    avatar_url: preserveViewerIdentity
-      ? baseProfile.avatar_url
-      : presetData.profile.avatar_url,
-    banner_url: preserveViewerIdentity
-      ? baseProfile.banner_url
-      : presetData.profile.banner_url,
+    bio: presetData.profile.bio,
+    avatar_url: presetData.profile.avatar_url,
+    banner_url: presetData.profile.banner_url,
   };
 
   const presetLayout = presetData.settings.layout as ProfileLayout | undefined;
