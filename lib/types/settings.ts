@@ -205,6 +205,7 @@ export type ProfileSettings = {
   card_offset_x: number;
   card_offset_y: number;
   card_width: number;
+  card_max_height: number;
   discord_user_id: string;
   discord_username: string;
   discord_avatar: string;

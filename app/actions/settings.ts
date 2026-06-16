@@ -352,6 +352,7 @@ export async function updateCardLayoutAction(layout: {
   card_offset_x: number;
   card_offset_y: number;
   card_width: number;
+  card_max_height: number;
 }): Promise<SettingsFormState> {
   const userId = await getAuthenticatedUserId();
   if (!userId) return { error: "You must be logged in." };

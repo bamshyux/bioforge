@@ -113,6 +113,7 @@ export const DEFAULT_SETTINGS: Omit<
   card_offset_x: 0,
   card_offset_y: 0,
   card_width: 100,
+  card_max_height: 0,
   discord_user_id: "",
   discord_username: "",
   discord_avatar: "",
@@ -390,6 +391,7 @@ export function mergeSettings(
     card_offset_x: row?.card_offset_x ?? DEFAULT_SETTINGS.card_offset_x,
     card_offset_y: row?.card_offset_y ?? DEFAULT_SETTINGS.card_offset_y,
     card_width: row?.card_width ?? DEFAULT_SETTINGS.card_width,
+    card_max_height: row?.card_max_height ?? DEFAULT_SETTINGS.card_max_height,
     discord_user_id:
       (row as { widgets_discord_user_id?: string })?.widgets_discord_user_id ??
       row?.discord_user_id ??
@@ -439,11 +441,22 @@ export function buildCardStyle(settings: ProfileSettings): Record<string, string
   };
 }
 
+export const CARD_LAYOUT_MIN_HEIGHT = 280;
+
+function cardHeightStyle(maxHeight: number): Record<string, string | number> {
+  if (maxHeight <= 0) return {};
+  return {
+    maxHeight: Math.max(CARD_LAYOUT_MIN_HEIGHT, maxHeight),
+    overflowY: "auto",
+  };
+}
+
 export function getCardLayoutStyle(settings: ProfileSettings): Record<string, string | number> {
   return {
     width: `${settings.card_width}%`,
     maxWidth: "100%",
     transform: `translate(${settings.card_offset_x}px, ${settings.card_offset_y}px)`,
+    ...cardHeightStyle(settings.card_max_height),
   };
 }
 
@@ -451,11 +464,15 @@ export function clampCardLayout(values: {
   card_offset_x: number;
   card_offset_y: number;
   card_width: number;
+  card_max_height: number;
 }) {
+  const maxHeight = Math.round(values.card_max_height);
   return {
     card_offset_x: Math.min(500, Math.max(-500, Math.round(values.card_offset_x))),
     card_offset_y: Math.min(500, Math.max(-500, Math.round(values.card_offset_y))),
     card_width: Math.min(150, Math.max(50, Math.round(values.card_width))),
+    card_max_height:
+      maxHeight <= 0 ? 0 : Math.min(2000, Math.max(CARD_LAYOUT_MIN_HEIGHT, maxHeight)),
   };
 }
 

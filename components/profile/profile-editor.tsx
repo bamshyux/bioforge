@@ -124,7 +124,8 @@ export function ProfileEditor({
   const bannerDisplayUrl = bannerPreview ?? profile?.banner_url ?? null;
 
   return (
-    <form action={formAction} data-dashboard-primary-form className="space-y-6">
+    <div className="space-y-6">
+      <form action={formAction} data-dashboard-primary-form className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
           <label htmlFor="username" className={labelClassName}>Username</label>
@@ -171,10 +172,6 @@ export function ProfileEditor({
           className={`${inputClassName} resize-none`}
         />
       </div>
-
-      {settings ? (
-        <BioStyleEditor settings={settings} bioPreview={bioPreview} embedded />
-      ) : null}
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
@@ -257,6 +254,11 @@ export function ProfileEditor({
       <button type="submit" disabled={isPending} className={buttonPrimaryClassName}>
         {isPending ? "Saving..." : "Save Profile"}
       </button>
-    </form>
+      </form>
+
+      {settings ? (
+        <BioStyleEditor settings={settings} bioPreview={bioPreview} embedded />
+      ) : null}
+    </div>
   );
 }

@@ -99,6 +99,7 @@ export const REQUIRED_PROFILE_SETTINGS_COLUMNS = [
   "card_offset_x",
   "card_offset_y",
   "card_width",
+  "card_max_height",
   "created_at",
   "updated_at",
 ] as const;
@@ -166,6 +167,7 @@ const COLUMN_MIGRATIONS: Record<string, string> = {
   card_offset_x: "supabase/v28_card_layout.sql",
   card_offset_y: "supabase/v28_card_layout.sql",
   card_width: "supabase/v28_card_layout.sql",
+  card_max_height: "supabase/v48_card_max_height.sql",
   show_discord_status: "supabase/v34_discord_connect.sql",
   discord_username: "supabase/v34_discord_connect.sql",
   discord_avatar: "supabase/v34_discord_connect.sql",

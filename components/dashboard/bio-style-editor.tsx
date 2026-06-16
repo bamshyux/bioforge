@@ -8,7 +8,6 @@ import {
 import {
   buttonPrimaryClassName,
   cardClassName,
-  ColorField,
   labelClassName,
   SliderField,
   ToggleField,
@@ -56,6 +55,48 @@ function previewSettings(settings: ProfileSettings, form: BioStyleFormState): Pr
   };
 }
 
+function BioTextColorField({
+  label,
+  value,
+  fallback,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  fallback: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label className={labelClassName}>{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value || fallback}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 cursor-pointer rounded-lg border border-white/[0.08] bg-[#141414]"
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={`Profile color (${fallback})`}
+          className="min-w-0 flex-1 rounded-lg border border-white/[0.08] bg-[#0f0f0f] px-3 py-2 text-xs text-white placeholder:text-neutral-600"
+        />
+        {value ? (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-500 hover:text-white"
+          >
+            Reset
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function BioStyleEditor({
   settings,
   bioPreview,
@@ -95,28 +136,37 @@ export function BioStyleEditor({
         </p>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-5">
+      <form onSubmit={handleSave} data-dashboard-section-form="bio" className="space-y-5">
         <div className="rounded-xl border border-white/[0.06] bg-[#0a0a0a] p-4">
           <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-600">Preview</p>
           <ProfileBio text={sampleText} settings={preview} className="!mb-0" />
         </div>
 
+        <BioTextColorField
+          label="Bio text color"
+          value={form.bio_use_text_color ? "" : form.bio_color}
+          fallback={settings.text_color}
+          onChange={(bio_color) => {
+            if (!bio_color.trim()) {
+              patchForm({ bio_color: "", bio_use_text_color: true });
+              return;
+            }
+            patchForm({ bio_color, bio_use_text_color: false });
+          }}
+        />
+
         <ToggleField
           name="bio_use_text_color"
           label="Use profile text color"
-          description="When on, bio uses your main text color from Customize"
+          description="When on, bio matches your main text color from Customize"
           checked={form.bio_use_text_color}
-          onCheckedChange={(bio_use_text_color) => patchForm({ bio_use_text_color })}
+          onCheckedChange={(bio_use_text_color) =>
+            patchForm({
+              bio_use_text_color,
+              bio_color: bio_use_text_color ? "" : form.bio_color || settings.text_color,
+            })
+          }
         />
-
-        {!form.bio_use_text_color ? (
-          <ColorField
-            name="bio_color"
-            label="Bio color"
-            value={form.bio_color || settings.text_color}
-            onChange={(bio_color) => patchForm({ bio_color, bio_use_text_color: false })}
-          />
-        ) : null}
 
         <ToggleField
           name="bio_use_profile_font"

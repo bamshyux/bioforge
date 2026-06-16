@@ -16,6 +16,8 @@ type UnsavedChangesContextValue = {
   isSaving: boolean;
   markDirty: () => void;
   markClean: () => void;
+  markSaving: () => void;
+  clearSaving: () => void;
   setLastDirtyForm: (form: HTMLFormElement | null) => void;
   saveChanges: () => void;
 };
@@ -42,6 +44,13 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const lastDirtyFormRef = useRef<HTMLFormElement | null>(null);
   const savingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const clearSavingTimeout = useCallback(() => {
+    if (savingTimeoutRef.current) {
+      clearTimeout(savingTimeoutRef.current);
+      savingTimeoutRef.current = null;
+    }
+  }, []);
+
   const markDirty = useCallback(() => {
     setIsDirty(true);
   }, []);
@@ -49,11 +58,22 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const markClean = useCallback(() => {
     setIsDirty(false);
     setIsSaving(false);
-    if (savingTimeoutRef.current) {
-      clearTimeout(savingTimeoutRef.current);
+    clearSavingTimeout();
+  }, [clearSavingTimeout]);
+
+  const markSaving = useCallback(() => {
+    setIsSaving(true);
+    clearSavingTimeout();
+    savingTimeoutRef.current = setTimeout(() => {
+      setIsSaving(false);
       savingTimeoutRef.current = null;
-    }
-  }, []);
+    }, 30000);
+  }, [clearSavingTimeout]);
+
+  const clearSaving = useCallback(() => {
+    setIsSaving(false);
+    clearSavingTimeout();
+  }, [clearSavingTimeout]);
 
   const setLastDirtyForm = useCallback((form: HTMLFormElement | null) => {
     lastDirtyFormRef.current = form;
@@ -65,22 +85,16 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]:not(:disabled)');
     if (!submit) {
-      form.querySelector("button[type=\"submit\"]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      form.querySelector('button[type="submit"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
-    setIsSaving(true);
+    markSaving();
     form.requestSubmit();
-
-    if (savingTimeoutRef.current) clearTimeout(savingTimeoutRef.current);
-    savingTimeoutRef.current = setTimeout(() => {
-      setIsSaving(false);
-      savingTimeoutRef.current = null;
-    }, 30000);
-  }, []);
+  }, [markSaving]);
 
   useEffect(() => {
-    if (!isDirty) return;
+    if (!isDirty || isSaving) return;
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -89,18 +103,27 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  }, [isDirty, isSaving]);
 
   useEffect(
     () => () => {
-      if (savingTimeoutRef.current) clearTimeout(savingTimeoutRef.current);
+      clearSavingTimeout();
     },
-    [],
+    [clearSavingTimeout],
   );
 
   const value = useMemo(
-    () => ({ isDirty, isSaving, markDirty, markClean, setLastDirtyForm, saveChanges }),
-    [isDirty, isSaving, markDirty, markClean, setLastDirtyForm, saveChanges],
+    () => ({
+      isDirty,
+      isSaving,
+      markDirty,
+      markClean,
+      markSaving,
+      clearSaving,
+      setLastDirtyForm,
+      saveChanges,
+    }),
+    [isDirty, isSaving, markDirty, markClean, markSaving, clearSaving, setLastDirtyForm, saveChanges],
   );
 
   return (
@@ -178,20 +201,41 @@ export function DashboardFormTracker({ children }: { children: ReactNode }) {
     [context],
   );
 
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLDivElement>) => {
+      if (!context) return;
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      context.setLastDirtyForm(form);
+      context.markSaving();
+    },
+    [context],
+  );
+
   return (
-    <div onInput={handleMarkDirty} onChange={handleMarkDirty}>
+    <div onInput={handleMarkDirty} onChange={handleMarkDirty} onSubmitCapture={handleSubmit}>
       {children}
     </div>
   );
 }
 
 /** Clear the unsaved banner after a successful form save. */
-export function useClearUnsavedOnSuccess(state: { success?: string | boolean | null }) {
+export function useClearUnsavedOnSuccess(state: {
+  success?: string | boolean | null;
+  error?: string | null;
+}) {
   const context = useUnsavedChangesOptional();
+  const markCleanRef = useRef(context?.markClean);
+  const clearSavingRef = useRef(context?.clearSaving);
+
+  markCleanRef.current = context?.markClean;
+  clearSavingRef.current = context?.clearSaving;
 
   useEffect(() => {
     if (state.success) {
-      context?.markClean();
+      markCleanRef.current?.();
+    } else if (state.error) {
+      clearSavingRef.current?.();
     }
-  }, [state.success, context]);
+  }, [state.success, state.error]);
 }

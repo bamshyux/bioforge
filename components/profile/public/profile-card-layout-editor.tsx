@@ -2,15 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { updateCardLayoutAction } from "@/app/actions/settings";
-import { clampCardLayout, getCardLayoutStyle } from "@/lib/settings";
+import { CARD_LAYOUT_MIN_HEIGHT, clampCardLayout, getCardLayoutStyle } from "@/lib/settings";
 import type { ProfileEmbed } from "@/lib/types/embed";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { ProfileEditWidgetsPanel } from "./profile-edit-widgets-panel";
+import { ProfileParallaxCard } from "./profile-parallax";
 
 export type CardLayoutState = {
   offsetX: number;
   offsetY: number;
   width: number;
+  maxHeight: number;
 };
 
 function layoutFromSettings(settings: ProfileSettings): CardLayoutState {
@@ -18,7 +20,45 @@ function layoutFromSettings(settings: ProfileSettings): CardLayoutState {
     offsetX: settings.card_offset_x,
     offsetY: settings.card_offset_y,
     width: settings.card_width,
+    maxHeight: settings.card_max_height,
   };
+}
+
+function layoutToPatch(layout: CardLayoutState) {
+  return clampCardLayout({
+    card_offset_x: layout.offsetX,
+    card_offset_y: layout.offsetY,
+    card_width: layout.width,
+    card_max_height: layout.maxHeight,
+  });
+}
+
+function layoutFromPatch(patch: ReturnType<typeof clampCardLayout>): CardLayoutState {
+  return {
+    offsetX: patch.card_offset_x,
+    offsetY: patch.card_offset_y,
+    width: patch.card_width,
+    maxHeight: patch.card_max_height,
+  };
+}
+
+function measureNaturalHeight(container: HTMLDivElement | null) {
+  if (!container) return CARD_LAYOUT_MIN_HEIGHT;
+
+  const prevMaxHeight = container.style.maxHeight;
+  const prevOverflowY = container.style.overflowY;
+  container.style.maxHeight = "none";
+  container.style.overflowY = "visible";
+  const height = container.scrollHeight;
+  container.style.maxHeight = prevMaxHeight;
+  container.style.overflowY = prevOverflowY;
+
+  return Math.max(CARD_LAYOUT_MIN_HEIGHT, height);
+}
+
+function resolveResizeHeight(nextHeight: number, naturalHeight: number) {
+  const clamped = Math.min(naturalHeight, Math.max(CARD_LAYOUT_MIN_HEIGHT, Math.round(nextHeight)));
+  return clamped >= naturalHeight - 4 ? 0 : clamped;
 }
 
 function ProfileEditModeBar({
@@ -73,8 +113,6 @@ function ProfileEditModeBar({
   );
 }
 
-import { ProfileParallaxCard } from "./profile-parallax";
-
 export function ProfileCardLayoutEditor({
   settings,
   isOwner,
@@ -102,31 +140,30 @@ export function ProfileCardLayoutEditor({
     const next = layoutFromSettings(settings);
     setLayout(next);
     setSavedLayout(next);
-  }, [settings.updated_at, settings.card_offset_x, settings.card_offset_y, settings.card_width]);
+  }, [
+    settings.updated_at,
+    settings.card_offset_x,
+    settings.card_offset_y,
+    settings.card_width,
+    settings.card_max_height,
+  ]);
 
   const dirty =
     layout.offsetX !== savedLayout.offsetX ||
     layout.offsetY !== savedLayout.offsetY ||
-    layout.width !== savedLayout.width;
+    layout.width !== savedLayout.width ||
+    layout.maxHeight !== savedLayout.maxHeight;
 
   const handleSave = useCallback(() => {
     startSave(async () => {
       setStatus(null);
-      const patch = clampCardLayout({
-        card_offset_x: layout.offsetX,
-        card_offset_y: layout.offsetY,
-        card_width: layout.width,
-      });
+      const patch = layoutToPatch(layout);
       const result = await updateCardLayoutAction(patch);
       if (result.error) {
         setStatus(result.error);
         return;
       }
-      const next = {
-        offsetX: patch.card_offset_x,
-        offsetY: patch.card_offset_y,
-        width: patch.card_width,
-      };
+      const next = layoutFromPatch(patch);
       setLayout(next);
       setSavedLayout(next);
       setStatus("Layout saved");
@@ -146,18 +183,7 @@ export function ProfileCardLayoutEditor({
     setStatus(null);
   }, [savedLayout]);
 
-  const clampLayout = useCallback((next: CardLayoutState) => {
-    const clamped = clampCardLayout({
-      card_offset_x: next.offsetX,
-      card_offset_y: next.offsetY,
-      card_width: next.width,
-    });
-    return {
-      offsetX: clamped.card_offset_x,
-      offsetY: clamped.card_offset_y,
-      width: clamped.card_width,
-    };
-  }, []);
+  const clampLayout = useCallback((next: CardLayoutState) => layoutFromPatch(layoutToPatch(next)), []);
 
   const onDragStart = useCallback(
     (e: React.PointerEvent) => {
@@ -174,17 +200,20 @@ export function ProfileCardLayoutEditor({
     [editMode, layout.offsetX, layout.offsetY],
   );
 
-  const onDragMove = useCallback((e: React.PointerEvent) => {
-    const drag = dragRef.current;
-    if (!drag) return;
-    setLayout((prev) =>
-      clampLayout({
-        ...prev,
-        offsetX: drag.originX + (e.clientX - drag.startX),
-        offsetY: drag.originY + (e.clientY - drag.startY),
-      }),
-    );
-  }, [clampLayout]);
+  const onDragMove = useCallback(
+    (e: React.PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      setLayout((prev) =>
+        clampLayout({
+          ...prev,
+          offsetX: drag.originX + (e.clientX - drag.startX),
+          offsetY: drag.originY + (e.clientY - drag.startY),
+        }),
+      );
+    },
+    [clampLayout],
+  );
 
   const onDragEnd = useCallback((e: React.PointerEvent) => {
     if (!dragRef.current) return;
@@ -201,18 +230,81 @@ export function ProfileCardLayoutEditor({
     [clampLayout],
   );
 
+  const handleVerticalResize = useCallback(
+    (
+      e: PointerEvent,
+      start: { startY: number; startHeight: number; naturalHeight: number },
+    ) => {
+      const nextHeight = start.startHeight + (e.clientY - start.startY);
+      const maxHeight = resolveResizeHeight(nextHeight, start.naturalHeight);
+      setLayout((prev) => clampLayout({ ...prev, maxHeight }));
+    },
+    [clampLayout],
+  );
+
+  const handleCornerResize = useCallback(
+    (
+      e: PointerEvent,
+      start: {
+        startX: number;
+        startY: number;
+        startWidth: number;
+        startHeight: number;
+        naturalHeight: number;
+        containerWidth: number;
+      },
+    ) => {
+      const deltaPx = e.clientX - start.startX;
+      const deltaPercent = (deltaPx / Math.max(start.containerWidth, 1)) * 100;
+      const nextHeight = start.startHeight + (e.clientY - start.startY);
+      const maxHeight = resolveResizeHeight(nextHeight, start.naturalHeight);
+      setLayout((prev) =>
+        clampLayout({
+          ...prev,
+          width: start.startWidth + deltaPercent,
+          maxHeight,
+        }),
+      );
+    },
+    [clampLayout],
+  );
+
+  const bindResizeListeners = useCallback((target: HTMLDivElement, move: (event: PointerEvent) => void) => {
+    const moveHandler = (ev: PointerEvent) => move(ev);
+    const upHandler = () => {
+      target.removeEventListener("pointermove", moveHandler);
+      target.removeEventListener("pointerup", upHandler);
+      target.removeEventListener("pointercancel", upHandler);
+    };
+    target.addEventListener("pointermove", moveHandler);
+    target.addEventListener("pointerup", upHandler);
+    target.addEventListener("pointercancel", upHandler);
+  }, []);
+
+  const startPointerResize = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>, move: (event: PointerEvent) => void) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      bindResizeListeners(e.currentTarget, move);
+    },
+    [bindResizeListeners],
+  );
+
   const wrapperStyle = {
-    width: `${layout.width}%`,
-    maxWidth: "100%",
-    transform: `translate(${layout.offsetX}px, ${layout.offsetY}px)`,
+    ...getCardLayoutStyle({
+      ...settings,
+      card_offset_x: layout.offsetX,
+      card_offset_y: layout.offsetY,
+      card_width: layout.width,
+      card_max_height: layout.maxHeight,
+    }),
   };
 
   if (!isOwner) {
     return (
       <div className="mx-auto w-full" style={getCardLayoutStyle(settings)}>
-        <ProfileParallaxCard enabled={!!parallaxEnabled}>
-          {children}
-        </ProfileParallaxCard>
+        <ProfileParallaxCard enabled={!!parallaxEnabled}>{children}</ProfileParallaxCard>
       </div>
     );
   }
@@ -235,7 +327,7 @@ export function ProfileCardLayoutEditor({
         )}
         {editMode && (
           <p className="pointer-events-none max-w-sm text-center text-[10px] text-neutral-500">
-            Drag the card to move · drag the right edge to resize width
+            Drag to move · right edge for width · bottom edge for height
           </p>
         )}
         {editMode && (
@@ -272,24 +364,14 @@ export function ProfileCardLayoutEditor({
             <div
               role="presentation"
               onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 const parent = containerRef.current?.parentElement;
                 if (!parent) return;
-                e.currentTarget.setPointerCapture(e.pointerId);
                 const start = {
                   startX: e.clientX,
                   startWidth: layout.width,
                   containerWidth: parent.clientWidth,
                 };
-                const target = e.currentTarget;
-                const move = (ev: PointerEvent) => handleHorizontalResize(ev, start);
-                const up = () => {
-                  target.removeEventListener("pointermove", move);
-                  target.removeEventListener("pointerup", up);
-                };
-                target.addEventListener("pointermove", move);
-                target.addEventListener("pointerup", up);
+                startPointerResize(e, (ev) => handleHorizontalResize(ev, start));
               }}
               className="absolute -right-1 top-1/2 z-20 h-10 w-2 -translate-y-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
               style={{ cursor: "ew-resize" }}
@@ -297,33 +379,41 @@ export function ProfileCardLayoutEditor({
             <div
               role="presentation"
               onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                const naturalHeight = measureNaturalHeight(containerRef.current);
+                const currentHeight = layout.maxHeight > 0 ? layout.maxHeight : naturalHeight;
+                const start = {
+                  startY: e.clientY,
+                  startHeight: currentHeight,
+                  naturalHeight,
+                };
+                startPointerResize(e, (ev) => handleVerticalResize(ev, start));
+              }}
+              className="absolute -bottom-1 left-1/2 z-20 h-2 w-10 -translate-x-1/2 touch-none rounded-full bg-[var(--bf-accent)]/80"
+              style={{ cursor: "ns-resize" }}
+            />
+            <div
+              role="presentation"
+              onPointerDown={(e) => {
                 const parent = containerRef.current?.parentElement;
                 if (!parent) return;
-                e.currentTarget.setPointerCapture(e.pointerId);
+                const naturalHeight = measureNaturalHeight(containerRef.current);
+                const currentHeight = layout.maxHeight > 0 ? layout.maxHeight : naturalHeight;
                 const start = {
                   startX: e.clientX,
+                  startY: e.clientY,
                   startWidth: layout.width,
+                  startHeight: currentHeight,
+                  naturalHeight,
                   containerWidth: parent.clientWidth,
                 };
-                const target = e.currentTarget;
-                const move = (ev: PointerEvent) => handleHorizontalResize(ev, start);
-                const up = () => {
-                  target.removeEventListener("pointermove", move);
-                  target.removeEventListener("pointerup", up);
-                };
-                target.addEventListener("pointermove", move);
-                target.addEventListener("pointerup", up);
+                startPointerResize(e, (ev) => handleCornerResize(ev, start));
               }}
               className="absolute -bottom-1 -right-1 z-20 h-4 w-4 touch-none rounded-sm bg-[var(--bf-accent)]/80"
               style={{ cursor: "nwse-resize" }}
             />
           </>
         )}
-        <ProfileParallaxCard enabled={!!parallaxEnabled && !editMode}>
-          {children}
-        </ProfileParallaxCard>
+        <ProfileParallaxCard enabled={!!parallaxEnabled && !editMode}>{children}</ProfileParallaxCard>
       </div>
     </>
   );

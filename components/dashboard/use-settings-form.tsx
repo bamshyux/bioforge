@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { updateSettingsAction } from "@/app/actions/settings";
 import { updateSocialSettingsAction } from "@/app/actions/social";
-import { useClearUnsavedOnSuccess } from "@/components/dashboard/unsaved-changes";
+import { useClearUnsavedOnSuccess, useUnsavedChangesOptional } from "@/components/dashboard/unsaved-changes";
 import type { ProfileSettings, SettingsFormState, SettingsSection } from "@/lib/types/settings";
 
 const initial: SettingsFormState = {};
@@ -28,6 +28,7 @@ function appendToFormData(fd: FormData, values: SettingsFormValues) {
 
 export function useSettingsForm(section: SettingsSection, successMessage?: string) {
   const router = useRouter();
+  const unsaved = useUnsavedChangesOptional();
   const [state, formAction, isPending] = useActionState(updateSettingsAction, initial);
   useClearUnsavedOnSuccess(state);
 
@@ -39,12 +40,13 @@ export function useSettingsForm(section: SettingsSection, successMessage?: strin
 
   const submit = useCallback(
     (values: SettingsFormValues) => {
+      unsaved?.markSaving();
       const fd = new FormData();
       fd.set("_section", section);
       appendToFormData(fd, values);
       formAction(fd);
     },
-    [formAction, section],
+    [formAction, section, unsaved],
   );
 
   const displaySuccess =
@@ -72,6 +74,7 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
   const [form, setForm] = useState(() => readForm(settings));
 
   const { state, submit: rawSubmit, isPending } = useSettingsForm(section, successMessage);
+  const unsaved = useUnsavedChangesOptional();
 
   useEffect(() => {
     if (skipSyncRef.current) {
@@ -84,16 +87,21 @@ export function useDashboardSettingsSection<T extends SettingsFormValues>(
     setForm(readForm(settingsRef.current));
   }, [settings.updated_at, readForm]);
 
-  const patchForm = useCallback((partial: Partial<T>) => {
-    setForm((prev) => ({ ...prev, ...partial }));
-  }, []);
+  const patchForm = useCallback(
+    (partial: Partial<T>) => {
+      setForm((prev) => ({ ...prev, ...partial }));
+      unsaved?.markDirty();
+    },
+    [unsaved],
+  );
 
   const submit = useCallback(
     (values: T) => {
       skipSyncRef.current = true;
+      unsaved?.markSaving();
       rawSubmit(values);
     },
-    [rawSubmit],
+    [rawSubmit, unsaved],
   );
 
   return { form, setForm, patchForm, submit, state, isPending };
@@ -110,6 +118,7 @@ function useFormActionSection<T extends SettingsFormValues>(
   successMessage?: string,
 ) {
   const router = useRouter();
+  const unsaved = useUnsavedChangesOptional();
   const [state, formAction, isPending] = useActionState(action, initial);
   useClearUnsavedOnSuccess(state);
 
@@ -121,11 +130,12 @@ function useFormActionSection<T extends SettingsFormValues>(
 
   const submit = useCallback(
     (values: T) => {
+      unsaved?.markSaving();
       const fd = new FormData();
       appendToFormData(fd, values);
       formAction(fd);
     },
-    [formAction],
+    [formAction, unsaved],
   );
 
   const displaySuccess =
@@ -150,6 +160,7 @@ export function useSocialDashboardSection(
     updateSocialSettingsAction,
     successMessage,
   );
+  const unsaved = useUnsavedChangesOptional();
 
   useEffect(() => {
     if (skipSyncRef.current) {
@@ -162,16 +173,21 @@ export function useSocialDashboardSection(
     setForm(readForm(settingsRef.current));
   }, [settings.updated_at, readForm]);
 
-  const patchForm = useCallback((partial: Partial<SocialFormValues>) => {
-    setForm((prev) => ({ ...prev, ...partial }));
-  }, []);
+  const patchForm = useCallback(
+    (partial: Partial<SocialFormValues>) => {
+      setForm((prev) => ({ ...prev, ...partial }));
+      unsaved?.markDirty();
+    },
+    [unsaved],
+  );
 
   const submit = useCallback(
     (values: SocialFormValues) => {
       skipSyncRef.current = true;
+      unsaved?.markSaving();
       rawSubmit(values);
     },
-    [rawSubmit],
+    [rawSubmit, unsaved],
   );
 
   return { form, patchForm, submit, state, isPending };
