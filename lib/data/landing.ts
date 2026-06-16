@@ -20,6 +20,12 @@ async function db() {
   return createAdminClient() ?? (await createClient());
 }
 
+/** Supabase FK joins may return a single row or a one-element array depending on inference. */
+function unwrapJoin<T>(value: T | T[] | null | undefined): T | null {
+  if (value == null) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -117,14 +123,24 @@ export async function getFeaturedProfiles(): Promise<LandingFeaturedProfile[]> {
   if (!error && featured?.length) {
     const result: LandingFeaturedProfile[] = [];
     for (const row of featured) {
-      const profileRaw = row.profiles as unknown;
-      const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
-        id: string;
-        username: string | null;
-        display_name: string | null;
-        avatar_url: string | null;
-        bio: string | null;
-      } | null;
+      const profile = unwrapJoin(
+        row.profiles as
+          | {
+              id: string;
+              username: string | null;
+              display_name: string | null;
+              avatar_url: string | null;
+              bio: string | null;
+            }
+          | {
+              id: string;
+              username: string | null;
+              display_name: string | null;
+              avatar_url: string | null;
+              bio: string | null;
+            }[]
+          | null,
+      );
       const mapped = profile ? mapProfile(profile) : null;
       if (mapped) {
         result.push({ ...mapped, sort_order: row.sort_order });
@@ -166,7 +182,7 @@ export async function getLandingActivityFeed(limit = 20): Promise<LandingActivit
   ]);
 
   for (const row of events.data ?? []) {
-    const profile = row.profiles as { username: string | null; avatar_url: string | null } | null;
+    const profile = unwrapJoin(row.profiles);
     items.push({
       id: `event-${row.id}`,
       type: row.event_type as LandingActivityItem["type"],
@@ -190,7 +206,7 @@ export async function getLandingActivityFeed(limit = 20): Promise<LandingActivit
   }
 
   for (const row of themes.data ?? []) {
-    const profile = row.profiles as { username: string | null; avatar_url: string | null } | null;
+    const profile = unwrapJoin(row.profiles);
     items.push({
       id: `theme-${row.id}`,
       type: "theme_created",
@@ -202,8 +218,8 @@ export async function getLandingActivityFeed(limit = 20): Promise<LandingActivit
   }
 
   for (const row of badgeAwards.data ?? []) {
-    const profile = row.profiles as { username: string | null; avatar_url: string | null } | null;
-    const badge = row.badges as { name: string } | null;
+    const profile = unwrapJoin(row.profiles);
+    const badge = unwrapJoin(row.badges);
     items.push({
       id: `badge-${row.id}`,
       type: "badge_earned",
@@ -310,22 +326,13 @@ export async function listLandingFeaturedProfiles(): Promise<LandingFeaturedProf
     .select("id, sort_order, is_active, profile_id, profiles:profile_id (username, display_name)")
     .order("sort_order", { ascending: true });
 
-  return (data ?? []).map((row) => {
-    const profileRaw = row.profiles as
-      | { username: string | null; display_name: string | null }
-      | { username: string | null; display_name: string | null }[]
-      | null;
-
-    const profile = Array.isArray(profileRaw) ? (profileRaw[0] ?? null) : profileRaw;
-
-    return {
-      id: row.id,
-      sort_order: row.sort_order,
-      is_active: row.is_active,
-      profile_id: row.profile_id,
-      profiles: profile,
-    };
-  });
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    sort_order: row.sort_order,
+    is_active: row.is_active,
+    profile_id: row.profile_id,
+    profiles: unwrapJoin(row.profiles),
+  }));
 }
 
 export async function listLandingTestimonialsAdmin() {
