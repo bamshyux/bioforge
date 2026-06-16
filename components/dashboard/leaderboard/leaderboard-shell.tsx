@@ -11,6 +11,7 @@ import type {
 import { LEADERBOARD_PERIODS } from "@/lib/types/leaderboard";
 import { LeaderboardPodium } from "./leaderboard-podium";
 import { LeaderboardRow } from "./leaderboard-row";
+import { LeaderboardTrophyIcon } from "./leaderboard-trophy-icon";
 
 type LeaderboardPayload = {
   podium: LeaderboardEntry[];
@@ -23,8 +24,8 @@ type LeaderboardPayload = {
 function EmptyState({ tab, query }: { tab: LeaderboardTab; query: string }) {
   return (
     <div className="bf-leaderboard-empty flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/[0.08] bg-[#111]/50 px-8 py-16 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] text-3xl">
-        🏆
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] text-white/90">
+        <LeaderboardTrophyIcon className="h-9 w-9" />
       </div>
       <h3 className="text-lg font-semibold text-white">No rankings yet</h3>
       <p className="mt-2 max-w-md text-sm text-neutral-500">

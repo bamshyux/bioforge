@@ -66,7 +66,6 @@ begin
   filtered as (
     select *
     from ranked
-    where stat_count > 0
   )
   select
     f.profile_id,
@@ -135,7 +134,6 @@ begin
   filtered as (
     select *
     from ranked
-    where stat_count > 0
   )
   select
     f.profile_id,

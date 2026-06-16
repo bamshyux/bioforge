@@ -347,9 +347,16 @@ export function CommunityThemesShell({
 
           <section className="space-y-5">
             <Reveal>
-              <div className="bf-explore-search flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#0a0a0a] p-4 lg:flex-row lg:items-center">
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <svg className="h-5 w-5 shrink-0 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div className="bf-explore-search flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3 transition-colors focus-within:border-white/[0.16]">
+                  <svg
+                    className="h-5 w-5 shrink-0 text-neutral-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  >
                     <circle cx="11" cy="11" r="7" />
                     <path d="M20 20l-3.5-3.5" />
                   </svg>
@@ -364,7 +371,8 @@ export function CommunityThemesShell({
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as CommunityThemeSort)}
-                  className={`${inputClassName} lg:w-48`}
+                  className={`${inputClassName} shrink-0 sm:w-48`}
+                  aria-label="Sort themes"
                 >
                   {COMMUNITY_THEME_SORTS.map((item) => (
                     <option key={item.id} value={item.id}>
