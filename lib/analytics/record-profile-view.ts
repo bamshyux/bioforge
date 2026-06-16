@@ -1,3 +1,7 @@
+import {
+  BAM_FROZEN_VIEW_COUNT,
+  isFrozenViewCountProfile,
+} from "@/lib/analytics/frozen-view-count";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -52,6 +56,23 @@ export async function recordProfileView(
 
   const hash = visitorHash.slice(0, 64);
   const countryLabel = country.slice(0, 64) || "Unknown";
+
+  async function isFrozenProfile(): Promise<boolean> {
+    const admin = createAdminClient();
+    const client = admin ?? (await createClient());
+    const { data: profile } = await client
+      .from("profiles")
+      .select("username, uid")
+      .eq("id", profileId)
+      .not("username", "is", null)
+      .maybeSingle();
+    return isFrozenViewCountProfile(profile);
+  }
+
+  if (await isFrozenProfile()) {
+    return { ok: true, skipped: true };
+  }
+
   const admin = createAdminClient();
 
   if (admin) {
@@ -95,6 +116,17 @@ export async function recordProfileView(
 
 export async function readPublicViewCount(profileId: string): Promise<number> {
   const supabase = await createClient();
+
+  const { data: identity } = await supabase
+    .from("profiles")
+    .select("username, uid")
+    .eq("id", profileId)
+    .not("username", "is", null)
+    .maybeSingle();
+
+  if (isFrozenViewCountProfile(identity)) {
+    return BAM_FROZEN_VIEW_COUNT;
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
