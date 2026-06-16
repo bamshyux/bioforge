@@ -119,6 +119,13 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         keywords: ["css", "custom", "code"],
         Icon: IconEffects,
       },
+      {
+        href: "/dashboard/profile-presets",
+        label: "Profile Presets",
+        description: "Save and switch full profile styles",
+        keywords: ["preset", "saved", "profile", "switch", "scene"],
+        Icon: IconLayout,
+      },
     ],
   },
   {
@@ -368,7 +375,7 @@ export function getSectionForPath(pathname: string): DashboardSection | undefine
 export function isNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/dashboard/appearance") {
-    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme"].some((p) => pathname.startsWith(p));
+    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme", "/dashboard/profile-presets"].some((p) => pathname.startsWith(p));
   }
   if (href === "/dashboard/content") {
     return ["/dashboard/content", "/dashboard/links", "/dashboard/embeds", "/dashboard/widgets", "/dashboard/music"].some((p) => pathname.startsWith(p));

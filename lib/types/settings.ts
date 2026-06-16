@@ -253,6 +253,7 @@ export type ProfileSettings = {
   discord_show_lanyard_hint: boolean;
   discord_card_config: import("@/lib/types/discord-widget").DiscordCardConfig;
   custom_theme_id: string | null;
+  active_preset_id: string | null;
   created_at: string;
   updated_at: string;
 };

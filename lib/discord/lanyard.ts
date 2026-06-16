@@ -1,7 +1,7 @@
 import { getDiscordAvatarUrl } from "@/lib/discord/config";
 import { pickActivityImageUrl, resolveActivityAssetUrl } from "@/lib/discord/activity-images";
 import { resolveDetectableGameIconUrl } from "@/lib/discord/detectable-apps";
-import { parseDiscordProfileBadges } from "@/lib/discord/profile-badges";
+import { parseDiscordProfileBadges, type LanyardDiscordUser } from "@/lib/discord/profile-badges";
 import type { DiscordActivity, DiscordPresence, DiscordPresenceStatus } from "@/lib/discord/types";
 
 type LanyardActivity = {
@@ -117,12 +117,14 @@ async function fetchLanyardData(discordUserId: string): Promise<LanyardResponse[
 
 export async function fetchLanyardDiscordUser(
   discordUserId: string,
-): Promise<{ username: string; avatar: string | null } | null> {
+): Promise<{ username: string; avatar: string | null; banner: string | null; user: LanyardDiscordUser } | null> {
   const data = await fetchLanyardData(discordUserId);
   if (!data?.discord_user?.username) return null;
   return {
     username: data.discord_user.username,
     avatar: data.discord_user.avatar ?? null,
+    banner: data.discord_user.banner ?? null,
+    user: data.discord_user,
   };
 }
 

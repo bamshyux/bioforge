@@ -178,6 +178,7 @@ const COLUMN_MIGRATIONS: Record<string, string> = {
   discord_banner: "supabase/v63_discord_premium_type.sql",
   discord_premium_type: "supabase/v63_discord_premium_type.sql",
   custom_theme_id: "supabase/v35_custom_themes.sql",
+  active_preset_id: "supabase/v64_profile_presets.sql",
   overlay_opacity: "supabase/v3_features.sql",
   vignette: "supabase/v3_features.sql",
   noise_texture: "supabase/v3_features.sql",

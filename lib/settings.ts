@@ -128,6 +128,7 @@ export const DEFAULT_SETTINGS: Omit<
   discord_show_lanyard_hint: false,
   discord_card_config: DEFAULT_DISCORD_CARD_CONFIG,
   custom_theme_id: null,
+  active_preset_id: null,
 };
 
 export const CONTENT_ALIGNMENT_OPTIONS: { value: ContentAlignment; label: string }[] = [
@@ -493,6 +494,7 @@ export function mergeSettings(
       DEFAULT_SETTINGS.discord_show_lanyard_hint,
     discord_card_config: DEFAULT_DISCORD_CARD_CONFIG,
     custom_theme_id: row?.custom_theme_id ?? null,
+    active_preset_id: row?.active_preset_id ?? null,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };

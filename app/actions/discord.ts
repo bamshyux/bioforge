@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { fetchLanyardDiscordUser } from "@/lib/discord/lanyard";
 import { DISCORD_LANYARD_SAVE_ERROR } from "@/lib/discord/messages";
-import { isDiscordLinked, isValidDiscordUserId, needsDiscordProfileRefresh } from "@/lib/discord/connection";
+import { inferPremiumTypeFromProfileSignals } from "@/lib/discord/profile-badges";
 import {
   removeDiscordStatusWidget,
   setDiscordStatusWidgetEnabled,
@@ -116,10 +116,18 @@ export async function saveDiscordUserIdAction(discordUserId: string): Promise<{ 
     return { error: DISCORD_LANYARD_SAVE_ERROR };
   }
 
+  const premiumType = inferPremiumTypeFromProfileSignals({
+    premiumType: lanyardUser.user.premium_type,
+    avatar: lanyardUser.avatar,
+    banner: lanyardUser.banner,
+  });
+
   const patch = await omitUnsupportedSettingsColumns({
     widgets_discord_user_id: trimmed,
     discord_username: lanyardUser.username,
     discord_avatar: lanyardUser.avatar ?? "",
+    discord_banner: lanyardUser.banner ?? "",
+    discord_premium_type: premiumType,
     show_discord_status: false,
   });
   const supabase = await createClient();
@@ -200,9 +208,17 @@ export async function refreshDiscordProfileAction(): Promise<{ error?: string }>
     return {};
   }
 
+  const premiumType = inferPremiumTypeFromProfileSignals({
+    premiumType: lanyardUser.user.premium_type,
+    avatar: lanyardUser.avatar,
+    banner: lanyardUser.banner,
+  });
+
   const patch = await omitUnsupportedSettingsColumns({
     discord_username: lanyardUser.username,
     discord_avatar: lanyardUser.avatar ?? "",
+    discord_banner: lanyardUser.banner ?? "",
+    discord_premium_type: premiumType,
   });
   await supabase.from("profile_settings").update(patch).eq("profile_id", userId);
   await revalidateProfile(userId);

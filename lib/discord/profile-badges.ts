@@ -12,6 +12,8 @@ export const EMPTY_DISCORD_PROFILE_BADGES: DiscordProfileBadges = {
 
 export type DiscordBadgeHints = {
   premiumType?: number | null;
+  avatar?: string | null;
+  banner?: string | null;
 };
 
 type LanyardGuildIdentity = {
@@ -84,13 +86,44 @@ function hasPremiumType(premiumType: number | null | undefined): boolean {
   return Number.isFinite(parsed) && parsed > 0;
 }
 
+function hasAnimatedAvatar(avatar: string | null | undefined): boolean {
+  return Boolean(avatar?.startsWith("a_"));
+}
+
+function hasProfileBanner(banner: string | null | undefined): boolean {
+  return Boolean(banner?.trim());
+}
+
+/** Infer a storable premium_type from Discord API or Lanyard-visible signals. */
+export function inferPremiumTypeFromProfileSignals(input: {
+  premiumType?: number | null;
+  avatar?: string | null;
+  banner?: string | null;
+}): number {
+  if (hasPremiumType(input.premiumType)) return Number(input.premiumType);
+  if (hasAnimatedAvatar(input.avatar) || hasProfileBanner(input.banner)) return 2;
+  return 0;
+}
+
+function hasNitroSignals(input: {
+  premiumType?: number | null;
+  avatar?: string | null;
+  banner?: string | null;
+}): boolean {
+  return inferPremiumTypeFromProfileSignals(input) > 0;
+}
+
 function parseNitro(user: LanyardDiscordUser): boolean {
-  return hasPremiumType(user.premium_type);
+  return hasNitroSignals({
+    premiumType: user.premium_type,
+    avatar: user.avatar,
+    banner: user.banner,
+  });
 }
 
 export function hasDiscordNitroFromHints(hints: DiscordBadgeHints | null | undefined): boolean {
   if (!hints) return false;
-  return hasPremiumType(hints.premiumType);
+  return hasNitroSignals(hints);
 }
 
 export function mergeDiscordProfileBadges(
@@ -125,8 +158,12 @@ export function hasDiscordProfileBadges(badges: DiscordProfileBadges): boolean {
 
 export function getDiscordBadgeHintsFromSettings(settings: {
   discord_premium_type?: number | null;
+  discord_avatar?: string | null;
+  discord_banner?: string | null;
 }): DiscordBadgeHints {
   return {
     premiumType: settings.discord_premium_type,
+    avatar: settings.discord_avatar,
+    banner: settings.discord_banner,
   };
 }

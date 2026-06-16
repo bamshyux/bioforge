@@ -7,8 +7,10 @@ import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EmailVerificationBanner } from "@/components/dashboard/email-verification-banner";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { ProfilePresetQuickSave } from "@/components/dashboard/profile-presets/profile-preset-quick-save";
 import { ViewLiveProfileButton } from "@/components/dashboard/view-live-profile-button";
 import { getProfileByUserId } from "@/lib/data/profiles";
+import { getSettingsByProfileId } from "@/lib/data/settings";
 import { getAdminAccess } from "@/lib/auth/admin-access";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,6 +36,7 @@ export default async function DashboardLayout({
     userData.user?.email && !userData.user.email_confirmed_at,
   );
   const profile = await getProfileByUserId(userId);
+  const settings = await getSettingsByProfileId(userId);
   const adminAccess = await getAdminAccess();
   const showAdminPanel = !!adminAccess;
 
@@ -50,6 +53,7 @@ export default async function DashboardLayout({
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <ProfilePresetQuickSave activePresetId={settings.active_preset_id} />
             <ViewLiveProfileButton username={profile?.username} />
             <span className="hidden h-4 w-px bg-white/[0.08] md:block" aria-hidden />
             <span className="hidden max-w-[160px] truncate text-[13px] text-neutral-500 xl:inline">
