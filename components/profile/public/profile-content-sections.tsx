@@ -100,7 +100,7 @@ function LinksSectionInner({
   profileId: string;
 }) {
   if (links.length === 0) {
-    return <p className="text-sm text-neutral-600">No links yet.</p>;
+    return null;
   }
 
   const featured = links.find((l) => l.is_featured);
