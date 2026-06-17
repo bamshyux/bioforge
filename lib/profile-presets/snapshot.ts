@@ -32,6 +32,30 @@ const SETTINGS_EXCLUDE = new Set([
   "discord_show_lanyard_hint",
 ]);
 
+/** Always persisted so presets restore page + enter-gate backgrounds. */
+const BACKGROUND_PRESET_KEYS = [
+  "background_type",
+  "background_color",
+  "background_image_url",
+  "background_video_url",
+  "gradient_colors",
+  "animated_gradient",
+  "particle_effect",
+  "overlay_opacity",
+  "vignette",
+  "noise_texture",
+  "enter_gate_background_type",
+  "enter_gate_background_color",
+  "enter_gate_background_image_url",
+  "enter_gate_background_video_url",
+  "enter_gate_gradient_colors",
+  "enter_gate_animated_gradient",
+  "enter_gate_overlay_opacity",
+  "enter_gate_vignette",
+  "enter_gate_noise",
+  "enter_gate_particle_effect",
+] as const satisfies readonly (keyof ProfileSettings)[];
+
 function extractPresetSettings(settings: ProfileSettings): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(settings)) {
@@ -39,6 +63,11 @@ function extractPresetSettings(settings: ProfileSettings): Record<string, unknow
       result[key] = value;
     }
   }
+
+  for (const key of BACKGROUND_PRESET_KEYS) {
+    result[key] = settings[key];
+  }
+
   return result;
 }
 
