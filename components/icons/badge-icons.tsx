@@ -152,7 +152,7 @@ const paths: Record<string, (p: IconProps) => React.ReactNode> = {
     <Svg {...p}>
       <circle cx="9" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.85" />
       <circle cx="15.5" cy="10.5" r="2" stroke="currentColor" strokeWidth="1.85" />
-      <path d="M5.5 18.5c0-2.8 1.8-4.5 3.5-4.5s3.5 1.7 3.5 4.5M13 18.5c0-2.2 1.2-3.5 2.5-3.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
+      <path d="M5.5 18.5c0-2.8 1.8-4.5 3.5-4.5s3.5 1.7 3.5 4.5M12.5 18.5c0-2.2 1.5-3.5 3-3.5s3 1.3 3 3.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
       <path d="M16.5 8.5h3.5v3.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
       <text x="17.2" y="11.2" textAnchor="middle" fill="currentColor" fontSize="4.5" fontWeight="700">100</text>
     </Svg>

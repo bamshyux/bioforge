@@ -160,7 +160,7 @@ export function BadgeGlyph({ slug, color }: { slug: string; color: string }): Re
           <circle cx="9" cy="10" r="2.8" fill={c} />
           <path d="M4.5 18c0-2.8 2-4.5 4.5-4.5s4.5 1.7 4.5 4.5" fill={c} />
           <circle cx="16" cy="10.5" r="2.2" fill={c} opacity="0.75" />
-          <path d="M13 17.5h6" stroke={c} strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M11.5 18c0-2.2 1.3-3.5 4.5-3.5s4.5 1.3 4.5 3.5" fill={c} opacity="0.75" />
         </>
       );
 
