@@ -13,6 +13,11 @@ import type {
 } from "@/lib/types/profile-preset";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { omitUnsupportedSettingsColumns, formatSchemaError } from "@/lib/db/validate-schema";
+import {
+  BACKGROUND_PRESET_SELECT,
+  normalizePresetBackgroundSettings,
+  pickBackgroundPresetSettings,
+} from "@/lib/profile-presets/background-settings";
 import { createClient } from "@/lib/supabase/server";
 
 const SETTINGS_EXCLUDE = new Set([
@@ -32,29 +37,29 @@ const SETTINGS_EXCLUDE = new Set([
   "discord_show_lanyard_hint",
 ]);
 
-/** Always persisted so presets restore page + enter-gate backgrounds. */
-const BACKGROUND_PRESET_KEYS = [
-  "background_type",
-  "background_color",
-  "background_image_url",
-  "background_video_url",
-  "gradient_colors",
-  "animated_gradient",
-  "particle_effect",
-  "overlay_opacity",
-  "vignette",
-  "noise_texture",
-  "enter_gate_background_type",
-  "enter_gate_background_color",
-  "enter_gate_background_image_url",
-  "enter_gate_background_video_url",
-  "enter_gate_gradient_colors",
-  "enter_gate_animated_gradient",
-  "enter_gate_overlay_opacity",
-  "enter_gate_vignette",
-  "enter_gate_noise",
-  "enter_gate_particle_effect",
-] as const satisfies readonly (keyof ProfileSettings)[];
+function parsePresetSettingsRecord(raw: unknown): Record<string, unknown> {
+  if (!raw) return {};
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+}
+
+async function readBackgroundColumnsFromDb(profileId: string): Promise<Record<string, unknown>> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profile_settings")
+    .select(BACKGROUND_PRESET_SELECT)
+    .eq("profile_id", profileId)
+    .maybeSingle();
+
+  return (data ?? {}) as Record<string, unknown>;
+}
 
 function extractPresetSettings(settings: ProfileSettings): Record<string, unknown> {
   const result: Record<string, unknown> = {};
@@ -64,11 +69,8 @@ function extractPresetSettings(settings: ProfileSettings): Record<string, unknow
     }
   }
 
-  for (const key of BACKGROUND_PRESET_KEYS) {
-    result[key] = settings[key];
-  }
-
-  return result;
+  const background = pickBackgroundPresetSettings({ ...result, ...settings });
+  return { ...result, ...background };
 }
 
 function resolveFeaturedLinkIndex(
@@ -81,10 +83,11 @@ function resolveFeaturedLinkIndex(
 }
 
 export async function captureProfilePresetSnapshot(userId: string): Promise<ProfilePresetData> {
-  const [profile, settings, links, embeds, featuredBlocks, profileBadges, discordWidget] =
+  const [profile, settings, backgroundColumns, links, embeds, featuredBlocks, profileBadges, discordWidget] =
     await Promise.all([
       getProfileByUserId(userId),
       getSettingsByProfileId(userId),
+      readBackgroundColumnsFromDb(userId),
       getLinksByProfileId(userId),
       getEmbedsByProfileId(userId),
       getFeaturedBlocksByProfileId(userId),
@@ -92,9 +95,17 @@ export async function captureProfilePresetSnapshot(userId: string): Promise<Prof
       getDiscordStatusWidget(userId),
     ]);
 
+  const settingsForPreset = {
+    ...settings,
+    ...normalizePresetBackgroundSettings({
+      ...settings,
+      ...backgroundColumns,
+    }),
+  } as ProfileSettings;
+
   let customTheme: ProfilePresetData["customTheme"] = null;
-  if (settings.layout === "custom" && settings.custom_theme_id) {
-    const theme = await getCustomThemeById(settings.custom_theme_id, userId);
+  if (settingsForPreset.layout === "custom" && settingsForPreset.custom_theme_id) {
+    const theme = await getCustomThemeById(settingsForPreset.custom_theme_id, userId);
     if (theme) {
       customTheme = { name: theme.name, css: theme.css };
     }
@@ -105,10 +116,10 @@ export async function captureProfilePresetSnapshot(userId: string): Promise<Prof
         is_enabled: discordWidget.is_enabled,
         config: discordWidget.config,
       }
-    : settings.show_discord_status
+    : settingsForPreset.show_discord_status
       ? {
-          is_enabled: settings.show_discord_status,
-          config: settings.discord_card_config,
+          is_enabled: settingsForPreset.show_discord_status,
+          config: settingsForPreset.discord_card_config,
         }
       : null;
 
@@ -120,7 +131,7 @@ export async function captureProfilePresetSnapshot(userId: string): Promise<Prof
       avatar_url: profile?.avatar_url ?? null,
       banner_url: profile?.banner_url ?? null,
     },
-    settings: extractPresetSettings(settings),
+    settings: extractPresetSettings(settingsForPreset),
     links: links.map((link) => ({
       title: link.title,
       url: link.url,
@@ -158,7 +169,7 @@ export async function captureProfilePresetSnapshot(userId: string): Promise<Prof
     })),
     discordWidget: discordWidgetSnapshot,
     customTheme,
-    featuredLinkIndex: resolveFeaturedLinkIndex(links, settings.featured_link_id),
+    featuredLinkIndex: resolveFeaturedLinkIndex(links, settingsForPreset.featured_link_id),
   };
 }
 
@@ -182,7 +193,7 @@ function parsePresetData(raw: unknown): ProfilePresetData | null {
       avatar_url: data.profile.avatar_url ?? null,
       banner_url: data.profile.banner_url ?? null,
     },
-    settings: (data.settings ?? {}) as Record<string, unknown>,
+    settings: normalizePresetBackgroundSettings(parsePresetSettingsRecord(data.settings)),
     links: Array.isArray(data.links) ? data.links : [],
     embeds: Array.isArray(data.embeds) ? data.embeds : [],
     featuredBlocks: Array.isArray(data.featuredBlocks) ? data.featuredBlocks : [],
@@ -249,8 +260,10 @@ export async function applyProfilePresetSnapshot(
   const supabase = await createClient();
   const customThemeId = await resolveCustomThemeId(userId, data);
 
+  const normalizedBackground = normalizePresetBackgroundSettings(data.settings);
   const settingsPatch: Record<string, unknown> = {
     ...data.settings,
+    ...normalizedBackground,
     custom_theme_id: customThemeId,
   };
 

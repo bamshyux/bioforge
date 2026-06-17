@@ -1,4 +1,5 @@
 import { mergeSettings } from "@/lib/settings";
+import { normalizePresetBackgroundSettings } from "@/lib/profile-presets/background-settings";
 import { scopeProfileCss } from "@/lib/themes/scope-css";
 import type { ProfileBadge } from "@/lib/types/badge";
 import type { ProfileEmbed } from "@/lib/types/embed";
@@ -46,9 +47,12 @@ export function buildProfileViewFromPreset({
   };
 
   const presetLayout = presetData.settings.layout as ProfileLayout | undefined;
+  const normalizedPresetSettings = normalizePresetBackgroundSettings(
+    presetData.settings as Record<string, unknown>,
+  );
   const settings = mergeSettings(
     {
-      ...(presetData.settings as Partial<ProfileSettings>),
+      ...(normalizedPresetSettings as Partial<ProfileSettings>),
       show_discord_status: presetData.discordWidget?.is_enabled ?? false,
       discord_card_config: presetData.discordWidget?.config ?? undefined,
       layout: presetData.customTheme?.css?.trim() ? "custom" : presetLayout,

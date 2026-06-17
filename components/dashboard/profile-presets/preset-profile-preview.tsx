@@ -69,7 +69,7 @@ export function PresetProfilePreview({
     <div className="relative h-[210px] w-full overflow-hidden bg-[#090909] sm:h-[230px]">
       {fontUrl ? <link rel="stylesheet" href={fontUrl} /> : null}
       <ProfileBackground settings={preview.settings} contained />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
         <div
           className="absolute left-1/2 top-3 origin-top"
           style={{

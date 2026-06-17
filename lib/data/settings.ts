@@ -23,6 +23,13 @@ export async function getSettingsByProfileId(
       row.gradient_colors = undefined;
     }
   }
+  if (row?.enter_gate_gradient_colors && typeof row.enter_gate_gradient_colors === "string") {
+    try {
+      row.enter_gate_gradient_colors = JSON.parse(row.enter_gate_gradient_colors as unknown as string);
+    } catch {
+      row.enter_gate_gradient_colors = undefined;
+    }
+  }
 
   let settings = mergeSettings(row, profileId);
   const widget = await getDiscordStatusWidget(profileId);
