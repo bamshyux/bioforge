@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { parsePresetData } from "@/lib/profile-presets/snapshot";
+import type { ProfilePresetData } from "@/lib/types/profile-preset";
 import type {
   CommunityThemeCategory,
   CommunityThemeListing,
@@ -31,6 +33,7 @@ type ListingRow = {
   visibility: CommunityThemeVisibility;
   preview_image_url: string | null;
   preview_style: string;
+  published_preset_data?: unknown;
   like_count: number | null;
   install_count: number | null;
   is_staff_pick: boolean;
@@ -70,6 +73,9 @@ function mapListing(row: ListingRow, extras?: Partial<CommunityThemeListing>): C
     visibility: row.visibility,
     preview_image_url: row.preview_image_url,
     preview_style: row.preview_style,
+    published_preset_data: row.published_preset_data
+      ? parsePresetData(row.published_preset_data)
+      : null,
     like_count: Number(row.like_count) || 0,
     install_count: Number(row.install_count) || 0,
     is_staff_pick: row.is_staff_pick,
@@ -127,7 +133,7 @@ export async function searchCommunityThemes(options: {
     .select(
       `
         id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, like_count, install_count, is_staff_pick,
+        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
       `,
@@ -252,7 +258,7 @@ export async function getMyPublishedThemes(userId: string): Promise<CommunityThe
     .select(
       `
         id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, like_count, install_count, is_staff_pick,
+        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
       `,
@@ -275,7 +281,7 @@ export async function getCommunityThemeListingById(
     .select(
       `
         id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, like_count, install_count, is_staff_pick,
+        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
         published_at, created_at, updated_at,
         profiles:author_id (username, display_name, avatar_url)
       `,
@@ -342,11 +348,17 @@ export async function getListingForPreset(presetId: string, userId: string) {
 export async function getPresetPreviewData(
   listingId: string,
   userId?: string,
-): Promise<{ name: string; preset_data: unknown } | null> {
+): Promise<{ name: string; preset_data: ProfilePresetData } | null> {
   const listing = await getCommunityThemeListingById(listingId, userId);
-  if (!listing || listing.listing_type !== "profile_preset" || !listing.profile_preset_id) {
+  if (!listing || listing.listing_type !== "profile_preset") {
     return null;
   }
+
+  if (listing.published_preset_data) {
+    return { name: listing.title, preset_data: listing.published_preset_data };
+  }
+
+  if (!listing.profile_preset_id) return null;
 
   const supabase = createAdminClient() ?? (await createClient());
   const { data } = await supabase
@@ -355,8 +367,9 @@ export async function getPresetPreviewData(
     .eq("id", listing.profile_preset_id)
     .maybeSingle();
 
-  if (!data?.preset_data) return null;
-  return { name: String(data.name), preset_data: data.preset_data };
+  const presetData = data?.preset_data ? parsePresetData(data.preset_data) : null;
+  if (!presetData) return null;
+  return { name: String(data?.name ?? listing.title), preset_data: presetData };
 }
 
 export async function getThemePreviewCss(listingId: string, userId?: string): Promise<string | null> {

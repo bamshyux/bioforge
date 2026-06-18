@@ -17,7 +17,9 @@ import type {
 } from "@/lib/types/community-theme";
 import { MAX_CUSTOM_THEMES } from "@/lib/types/custom-theme";
 import { MAX_PROFILE_PRESETS } from "@/lib/types/profile-preset";
+import type { ProfilePresetData } from "@/lib/types/profile-preset";
 import { resolvePresetThumbnailUrl } from "@/lib/profile-presets/snapshot";
+import { resolveCommunityPresetSnapshot } from "@/lib/profile-presets/community-snapshot";
 import { parsePresetData } from "@/lib/profile-presets/snapshot";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -188,6 +190,7 @@ export async function publishCommunityProfilePresetAction(input: {
     listing_type: "profile_preset" as const,
     theme_id: null,
     profile_preset_id: input.presetId,
+    published_preset_data: presetData,
     author_id: userId,
     title,
     description,
@@ -378,22 +381,39 @@ export async function installCommunityThemeAction(
 async function installCommunityProfilePresetListing(
   listing: Awaited<ReturnType<typeof getCommunityThemeListingById>> & {
     profile_preset_id: string | null;
+    published_preset_data?: ProfilePresetData | null;
   },
   userId: string,
   applyAfter: boolean,
 ): Promise<CommunityThemeFormState> {
-  if (!listing?.profile_preset_id) return { error: "Preset source not found." };
-
-  if (listing.author_id === userId) {
-    const { applyProfilePresetAction } = await import("@/app/actions/profile-presets");
-    const result = await applyProfilePresetAction(listing.profile_preset_id);
-    return result.error
-      ? { error: result.error }
-      : { success: "Your preset has been applied to your profile." };
-  }
-
   const admin = createAdminClient();
   const client = admin ?? (await createClient());
+
+  let fallbackPresetData: unknown = null;
+  if (listing.profile_preset_id) {
+    const { data: sourcePreset } = await client
+      .from("profile_presets")
+      .select("preset_data, thumbnail_url")
+      .eq("id", listing.profile_preset_id)
+      .maybeSingle();
+    fallbackPresetData = sourcePreset?.preset_data ?? null;
+  }
+
+  const snapshot = resolveCommunityPresetSnapshot(
+    listing.published_preset_data,
+    fallbackPresetData,
+  );
+  if (!snapshot) return { error: "Preset source not found." };
+
+  if (listing.author_id === userId) {
+    const applyResult = await applyProfilePresetSnapshot(userId, snapshot);
+    if (applyResult.error) return { error: applyResult.error };
+    if (listing.profile_preset_id) {
+      await setActivePresetId(userId, listing.profile_preset_id);
+    }
+    await revalidateCommunity(userId);
+    return { success: "Preset applied to your profile." };
+  }
 
   const { data: existingInstall } = await client
     .from("community_theme_installs")
@@ -404,13 +424,19 @@ async function installCommunityProfilePresetListing(
 
   if (existingInstall?.installed_preset_id) {
     if (applyAfter) {
-      const result = await applyProfilePresetSnapshot(userId, (
-        await client
-          .from("profile_presets")
-          .select("preset_data")
-          .eq("id", existingInstall.installed_preset_id)
-          .maybeSingle()
-      ).data?.preset_data);
+      const { data: installedPreset } = await client
+        .from("profile_presets")
+        .select("preset_data")
+        .eq("id", existingInstall.installed_preset_id)
+        .maybeSingle();
+
+      const installedSnapshot = resolveCommunityPresetSnapshot(
+        listing.published_preset_data,
+        installedPreset?.preset_data ?? snapshot,
+      );
+      if (!installedSnapshot) return { error: "Preset source not found." };
+
+      const result = await applyProfilePresetSnapshot(userId, installedSnapshot);
       if (result.error) return { error: result.error };
       await setActivePresetId(userId, existingInstall.installed_preset_id);
     }
@@ -419,14 +445,6 @@ async function installCommunityProfilePresetListing(
       presetId: existingInstall.installed_preset_id,
     };
   }
-
-  const { data: sourcePreset } = await client
-    .from("profile_presets")
-    .select("preset_data, thumbnail_url")
-    .eq("id", listing.profile_preset_id)
-    .maybeSingle();
-
-  if (!sourcePreset?.preset_data) return { error: "Preset source not found." };
 
   const { count } = await client
     .from("profile_presets")
@@ -446,8 +464,8 @@ async function installCommunityProfilePresetListing(
     .insert({
       user_id: userId,
       name: copyName,
-      thumbnail_url: listing.preview_image_url ?? sourcePreset.thumbnail_url ?? null,
-      preset_data: sourcePreset.preset_data,
+      thumbnail_url: listing.preview_image_url ?? resolvePresetThumbnailUrl(snapshot) ?? null,
+      preset_data: snapshot,
     })
     .select("id")
     .single();
@@ -465,7 +483,7 @@ async function installCommunityProfilePresetListing(
   if (installError) return { error: installError.message };
 
   if (applyAfter) {
-    const applyResult = await applyProfilePresetSnapshot(userId, sourcePreset.preset_data);
+    const applyResult = await applyProfilePresetSnapshot(userId, snapshot);
     if (applyResult.error) {
       return {
         success: "Preset saved to your library, but could not apply automatically.",

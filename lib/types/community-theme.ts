@@ -1,3 +1,5 @@
+import type { ProfilePresetData } from "@/lib/types/profile-preset";
+
 export type CommunityThemeListingType = "theme" | "profile_preset";
 
 export type CommunityThemeVisibility = "private" | "public" | "open_source";
@@ -49,6 +51,7 @@ export type CommunityThemeListing = {
   creator_username: string;
   creator_display_name: string;
   creator_avatar_url: string | null;
+  published_preset_data?: ProfilePresetData | null;
   liked_by_me?: boolean;
   installed_by_me?: boolean;
 };

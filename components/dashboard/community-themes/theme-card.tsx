@@ -95,7 +95,11 @@ export function CommunityThemeCard({
         style={{ animationDelay: `${index * 50}ms` }}
       >
         <button type="button" onClick={onPreview} className="text-left">
-          <CommunityThemePreviewCard theme={theme} />
+          <CommunityThemePreviewCard
+            theme={theme}
+            presetData={theme.published_preset_data ?? undefined}
+            presetName={theme.title}
+          />
         </button>
 
         <div className="flex flex-1 flex-col p-4">
