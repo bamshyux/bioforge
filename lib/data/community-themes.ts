@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { resolveCommunityPresetSnapshot } from "@/lib/profile-presets/community-snapshot";
 import { parsePresetData } from "@/lib/profile-presets/snapshot";
 import type { ProfilePresetData } from "@/lib/types/profile-preset";
 import type {
@@ -89,6 +90,83 @@ function mapListing(row: ListingRow, extras?: Partial<CommunityThemeListing>): C
   };
 }
 
+function listingSelect(includePublishedSnapshot: boolean): string {
+  const snapshotColumn = includePublishedSnapshot ? "published_preset_data, " : "";
+  return `
+    id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
+    preview_image_url, preview_style, ${snapshotColumn}like_count, install_count, is_staff_pick,
+    published_at, created_at, updated_at,
+    profiles:author_id (username, display_name, avatar_url)
+  `;
+}
+
+function missingPublishedSnapshotColumn(error: { message?: string; code?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === "42703" || error.message?.includes("published_preset_data") === true;
+}
+
+export function isMissingPublishedPresetSnapshotColumn(error: {
+  message?: string;
+  code?: string;
+} | null): boolean {
+  return missingPublishedSnapshotColumn(error);
+}
+
+type ListingQueryResult = {
+  data: ListingRow[] | null;
+  count?: number | null;
+  error: { message?: string; code?: string } | null;
+};
+
+async function attachLivePresetSnapshots(
+  supabase: Awaited<ReturnType<typeof db>>,
+  rows: ListingRow[],
+): Promise<void> {
+  const presetIds = [
+    ...new Set(
+      rows
+        .filter(
+          (row) =>
+            row.listing_type === "profile_preset" &&
+            row.profile_preset_id &&
+            !resolveCommunityPresetSnapshot(row.published_preset_data),
+        )
+        .map((row) => row.profile_preset_id as string),
+    ),
+  ];
+
+  if (presetIds.length === 0) return;
+
+  const { data: presets } = await supabase
+    .from("profile_presets")
+    .select("id, preset_data")
+    .in("id", presetIds);
+
+  const presetDataById = new Map((presets ?? []).map((preset) => [preset.id, preset.preset_data]));
+  for (const row of rows) {
+    if (!row.profile_preset_id || row.published_preset_data) continue;
+    const livePresetData = presetDataById.get(row.profile_preset_id);
+    if (livePresetData) {
+      row.published_preset_data = livePresetData;
+    }
+  }
+}
+
+async function queryListingsWithFallback(
+  run: (select: string) => PromiseLike<ListingQueryResult>,
+): Promise<ListingQueryResult> {
+  let result = await run(listingSelect(true));
+  if (!missingPublishedSnapshotColumn(result.error)) {
+    return result;
+  }
+
+  result = await run(listingSelect(false));
+  if (result.data?.length) {
+    await attachLivePresetSnapshots(await db(), result.data);
+  }
+  return result;
+}
+
 function sortColumn(sort: CommunityThemeSort): { column: string; ascending: boolean } {
   switch (sort) {
     case "most_installed":
@@ -128,46 +206,38 @@ export async function searchCommunityThemes(options: {
   const to = from + pageSize - 1;
   const { column, ascending } = sortColumn(sort);
 
-  let request = supabase
-    .from("community_theme_listings")
-    .select(
-      `
-        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
-        published_at, created_at, updated_at,
-        profiles:author_id (username, display_name, avatar_url)
-      `,
-      { count: "exact" },
-    );
+  const { data, count, error } = await queryListingsWithFallback((select) => {
+    let request = supabase.from("community_theme_listings").select(select, { count: "exact" });
 
-  if (options.authorId) {
-    request = request.eq("author_id", options.authorId);
-  } else {
-    request = request.in("visibility", ["public", "open_source"]).not("published_at", "is", null);
-  }
+    if (options.authorId) {
+      request = request.eq("author_id", options.authorId);
+    } else {
+      request = request.in("visibility", ["public", "open_source"]).not("published_at", "is", null);
+    }
 
-  if (options.staffPickOnly) {
-    request = request.eq("is_staff_pick", true);
-  }
+    if (options.staffPickOnly) {
+      request = request.eq("is_staff_pick", true);
+    }
 
-  if (options.publishedSince) {
-    request = request.gte("published_at", options.publishedSince);
-  }
+    if (options.publishedSince) {
+      request = request.gte("published_at", options.publishedSince);
+    }
 
-  if (category !== "all") {
-    request = request.eq("category", category);
-  }
+    if (category !== "all") {
+      request = request.eq("category", category);
+    }
 
-  if (listingType !== "all") {
-    request = request.eq("listing_type", listingType);
-  }
+    if (listingType !== "all") {
+      request = request.eq("listing_type", listingType);
+    }
 
-  if (query) {
-    const term = `%${query}%`;
-    request = request.or(`title.ilike.${term},description.ilike.${term}`);
-  }
+    if (query) {
+      const term = `%${query}%`;
+      request = request.or(`title.ilike.${term},description.ilike.${term}`);
+    }
 
-  const { data, count, error } = await request.order(column, { ascending }).range(from, to);
+    return request.order(column, { ascending }).range(from, to);
+  });
 
   if (error) {
     return {
@@ -253,18 +323,13 @@ export async function getFeaturedCommunityThemeSections(userId?: string) {
 
 export async function getMyPublishedThemes(userId: string): Promise<CommunityThemeListing[]> {
   const supabase = await db();
-  const { data } = await supabase
-    .from("community_theme_listings")
-    .select(
-      `
-        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
-        published_at, created_at, updated_at,
-        profiles:author_id (username, display_name, avatar_url)
-      `,
-    )
-    .eq("author_id", userId)
-    .order("updated_at", { ascending: false });
+  const { data } = await queryListingsWithFallback((select) =>
+    supabase
+      .from("community_theme_listings")
+      .select(select)
+      .eq("author_id", userId)
+      .order("updated_at", { ascending: false }),
+  );
 
   return (data ?? [])
     .map((row) => mapListing(row as ListingRow))
@@ -276,18 +341,24 @@ export async function getCommunityThemeListingById(
   userId?: string,
 ): Promise<CommunityThemeListing | null> {
   const supabase = await db();
-  const { data } = await supabase
+  let { data, error } = await supabase
     .from("community_theme_listings")
-    .select(
-      `
-        id, listing_type, theme_id, profile_preset_id, author_id, title, description, tags, category, visibility,
-        preview_image_url, preview_style, published_preset_data, like_count, install_count, is_staff_pick,
-        published_at, created_at, updated_at,
-        profiles:author_id (username, display_name, avatar_url)
-      `,
-    )
+    .select(listingSelect(true))
     .eq("id", listingId)
     .maybeSingle();
+
+  if (missingPublishedSnapshotColumn(error)) {
+    ({ data, error } = await supabase
+      .from("community_theme_listings")
+      .select(listingSelect(false))
+      .eq("id", listingId)
+      .maybeSingle());
+    if (data) {
+      await attachLivePresetSnapshots(supabase, [data as ListingRow]);
+    }
+  } else if (error) {
+    return null;
+  }
 
   if (!data) return null;
 

@@ -4,7 +4,7 @@ import { applyCustomThemeAction } from "@/app/actions/custom-themes";
 import { applyProfilePresetSnapshot } from "@/lib/profile-presets/snapshot";
 import { setActivePresetId } from "@/lib/data/profile-presets";
 import { revalidateUserProfile, getAuthenticatedUserId } from "@/lib/actions/auth";
-import { getCommunityThemeListingById } from "@/lib/data/community-themes";
+import { getCommunityThemeListingById, isMissingPublishedPresetSnapshotColumn } from "@/lib/data/community-themes";
 import { rejectIfModerated } from "@/lib/moderation/validate";
 import { guardSensitiveAction } from "@/lib/security/guard-action";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -213,19 +213,35 @@ export async function publishCommunityProfilePresetAction(input: {
   let listingId: string;
 
   if (existing?.id) {
-    const { error } = await supabase
+    let { error } = await supabase
       .from("community_theme_listings")
       .update(payload)
       .eq("id", existing.id)
       .eq("author_id", userId);
+    if (error && isMissingPublishedPresetSnapshotColumn(error)) {
+      const { published_preset_data: _snapshot, ...payloadWithoutSnapshot } = payload;
+      ({ error } = await supabase
+        .from("community_theme_listings")
+        .update(payloadWithoutSnapshot)
+        .eq("id", existing.id)
+        .eq("author_id", userId));
+    }
     if (error) return { error: error.message };
     listingId = existing.id;
   } else {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("community_theme_listings")
       .insert(payload)
       .select("id")
       .single();
+    if (error && isMissingPublishedPresetSnapshotColumn(error)) {
+      const { published_preset_data: _snapshot, ...payloadWithoutSnapshot } = payload;
+      ({ data, error } = await supabase
+        .from("community_theme_listings")
+        .insert(payloadWithoutSnapshot)
+        .select("id")
+        .single());
+    }
     if (error) return { error: error.message };
     listingId = data.id;
   }
