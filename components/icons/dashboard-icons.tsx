@@ -164,6 +164,53 @@ export function IconEye(p: IconProps) {
   );
 }
 
+export function IconCode(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <path d="M9 8l-4 4 4 4" />
+      <path d="M15 8l4 4-4 4" />
+    </Icon>
+  );
+}
+
+export function IconGuestbook(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <path d="M4 5h16v12H7l-3 3V5z" />
+      <path d="M8 10h8M8 13h5" />
+    </Icon>
+  );
+}
+
+export function IconEmbed(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M10 9.5v5l5-2.5-5-2.5z" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
+export function IconWidget(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <rect x="3" y="3" width="8" height="8" rx="1.5" />
+      <rect x="13" y="3" width="8" height="8" rx="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" />
+      <rect x="13" y="13" width="8" height="8" rx="1.5" />
+    </Icon>
+  );
+}
+
+export function IconVideo(p: IconProps) {
+  return (
+    <Icon {...p}>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <path d="M10 10.5v3l4-1.5-4-1.5z" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
 export function accentStyle() {
   return { color: BRAND.accent };
 }

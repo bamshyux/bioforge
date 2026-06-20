@@ -325,10 +325,12 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
   },
 ];
 
+import type { SearchIconId } from "@/lib/dashboard/search-icons";
+
 export type DashboardSearchEntry = DashboardNavItem & {
   section: string;
   sectionId: string;
-  emoji?: string;
+  iconId?: SearchIconId;
   priority?: number;
 };
 

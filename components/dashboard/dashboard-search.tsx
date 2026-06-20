@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { resolveSearchIcon } from "@/lib/dashboard/search-icons";
 import { searchDashboardIndex } from "@/lib/dashboard/search";
 
 export function DashboardSearch() {
@@ -116,7 +117,9 @@ export function DashboardSearch() {
                   No matching pages — try &ldquo;music&rdquo;, &ldquo;guestbook&rdquo;, or &ldquo;css&rdquo;
                 </li>
               ) : (
-                results.map((entry, i) => (
+                results.map((entry, i) => {
+                  const Icon = resolveSearchIcon(entry);
+                  return (
                   <li key={`${entry.href}-${entry.label}`}>
                     <button
                       type="button"
@@ -125,10 +128,8 @@ export function DashboardSearch() {
                         i === activeIndex ? "bg-white/[0.08]" : "hover:bg-white/[0.04]"
                       }`}
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-base">
-                        {entry.emoji ?? (
-                          entry.Icon ? <entry.Icon size={18} className="text-neutral-400" /> : "📄"
-                        )}
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-white">
+                        <Icon size={18} className="text-white" />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium text-white">{entry.label}</span>
@@ -140,7 +141,8 @@ export function DashboardSearch() {
                       <span className="shrink-0 text-[10px] uppercase tracking-wider text-neutral-600">Open</span>
                     </button>
                   </li>
-                ))
+                  );
+                })
               )}
             </ul>
             <div className="border-t border-white/[0.06] px-4 py-2.5 text-[11px] text-neutral-600">
