@@ -9,7 +9,7 @@ function isMonochromeColor(color: string) {
   return color.trim().toLowerCase() === MONOCHROME_FILL;
 }
 
-/** Block-letter OG inside a vertical hexagon — muted gold with white letters. */
+/** Cozy home mark for OG — warm gold house, readable at badge size. */
 export function OgBadgeMark({
   monochrome = false,
   idPrefix,
@@ -20,39 +20,80 @@ export function OgBadgeMark({
   const uid = useId().replace(/:/g, "");
   const prefix = idPrefix ?? uid;
   const goldId = `bf-og-gold-${prefix}`;
+  const roofId = `bf-og-roof-${prefix}`;
 
-  const hexFill = monochrome ? "#d4d4d8" : `url(#${goldId})`;
-  const letter = monochrome ? "#18181b" : "#f8f4ea";
+  const roofFill = monochrome ? "#d4d4d8" : `url(#${roofId})`;
+  const wallFill = monochrome ? "#a1a1aa" : `url(#${goldId})`;
+  const trim = monochrome ? "#18181b" : "#f8f4ea";
+  const accent = monochrome ? "#52525b" : "#8a7024";
 
   return (
     <>
       {!monochrome && (
         <defs>
-          <linearGradient id={goldId} x1="28%" y1="10%" x2="72%" y2="90%">
-            <stop offset="0%" stopColor="#d9c56a" />
-            <stop offset="50%" stopColor="#b8962e" />
+          <linearGradient id={goldId} x1="30%" y1="20%" x2="70%" y2="95%">
+            <stop offset="0%" stopColor="#e8d078" />
+            <stop offset="45%" stopColor="#c9a83a" />
             <stop offset="100%" stopColor="#8a7024" />
+          </linearGradient>
+          <linearGradient id={roofId} x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="#f0e08a" />
+            <stop offset="100%" stopColor="#b8962e" />
           </linearGradient>
         </defs>
       )}
 
-      <path d="M12 2.05 19.95 6.58v10.84L12 21.95 4.05 17.42V6.58Z" fill={hexFill} />
+      {/* Roof */}
+      <path d="M12 2.6 20.6 10.4H3.4L12 2.6z" fill={roofFill} />
 
+      {/* Chimney */}
+      <path d="M15.8 5.2h2.1v4.8h-2.1V5.2z" fill={wallFill} />
+      {!monochrome && (
+        <path
+          d="M16.2 4.4c.55-.45 1.05-.35 1.35.15.35.6-.05 1.15-.75 1.05-.45-.05-.75-.55-.6-1.2z"
+          fill="#fff8e7"
+          opacity="0.55"
+        />
+      )}
+
+      {/* House body */}
       <path
-        fill={letter}
-        fillRule="evenodd"
-        d="M11.05 4.1 5.65 7.18v9.64L11.05 19.9V4.1 M8.05 7.95h1.95v8.1H8.05V7.95"
+        d="M5.1 10.4h13.8v9.9c0 .55-.45 1-1 1H6.1c-.55 0-1-.45-1-1v-9.9z"
+        fill={wallFill}
       />
+
+      {/* Door */}
       <path
-        fill={letter}
-        fillRule="evenodd"
-        d="M12.95 4.1l5.55 3.08v9.64L12.95 19.9V4.1 M14.95 7.95h2.5v8.1h-2.5v-2.35h1.35v-1.15h-1.35V7.95"
+        d="M10.35 14.8a1.65 1.65 0 0 1 3.3 0V21H10.35v-6.2z"
+        fill={trim}
       />
+      <circle cx="12" cy="17.8" r="0.55" fill={accent} opacity={monochrome ? 0.8 : 1} />
+
+      {/* Windows */}
+      <rect x="6.6" y="12.1" width="2.5" height="2.5" rx="0.45" fill={trim} opacity="0.92" />
+      <rect x="14.9" y="12.1" width="2.5" height="2.5" rx="0.45" fill={trim} opacity="0.92" />
+
+      {/* Window crossbars + warm glow */}
+      <path
+        d="M7.85 12.1v2.5M6.6 13.35h2.5M15.15 12.1v2.5M14.9 13.35h2.5"
+        stroke={accent}
+        strokeWidth="0.45"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+
+      {/* Step */}
+      <path d="M8.8 21h6.4v1.15H8.8V21z" fill={monochrome ? "#71717a" : "#7a6420"} />
 
       {!monochrome && (
         <>
-          <circle cx="17.6" cy="5.9" r="0.62" fill="#fff8e7" opacity="0.55" />
-          <circle cx="6.35" cy="6.35" r="0.45" fill="#fff8e7" opacity="0.38" />
+          <circle cx="7.85" cy="13.35" r="0.45" fill="#fff8e7" opacity="0.65" />
+          <circle cx="16.15" cy="13.35" r="0.45" fill="#fff8e7" opacity="0.65" />
+          <path
+            d="M11.15 15.1h1.7v1.05h-1.7V15.1z"
+            fill={accent}
+            opacity="0.35"
+          />
         </>
       )}
     </>
