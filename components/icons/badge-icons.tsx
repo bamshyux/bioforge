@@ -22,7 +22,7 @@ function Svg({ size = 16, children, className = "" }: IconProps & { children: Re
 }
 
 const paths: Record<string, (p: IconProps) => React.ReactNode> = {
-  verified: (p) => <VerifiedBadgeIcon size={p.size ?? 20} className={p.className} />,
+  verified: (p) => <VerifiedBadgeIcon size={p.size ?? 14} className={p.className} />,
   developer: (p) => (
     <Svg {...p}>
       <path

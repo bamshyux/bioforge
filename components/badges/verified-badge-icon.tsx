@@ -16,6 +16,9 @@ function buildScallopPath(cx: number, cy: number, outerR: number, innerR: number
   return `${parts.join(" ")} Z`;
 }
 
+/** Verified scallops extend to the viewBox edge — scale down slightly vs other badge glyphs. */
+const VERIFIED_VISUAL_SCALE = 0.93;
+
 export function VerifiedBadgeIcon({
   size = 22,
   monochrome = false,
@@ -28,11 +31,12 @@ export function VerifiedBadgeIcon({
   const uid = useId().replace(/:/g, "");
   const gradId = `bf-verified-grad-${uid}`;
   const shape = buildScallopPath(12, 12, 11.1, 9.65, 12);
+  const visualSize = Math.max(1, Math.round(size * VERIFIED_VISUAL_SCALE));
 
   return (
     <svg
-      width={size}
-      height={size}
+      width={visualSize}
+      height={visualSize}
       viewBox="0 0 24 24"
       fill="none"
       className={`bf-verified-badge ${className}`.trim()}
