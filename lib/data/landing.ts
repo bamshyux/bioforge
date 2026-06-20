@@ -115,14 +115,12 @@ export async function getLandingStats(): Promise<LandingStats> {
     guestbook,
     themes,
     badges,
-    totalProfileViews,
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }).not("username", "is", null),
     supabase.from("guestbook_entries").select("*", { count: "exact", head: true }),
     supabase.from("custom_themes").select("*", { count: "exact", head: true }),
     supabase.from("profile_badges").select("*", { count: "exact", head: true }),
-    sumPublicProfileViews(supabase),
   ]);
 
   return {
