@@ -3,6 +3,7 @@ import {
   DEFAULT_TESTIMONIALS,
   DEFAULT_THEME_PREVIEWS,
 } from "@/lib/landing/defaults";
+import { isFrozenViewCountProfile } from "@/lib/analytics/frozen-view-count";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -47,7 +48,7 @@ async function sumPublicProfileViews(
     .not("username", "is", null);
 
   const fromViewCounts = (profiles ?? [])
-    .filter((row) => row.uid !== LANDING_EXCLUDED_VIEW_UID)
+    .filter((row) => !isFrozenViewCountProfile(row) && row.uid !== LANDING_EXCLUDED_VIEW_UID)
     .reduce((sum, row) => sum + (Number(row.view_count) || 0), 0);
 
   if (fromViewCounts > 0) return fromViewCounts;
@@ -91,13 +92,17 @@ function mapProfile(row: {
 export async function getLandingStats(): Promise<LandingStats> {
   const supabase = await db();
 
-  const { data: rpcData } = await supabase.rpc("public_platform_stats");
+  const [{ data: rpcData }, totalProfileViews] = await Promise.all([
+    supabase.rpc("public_platform_stats"),
+    sumPublicProfileViews(supabase),
+  ]);
+
   if (rpcData && typeof rpcData === "object") {
     const stats = rpcData as Record<string, number>;
     return {
       total_users: Number(stats.total_users) || 0,
       total_profiles: Number(stats.total_profiles) || 0,
-      total_profile_views: Number(stats.total_profile_views) || 0,
+      total_profile_views: totalProfileViews,
       total_guestbook_posts: Number(stats.total_guestbook_posts) || 0,
       total_custom_themes: Number(stats.total_custom_themes) || 0,
       total_badges_granted: Number(stats.total_badges_granted) || 0,
