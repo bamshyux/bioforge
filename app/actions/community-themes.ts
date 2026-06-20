@@ -243,6 +243,7 @@ export async function publishCommunityProfilePresetAction(input: {
         .single());
     }
     if (error) return { error: error.message };
+    if (!data) return { error: "Failed to publish preset." };
     listingId = data.id;
   }
 

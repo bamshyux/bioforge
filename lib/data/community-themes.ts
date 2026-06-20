@@ -118,6 +118,35 @@ type ListingQueryResult = {
   error: { message?: string; code?: string } | null;
 };
 
+type RawListingQueryResult = {
+  data: unknown;
+  count?: number | null;
+  error: { message?: string; code?: string } | null;
+};
+
+function normalizeListingQueryResult(raw: RawListingQueryResult): ListingQueryResult {
+  return {
+    data: Array.isArray(raw.data) ? (raw.data as ListingRow[]) : null,
+    count: raw.count ?? null,
+    error: raw.error,
+  };
+}
+
+async function queryListingsWithFallback(
+  run: (select: string) => PromiseLike<RawListingQueryResult>,
+): Promise<ListingQueryResult> {
+  let result = normalizeListingQueryResult(await run(listingSelect(true)));
+  if (!missingPublishedSnapshotColumn(result.error)) {
+    return result;
+  }
+
+  result = normalizeListingQueryResult(await run(listingSelect(false)));
+  if (result.data?.length) {
+    await attachLivePresetSnapshots(await db(), result.data);
+  }
+  return result;
+}
+
 async function attachLivePresetSnapshots(
   supabase: Awaited<ReturnType<typeof db>>,
   rows: ListingRow[],
@@ -150,21 +179,6 @@ async function attachLivePresetSnapshots(
       row.published_preset_data = livePresetData;
     }
   }
-}
-
-async function queryListingsWithFallback(
-  run: (select: string) => PromiseLike<ListingQueryResult>,
-): Promise<ListingQueryResult> {
-  let result = await run(listingSelect(true));
-  if (!missingPublishedSnapshotColumn(result.error)) {
-    return result;
-  }
-
-  result = await run(listingSelect(false));
-  if (result.data?.length) {
-    await attachLivePresetSnapshots(await db(), result.data);
-  }
-  return result;
 }
 
 function sortColumn(sort: CommunityThemeSort): { column: string; ascending: boolean } {
@@ -354,7 +368,7 @@ export async function getCommunityThemeListingById(
       .eq("id", listingId)
       .maybeSingle());
     if (data) {
-      await attachLivePresetSnapshots(supabase, [data as ListingRow]);
+      await attachLivePresetSnapshots(supabase, [data as unknown as ListingRow]);
     }
   } else if (error) {
     return null;
@@ -362,7 +376,7 @@ export async function getCommunityThemeListingById(
 
   if (!data) return null;
 
-  const listing = mapListing(data as ListingRow);
+  const listing = mapListing(data as unknown as ListingRow);
   if (!listing) return null;
 
   const isPublic = listing.visibility === "public" || listing.visibility === "open_source";
