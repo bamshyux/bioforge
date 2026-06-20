@@ -14,6 +14,7 @@ import {
   updateProfileVisibilityAction,
   updateUsernameAction,
 } from "@/app/actions/account-settings";
+import { restartDashboardTourAction } from "@/app/actions/onboarding";
 import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
@@ -58,6 +59,8 @@ export function AccountSettingsShell({ data }: { data: AccountSettingsData }) {
 
   const [sessionMsg, setSessionMsg] = useState<string>();
   const [signOutPending, setSignOutPending] = useState(false);
+  const [tourRestartMsg, setTourRestartMsg] = useState<string>();
+  const [tourRestartPending, setTourRestartPending] = useState(false);
 
   const currentSessionHash = data.sessions[0]?.session_token_hash;
 
@@ -70,6 +73,15 @@ export function AccountSettingsShell({ data }: { data: AccountSettingsData }) {
     const result = await revokeSessionAction(id);
     setSessionMsg(result.success ?? result.error);
     router.refresh();
+  }
+
+  async function handleRestartTour() {
+    setTourRestartPending(true);
+    setTourRestartMsg(undefined);
+    const result = await restartDashboardTourAction();
+    setTourRestartMsg(result.success ?? result.error);
+    setTourRestartPending(false);
+    if (result.success) router.push("/dashboard");
   }
 
   return (
@@ -176,6 +188,27 @@ export function AccountSettingsShell({ data }: { data: AccountSettingsData }) {
                       {visibilityPending ? "Saving..." : "Save visibility"}
                     </button>
                   </form>
+                </SettingRow>
+
+                <SettingRow
+                  label="Dashboard tour"
+                  description="Replay the guided walkthrough of the dashboard sections."
+                >
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleRestartTour}
+                      disabled={tourRestartPending}
+                      className={buttonSecondaryClassName}
+                    >
+                      {tourRestartPending ? "Restarting..." : "Restart dashboard tour"}
+                    </button>
+                    {tourRestartMsg ? (
+                      <p className={`text-sm ${tourRestartMsg.includes("Visit") ? "text-emerald-400" : "text-red-400"}`}>
+                        {tourRestartMsg}
+                      </p>
+                    ) : null}
+                  </div>
                 </SettingRow>
 
                 <SettingRow

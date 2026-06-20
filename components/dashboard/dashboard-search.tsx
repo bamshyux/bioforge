@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getDashboardSearchIndex } from "@/lib/dashboard/navigation";
+import { searchDashboardIndex } from "@/lib/dashboard/search";
 
 export function DashboardSearch() {
   const router = useRouter();
@@ -11,23 +11,7 @@ export function DashboardSearch() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const index = useMemo(() => getDashboardSearchIndex(), []);
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return index.slice(0, 12);
-    return index.filter((entry) => {
-      const haystack = [
-        entry.label,
-        entry.description ?? "",
-        entry.section,
-        ...(entry.keywords ?? []),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
-    }).slice(0, 12);
-  }, [index, query]);
+  const results = useMemo(() => searchDashboardIndex(query, 16), [query]);
 
   const navigate = useCallback(
     (href: string) => {
@@ -122,31 +106,38 @@ export function DashboardSearch() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search pages…"
+                placeholder="Try music, change background, badges, CSS…"
                 className="w-full bg-transparent py-4 text-sm text-white outline-none placeholder:text-neutral-600"
               />
             </div>
-            <ul className="max-h-[min(360px,50vh)] overflow-y-auto p-2">
+            <ul className="max-h-[min(400px,55vh)] overflow-y-auto p-2">
               {results.length === 0 ? (
-                <li className="px-3 py-8 text-center text-sm text-neutral-500">No pages found</li>
+                <li className="px-3 py-8 text-center text-sm text-neutral-500">
+                  No matching pages — try &ldquo;music&rdquo;, &ldquo;guestbook&rdquo;, or &ldquo;css&rdquo;
+                </li>
               ) : (
                 results.map((entry, i) => (
                   <li key={`${entry.href}-${entry.label}`}>
                     <button
                       type="button"
                       onClick={() => navigate(entry.href)}
-                      className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
                         i === activeIndex ? "bg-white/[0.08]" : "hover:bg-white/[0.04]"
                       }`}
                     >
-                      <span>
-                        <span className="block text-sm font-medium text-white">{entry.label}</span>
-                        <span className="mt-0.5 block text-xs text-neutral-500">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-base">
+                        {entry.emoji ?? (
+                          entry.Icon ? <entry.Icon size={18} className="text-neutral-400" /> : "📄"
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-white">{entry.label}</span>
+                        <span className="mt-0.5 block truncate text-xs text-neutral-500">
                           {entry.section}
                           {entry.description ? ` · ${entry.description}` : ""}
                         </span>
                       </span>
-                      <span className="shrink-0 text-[10px] uppercase tracking-wider text-neutral-600">Go</span>
+                      <span className="shrink-0 text-[10px] uppercase tracking-wider text-neutral-600">Open</span>
                     </button>
                   </li>
                 ))

@@ -187,7 +187,7 @@ export async function signUpAction(
   try {
     const adminResult = await signUpWithAdmin(email, password);
     if (adminResult === "ok") {
-      redirect("/dashboard");
+      redirect("/dashboard/setup");
     }
 
     if (adminResult.error !== "admin_unavailable") {
@@ -196,7 +196,7 @@ export async function signUpAction(
 
     const publicResult = await signUpWithPublicClient(email, password);
     if (publicResult === "ok") {
-      redirect("/dashboard");
+      redirect("/dashboard/setup");
     }
 
     if (publicResult.error === "email_delivery_failed") {

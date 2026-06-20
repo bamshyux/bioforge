@@ -96,7 +96,7 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         href: "/dashboard/background",
         label: "Background",
         description: "Gradients, video, and particles",
-        keywords: ["background", "gradient", "video", "particles"],
+        keywords: ["background", "gradient", "video", "particles", "change background", "wallpaper", "bg"],
         Icon: IconBackground,
       },
       {
@@ -117,7 +117,7 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         href: "/dashboard/custom-theme",
         label: "Custom Themes",
         description: "Scoped CSS editor",
-        keywords: ["css", "custom", "code"],
+        keywords: ["css", "custom", "code", "stylesheet"],
         Icon: IconEffects,
       },
     ],
@@ -177,7 +177,7 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         href: "/dashboard/music",
         label: "Music",
         description: "Background music player",
-        keywords: ["music", "audio", "player"],
+        keywords: ["music", "audio", "player", "autoplay", "spotify"],
         Icon: IconMusic,
       },
     ],
@@ -328,53 +328,9 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
 export type DashboardSearchEntry = DashboardNavItem & {
   section: string;
   sectionId: string;
+  emoji?: string;
+  priority?: number;
 };
-
-export function getDashboardSearchIndex(): DashboardSearchEntry[] {
-  const entries: DashboardSearchEntry[] = [];
-
-  for (const section of DASHBOARD_SECTIONS) {
-    if (section.href === "/dashboard") {
-      entries.push({
-        href: section.href,
-        label: section.label,
-        description: section.description,
-        section: section.label,
-        sectionId: section.id,
-        Icon: section.Icon,
-        keywords: ["home", "overview", "dashboard"],
-      });
-      continue;
-    }
-
-    for (const item of section.items) {
-      entries.push({
-        ...item,
-        section: section.label,
-        sectionId: section.id,
-      });
-    }
-
-    if (!section.items.some((item) => item.href === section.href)) {
-      entries.push({
-        href: section.href,
-        label: section.label,
-        description: section.description,
-        section: section.label,
-        sectionId: section.id,
-        Icon: section.Icon,
-      });
-    }
-  }
-
-  const seen = new Set<string>();
-  return entries.filter((entry) => {
-    const key = `${entry.href}:${entry.label}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
 
 export function getSectionForPath(pathname: string): DashboardSection | undefined {
   if (pathname === "/dashboard") return DASHBOARD_SECTIONS[0];

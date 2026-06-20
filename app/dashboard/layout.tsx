@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import { syncFounderBadges, syncSignupBadgesAction } from "@/app/actions/badges";
 import { CriedLogo } from "@/components/brand/logo";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { DashboardLayoutBody } from "@/components/dashboard/dashboard-layout-body";
 import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EmailVerificationBanner } from "@/components/dashboard/email-verification-banner";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { ProfilePresetQuickSave } from "@/components/dashboard/profile-presets/profile-preset-quick-save";
 import { ViewLiveProfileButton } from "@/components/dashboard/view-live-profile-button";
+import { getOnboardingState } from "@/lib/data/onboarding";
 import { getProfileByUserId } from "@/lib/data/profiles";
 import { resolveAppliedPresetId } from "@/lib/data/profile-presets";
 import { getAdminAccess } from "@/lib/auth/admin-access";
@@ -36,6 +37,7 @@ export default async function DashboardLayout({
     userData.user?.email && !userData.user.email_confirmed_at,
   );
   const profile = await getProfileByUserId(userId);
+  const onboarding = await getOnboardingState(userId, profile?.username);
   const activePresetId = await resolveAppliedPresetId(userId);
   const adminAccess = await getAdminAccess();
   const showAdminPanel = !!adminAccess;
@@ -68,11 +70,11 @@ export default async function DashboardLayout({
         <EmailVerificationBanner email={userData.user.email} />
       ) : null}
 
-      <DashboardShell>
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-10 px-5 py-10 lg:flex-row lg:items-start lg:gap-12 lg:px-10">
-          <DashboardSidebar showAdminPanel={showAdminPanel} />
-          <main className="min-w-0 flex-1 pb-16">{children}</main>
-        </div>
+      <DashboardShell
+        needsSetupWizard={onboarding.needsSetupWizard}
+        needsDashboardTour={onboarding.needsDashboardTour}
+      >
+        <DashboardLayoutBody showAdminPanel={showAdminPanel}>{children}</DashboardLayoutBody>
       </DashboardShell>
     </div>
   );

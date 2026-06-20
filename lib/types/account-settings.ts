@@ -11,6 +11,8 @@ export type AccountPreferences = {
   show_in_search: boolean;
   hide_view_counts: boolean;
   allow_direct_contact: boolean;
+  onboarding_wizard_completed_at: string | null;
+  dashboard_tour_completed_at: string | null;
   created_at: string;
   updated_at: string;
 };

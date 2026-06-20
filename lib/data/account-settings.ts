@@ -22,6 +22,8 @@ export const DEFAULT_ACCOUNT_PREFERENCES: Omit<
   show_in_search: true,
   hide_view_counts: false,
   allow_direct_contact: true,
+  onboarding_wizard_completed_at: null,
+  dashboard_tour_completed_at: null,
 };
 
 export function hashSessionToken(token: string) {
@@ -82,6 +84,8 @@ function mergeAccountPreferences(
     show_in_search: row?.show_in_search ?? DEFAULT_ACCOUNT_PREFERENCES.show_in_search,
     hide_view_counts: row?.hide_view_counts ?? DEFAULT_ACCOUNT_PREFERENCES.hide_view_counts,
     allow_direct_contact: row?.allow_direct_contact ?? DEFAULT_ACCOUNT_PREFERENCES.allow_direct_contact,
+    onboarding_wizard_completed_at: row?.onboarding_wizard_completed_at ?? null,
+    dashboard_tour_completed_at: row?.dashboard_tour_completed_at ?? null,
     created_at: row?.created_at ?? now,
     updated_at: row?.updated_at ?? now,
   };
