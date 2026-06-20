@@ -1,7 +1,9 @@
 import { ImageResponse } from "next/og";
+import type { ReactElement } from "react";
+import { embedOgImages } from "@/lib/og/embed-images";
+import { getOgFonts } from "@/lib/og/fonts";
 import { DefaultOgCard, OgProfileCard } from "@/lib/og/profile-card";
 import { getOgProfileSnapshot } from "@/lib/og/profile-data";
-import { getOgFonts } from "@/lib/og/fonts";
 
 type RouteContext = {
   params: Promise<{ username: string }>;
@@ -9,22 +11,44 @@ type RouteContext = {
 
 export const revalidate = 300;
 
-export async function GET(_request: Request, context: RouteContext) {
-  const { username } = await context.params;
-  const snapshot = await getOgProfileSnapshot(username);
+const OG_SIZE = { width: 1200, height: 630 } as const;
 
-  let element;
-  if (snapshot) {
-    element = <OgProfileCard profile={snapshot} />;
-  } else {
-    element = <DefaultOgCard />;
+const CACHE_HEADERS = {
+  "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=86400",
+  "Content-Type": "image/png",
+};
+
+async function renderOgImage(element: ReactElement) {
+  let fonts: Awaited<ReturnType<typeof getOgFonts>> | undefined;
+  try {
+    fonts = await getOgFonts();
+  } catch (error) {
+    console.error("[og] font load failed, using default font", error);
   }
 
-  const fonts = await getOgFonts();
-
   return new ImageResponse(element, {
-    width: 1200,
-    height: 630,
+    ...OG_SIZE,
     fonts,
+    headers: CACHE_HEADERS,
   });
+}
+
+export async function GET(_request: Request, context: RouteContext) {
+  try {
+    const { username } = await context.params;
+    const snapshot = await getOgProfileSnapshot(username);
+
+    if (!snapshot) {
+      return await renderOgImage(<DefaultOgCard />);
+    }
+
+    const profile = await embedOgImages(snapshot);
+    return await renderOgImage(<OgProfileCard profile={profile} />);
+  } catch (error) {
+    console.error("[og] render failed", error);
+    return new ImageResponse(<DefaultOgCard />, {
+      ...OG_SIZE,
+      headers: CACHE_HEADERS,
+    });
+  }
 }

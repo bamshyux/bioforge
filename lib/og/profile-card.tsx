@@ -41,7 +41,7 @@ function DefaultAvatar({ name, accent }: { name: string; accent: string }) {
         border: "4px solid rgba(255,255,255,0.18)",
       }}
     >
-      {initial}
+      <span>{initial}</span>
     </div>
   );
 }
@@ -62,11 +62,18 @@ export function DefaultOgCard() {
       }}
     >
       <BrandMark size={72} />
-      <div style={{ marginTop: 28, fontSize: 56, fontWeight: 700, letterSpacing: "-0.03em" }}>
-        cried.bio
+      <div style={{ display: "flex", marginTop: 28, fontSize: 56, fontWeight: 700, letterSpacing: "-0.03em" }}>
+        <span>cried.bio</span>
       </div>
-      <div style={{ marginTop: 14, fontSize: 28, color: "rgba(250,250,250,0.72)" }}>
-        Your bio link, your way
+      <div
+        style={{
+          display: "flex",
+          marginTop: 14,
+          fontSize: 28,
+          color: "rgba(250,250,250,0.72)",
+        }}
+      >
+        <span>Your bio link, your way</span>
       </div>
     </div>
   );
@@ -79,6 +86,8 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
   if (profile.showViews && profile.views != null) {
     stats.push(`${formatCount(profile.views)} views`);
   }
+
+  const visibleBadges = profile.badges.slice(0, 6);
 
   return (
     <div
@@ -93,14 +102,26 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
       }}
     >
       {profile.background.kind === "image" ? (
-        <>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+          }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={profile.background.url}
             alt=""
+            width={1200}
+            height={630}
             style={{
               position: "absolute",
-              inset: 0,
+              top: 0,
+              left: 0,
               width: "100%",
               height: "100%",
               objectFit: "cover",
@@ -109,11 +130,15 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
           <div
             style={{
               position: "absolute",
-              inset: 0,
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
               background: "linear-gradient(135deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 100%)",
             }}
           />
-        </>
+        </div>
       ) : null}
 
       <div
@@ -133,8 +158,8 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
             padding: "34px 38px",
             borderRadius: 28,
             background: cardBg,
-            border: `2px solid ${profile.accentColor}55`,
-            boxShadow: `0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05)`,
+            border: `2px solid ${profile.accentColor}`,
+            boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
@@ -150,7 +175,7 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
                   height: 112,
                   borderRadius: 9999,
                   objectFit: "cover",
-                  border: `4px solid ${profile.accentColor}88`,
+                  border: `4px solid ${profile.accentColor}`,
                 }}
               />
             ) : (
@@ -160,28 +185,32 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
               <div
                 style={{
+                  display: "flex",
                   fontSize: 48,
                   fontWeight: 700,
                   letterSpacing: "-0.03em",
                   lineHeight: 1.05,
                 }}
               >
-                {profile.displayName}
+                <span>{profile.displayName}</span>
               </div>
               <div
                 style={{
+                  display: "flex",
                   fontSize: 26,
                   color: "rgba(250,250,250,0.62)",
-                  fontFamily: "Inter",
                 }}
               >
-                {SITE_HOST}/{profile.username}
+                <span>
+                  {SITE_HOST}/{profile.username}
+                </span>
               </div>
             </div>
           </div>
 
           <div
             style={{
+              display: "flex",
               marginTop: 24,
               fontSize: 28,
               lineHeight: 1.45,
@@ -190,19 +219,12 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
               overflow: "hidden",
             }}
           >
-            {profile.bio}
+            <span>{profile.bio}</span>
           </div>
 
-          {profile.badges.length > 0 ? (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-                marginTop: 22,
-              }}
-            >
-              {profile.badges.map((badge) => (
+          {visibleBadges.length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "row", gap: 10, marginTop: 22 }}>
+              {visibleBadges.map((badge) => (
                 <div
                   key={badge.slug}
                   style={{
@@ -212,7 +234,7 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
                     padding: "8px 14px",
                     borderRadius: 9999,
                     background: "rgba(255,255,255,0.06)",
-                    border: `1px solid ${badge.color}66`,
+                    border: `1px solid ${badge.color}`,
                     color: profile.textColor,
                     fontSize: 20,
                     fontWeight: 600,
@@ -220,13 +242,14 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
                 >
                   <div
                     style={{
+                      display: "flex",
                       width: 12,
                       height: 12,
                       borderRadius: 9999,
                       background: badge.color,
                     }}
                   />
-                  {badge.name}
+                  <span>{badge.name}</span>
                 </div>
               ))}
             </div>
@@ -242,7 +265,9 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
             }}
           >
             {stats.map((stat) => (
-              <div key={stat}>{stat}</div>
+              <div key={stat} style={{ display: "flex" }}>
+                <span>{stat}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -266,7 +291,7 @@ export function OgProfileCard({ profile }: { profile: OgProfileSnapshot }) {
         }}
       >
         <BrandMark size={20} />
-        cried.bio
+        <span>cried.bio</span>
       </div>
     </div>
   );
