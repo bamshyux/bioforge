@@ -11,6 +11,8 @@ import {
 import { FormFeedback } from "@/components/dashboard/form-fields";
 import type { GuestbookEntry, GuestbookFormState } from "@/lib/types/guestbook";
 import type { ProfileSettings } from "@/lib/types/settings";
+import { CardBorderEffect } from "@/components/profile/card-border-effect";
+import { buildCardStyle } from "@/lib/settings";
 
 const initial: GuestbookFormState = {};
 const MAX_VISIBLE_ENTRIES = 6;
@@ -36,8 +38,12 @@ export function ProfileGuestbookSection({
   const hiddenCount = entries.length - visibleEntries.length;
 
   return (
-    <section className="bf-guestbook mt-10 border-t border-white/[0.04] pt-5">
-      <p className="bf-guestbook__label">guestbook</p>
+    <CardBorderEffect settings={settings} target="guestbook" borderRadius={settings.border_radius}>
+      <section
+        className="bf-guestbook mt-10 px-4 py-5"
+        style={buildCardStyle(settings)}
+      >
+        <p className="bf-guestbook__label">guestbook</p>
 
       {visibleEntries.length > 0 ? (
         <ul className="bf-guestbook__entries">
@@ -83,7 +89,8 @@ export function ProfileGuestbookSection({
           <Link href="/dashboard/guestbook">manage</Link>
         </p>
       )}
-    </section>
+      </section>
+    </CardBorderEffect>
   );
 }
 

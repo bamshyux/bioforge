@@ -11,6 +11,11 @@ import {
 } from "@/lib/embeds/config";
 import { getEmbedIframeSrc } from "@/lib/embeds/parse";
 import { isRobloxLinkEmbed, robloxEmbedLinkLabel } from "@/lib/embeds/roblox-profile";
+import { CardBorderEffect } from "@/components/profile/card-border-effect";
+
+function isSpotifyEmbed(embedType: ProfileEmbed["embed_type"]) {
+  return embedType === "spotify_track" || embedType === "spotify_playlist";
+}
 
 function GenericLinkCard({
   embed,
@@ -86,15 +91,16 @@ function RobloxCard({
   }
 
   return (
-    <a
-      href={embed.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="profile-embed block overflow-hidden transition-colors hover:opacity-95"
-      style={style}
-      data-embed-type={embed.embed_type}
-    >
-      <div className={`flex items-center gap-4 p-4 ${config.card_style === "minimal" ? "px-0 py-2" : ""}`}>
+    <CardBorderEffect settings={settings} target="roblox" borderRadius={settings.border_radius}>
+      <a
+        href={embed.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="profile-embed block overflow-hidden transition-colors hover:opacity-95"
+        style={style}
+        data-embed-type={embed.embed_type}
+      >
+        <div className={`flex items-center gap-4 p-4 ${config.card_style === "minimal" ? "px-0 py-2" : ""}`}>
         {showImage && imageUrl ? (
           <img
             src={imageUrl}
@@ -113,8 +119,9 @@ function RobloxCard({
           ) : null}
         </div>
         <span className="shrink-0 text-xs font-medium text-[var(--bf-accent)]">Open →</span>
-      </div>
-    </a>
+        </div>
+      </a>
+    </CardBorderEffect>
   );
 }
 
@@ -136,7 +143,7 @@ function IframeEmbed({
   const ratioClass = aspectRatioClass(config.aspect_ratio);
   const ratioStyle = aspectRatioStyle(config.aspect_ratio, config.compact_player);
 
-  return (
+  const body = (
     <div className="profile-embed overflow-hidden" style={style} data-embed-type={embed.embed_type}>
       {config.show_title ? (
         <div className="border-b border-white/[0.06] px-4 py-2.5">
@@ -156,6 +163,14 @@ function IframeEmbed({
         />
       </div>
     </div>
+  );
+
+  if (!isSpotifyEmbed(embed.embed_type)) return body;
+
+  return (
+    <CardBorderEffect settings={settings} target="spotify" borderRadius={settings.border_radius}>
+      {body}
+    </CardBorderEffect>
   );
 }
 

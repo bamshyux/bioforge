@@ -10,6 +10,9 @@ import { omitUnsupportedSettingsColumns } from "@/lib/db/validate-schema";
 import { markProfileAppearanceChanged } from "@/lib/data/profile-presets";
 import { rejectIfModerated } from "@/lib/moderation/validate";
 import type { SettingsFormState, SettingsSection } from "@/lib/types/settings";
+import type { CardBorderEffectPreset } from "@/lib/types/settings";
+import { parseCardBorderTargets } from "@/lib/card-border-effects/resolve";
+import { CARD_BORDER_EFFECT_OPTIONS } from "@/lib/card-border-effects/presets";
 import type {
   BackgroundType,
   EnterGateAnimation,
@@ -45,6 +48,7 @@ async function revalidateProfile(userId: string) {
   revalidatePath("/dashboard/background");
   revalidatePath("/dashboard/music");
   revalidatePath("/dashboard/effects");
+  revalidatePath("/dashboard/card-border-effects");
   revalidatePath("/dashboard/themes");
   revalidatePath("/dashboard/custom-theme");
   revalidatePath("/dashboard/profile-presets");
@@ -150,6 +154,18 @@ function parseParticle(value: string): ParticleEffect | null {
   return v as ParticleEffect;
 }
 
+function parseCardBorderEffect(value: string, fallback: CardBorderEffectPreset): CardBorderEffectPreset {
+  const allowed = CARD_BORDER_EFFECT_OPTIONS.map((option) => option.value);
+  return allowed.includes(value as CardBorderEffectPreset)
+    ? (value as CardBorderEffectPreset)
+    : fallback;
+}
+
+function clampCardBorder(value: number, min: number, max: number, fallback: number) {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
 function parseSectionUpdates(
   section: SettingsSection,
   formData: FormData,
@@ -178,6 +194,39 @@ function parseSectionUpdates(
           : existing.content_alignment) as import("@/lib/types/settings").ContentAlignment,
         layout_label: String(formData.get("layout_label") ?? existing.layout_label).slice(0, 64),
         hide_card_border: parseBool(formData.get("hide_card_border")),
+      };
+    case "card_border":
+      return {
+        card_border_effect: parseCardBorderEffect(
+          String(formData.get("card_border_effect") ?? existing.card_border_effect),
+          existing.card_border_effect,
+        ),
+        card_border_thickness: clampCardBorder(
+          parseIntField(formData.get("card_border_thickness"), existing.card_border_thickness),
+          1,
+          12,
+          existing.card_border_thickness,
+        ),
+        card_border_speed: clampCardBorder(
+          parseIntField(formData.get("card_border_speed"), existing.card_border_speed),
+          25,
+          300,
+          existing.card_border_speed,
+        ),
+        card_border_glow_intensity: clampCardBorder(
+          parseIntField(formData.get("card_border_glow_intensity"), existing.card_border_glow_intensity),
+          0,
+          100,
+          existing.card_border_glow_intensity,
+        ),
+        card_border_color: String(formData.get("card_border_color") ?? existing.card_border_color).slice(0, 32),
+        card_border_secondary_color: String(
+          formData.get("card_border_secondary_color") ?? existing.card_border_secondary_color,
+        ).slice(0, 32),
+        card_border_apply_all: parseBool(formData.get("card_border_apply_all")),
+        card_border_targets: parseCardBorderTargets(
+          formData.get("card_border_targets") ?? existing.card_border_targets,
+        ),
       };
     case "links":
       return {
@@ -350,6 +399,7 @@ export async function updateSettingsAction(
     themes: "Theme saved.",
     music: "Music settings saved.",
     effects: "Effects saved.",
+    card_border: "Card border effects saved.",
     profile: "Bio styling saved.",
     guestbook: "Guestbook settings saved.",
     social: "Social settings saved.",

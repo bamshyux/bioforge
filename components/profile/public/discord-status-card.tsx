@@ -7,6 +7,7 @@ import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
 import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
 import { DISCORD_LANYARD_INVITE_URL } from "@/lib/discord/messages";
 import { DiscordProfileBadges } from "@/components/profile/public/discord-profile-badges";
+import { CardBorderEffect } from "@/components/profile/card-border-effect";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
@@ -203,10 +204,11 @@ export function DiscordStatusCard({
       : null;
 
   return (
-    <div
-      className={`profile-discord-status bf-profile-block mb-5 w-full ${appearance.shellOverflowClass} ${appearance.maxWidthClass} ${appearance.cardAlignClass} ${appearance.shellClass}`}
-      style={{ ...appearance.shellStyle, ...appearance.cardFontStyle }}
-      data-discord-header-layout={appearance.dataAttributes.headerLayout}
+    <CardBorderEffect settings={settings} target="discord" borderRadius={settings.border_radius}>
+      <div
+        className={`profile-discord-status bf-profile-block mb-5 w-full ${appearance.shellOverflowClass} ${appearance.maxWidthClass} ${appearance.cardAlignClass} ${appearance.shellClass}`}
+        style={{ ...appearance.shellStyle, ...appearance.cardFontStyle }}
+        data-discord-header-layout={appearance.dataAttributes.headerLayout}
       data-discord-text-align={appearance.dataAttributes.textAlign}
       data-discord-card-align={appearance.dataAttributes.cardAlign}
     >
@@ -327,6 +329,7 @@ export function DiscordStatusCard({
           accentColor={appearance.accentColor}
         />
       ) : null}
-    </div>
+      </div>
+    </CardBorderEffect>
   );
 }

@@ -93,6 +93,13 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         Icon: IconCustomize,
       },
       {
+        href: "/dashboard/card-border-effects",
+        label: "Card Border Effects",
+        description: "Animated borders for profile cards",
+        keywords: ["border", "glow", "snake", "neon", "card effects", "outline", "animated border"],
+        Icon: IconEffects,
+      },
+      {
         href: "/dashboard/background",
         label: "Background",
         description: "Gradients, video, and particles",
@@ -350,7 +357,7 @@ export function getSectionForPath(pathname: string): DashboardSection | undefine
 export function isNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/dashboard/appearance") {
-    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme"].some((p) => pathname.startsWith(p));
+    return ["/dashboard/appearance", "/dashboard/customize", "/dashboard/card-border-effects", "/dashboard/background", "/dashboard/themes", "/dashboard/effects", "/dashboard/custom-theme"].some((p) => pathname.startsWith(p));
   }
   if (href === "/dashboard/presets") {
     return ["/dashboard/presets", "/dashboard/profile-presets"].some((p) => pathname.startsWith(p));

@@ -12,6 +12,7 @@ import type { ProfileLink } from "@/lib/types/link";
 import type { Profile } from "@/lib/types/profile";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { CriedLogo } from "@/components/brand/logo";
+import { CardBorderEffect } from "@/components/profile/card-border-effect";
 import { AnalyticsTracker } from "./analytics-tracker";
 import { BadgeRow } from "@/components/badges/badge-ui";
 import { MusicPlayer } from "./music-player";
@@ -932,7 +933,13 @@ export function PublicProfileClient({
                 <div className={getProfileAlignClass(settings.content_alignment)}>
                   <DiscordPresenceProvider presence={discordPresence ?? null}>
                     <ProfileThemeScope scopedCss={settings.layout === "custom" ? scopedCustomCss : null}>
-                      <Layout {...layoutProps} />
+                      <CardBorderEffect
+                        settings={settings}
+                        target="main"
+                        borderRadius={settings.border_radius}
+                      >
+                        <Layout {...layoutProps} />
+                      </CardBorderEffect>
                     </ProfileThemeScope>
                   </DiscordPresenceProvider>
                 </div>

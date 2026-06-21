@@ -137,10 +137,37 @@ export type SettingsSection =
   | "themes"
   | "music"
   | "effects"
+  | "card_border"
   | "links"
   | "guestbook"
   | "social"
   | "profile";
+
+export type CardBorderEffectPreset =
+  | "none"
+  | "standard"
+  | "neon-glow"
+  | "snake"
+  | "dual-snake"
+  | "energy-flow"
+  | "pulse"
+  | "lightning"
+  | "rgb-flow"
+  | "white-aura"
+  | "particle-trail"
+  | "liquid-chrome"
+  | "cyber-scan"
+  | "fire"
+  | "ice"
+  | "void";
+
+export type CardBorderTarget =
+  | "main"
+  | "discord"
+  | "roblox"
+  | "spotify"
+  | "links"
+  | "guestbook";
 
 export type ProfileSettings = {
   profile_id: string;
@@ -239,6 +266,14 @@ export type ProfileSettings = {
   enter_gate_card_opacity: number;
   layout_label: string;
   hide_card_border: boolean;
+  card_border_effect: CardBorderEffectPreset;
+  card_border_thickness: number;
+  card_border_speed: number;
+  card_border_glow_intensity: number;
+  card_border_color: string;
+  card_border_secondary_color: string;
+  card_border_apply_all: boolean;
+  card_border_targets: CardBorderTarget[];
   card_offset_x: number;
   card_offset_y: number;
   card_width: number;

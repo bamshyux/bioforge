@@ -6,6 +6,7 @@ import { buildLinkIconProps } from "@/lib/link-icon-effects";
 import type { ProfileLink } from "@/lib/types/link";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { LinkIcon } from "@/components/icons/social-icons";
+import { CardBorderEffect } from "@/components/profile/card-border-effect";
 import { trackLinkClick } from "./analytics-tracker";
 
 export function ProfileLinkButton({
@@ -23,30 +24,32 @@ export function ProfileLinkButton({
   const iconSize = settings.links_icon_size;
 
   return (
-    <a
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => trackLinkClick(profileId, link.id)}
-      className={`profile-link group flex items-center justify-between border px-4 py-3 ${animClass} ${hoverClass} ${
-        featured ? "border-[var(--bf-accent,#fafafa)]/30 bg-[var(--bf-accent,#fafafa)]/[0.06]" : ""
-      }`}
-      style={{
-        color: link.color ?? settings.text_color,
-        backgroundColor: featured ? undefined : (link.background_color ?? "rgba(255,255,255,0.03)"),
-        borderColor: featured ? undefined : `${settings.accent_color}15`,
-        borderRadius: settings.border_radius,
-        ...animStyle,
-      }}
-    >
-      <span className="flex items-center gap-3 text-sm font-medium">
-        <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
-        {link.title}
-      </span>
-      <span className="text-xs opacity-0 transition-opacity group-hover:opacity-50">
-        {formatLinkHostname(link.url)}
-      </span>
-    </a>
+    <CardBorderEffect settings={settings} target="links" borderRadius={settings.border_radius}>
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackLinkClick(profileId, link.id)}
+        className={`profile-link group flex items-center justify-between border px-4 py-3 ${animClass} ${hoverClass} ${
+          featured ? "border-[var(--bf-accent,#fafafa)]/30 bg-[var(--bf-accent,#fafafa)]/[0.06]" : ""
+        }`}
+        style={{
+          color: link.color ?? settings.text_color,
+          backgroundColor: featured ? undefined : (link.background_color ?? "rgba(255,255,255,0.03)"),
+          borderColor: featured ? undefined : `${settings.accent_color}15`,
+          borderRadius: settings.border_radius,
+          ...animStyle,
+        }}
+      >
+        <span className="flex items-center gap-3 text-sm font-medium">
+          <LinkIcon {...buildLinkIconProps(link.icon, settings, iconSize)} />
+          {link.title}
+        </span>
+        <span className="text-xs opacity-0 transition-opacity group-hover:opacity-50">
+          {formatLinkHostname(link.url)}
+        </span>
+      </a>
+    </CardBorderEffect>
   );
 }
 

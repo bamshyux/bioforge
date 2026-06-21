@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
   SaveConfirmation,
@@ -210,6 +211,19 @@ export function CustomizeEditor({ settings }: { settings: ProfileSettings }) {
               checked={form.profile_parallax}
               onCheckedChange={(profile_parallax) => patchForm({ profile_parallax })}
             />
+          </div>
+
+          <div className="rounded-xl border border-white/[0.08] bg-[#0c0c0c] p-4">
+            <p className="text-sm font-semibold text-white">Card Border Effects</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Animated snake, neon, RGB, and premium outline presets for all profile cards.
+            </p>
+            <Link
+              href="/dashboard/card-border-effects"
+              className="mt-3 inline-flex rounded-lg border border-white/[0.12] bg-[#141414] px-3 py-2 text-xs font-semibold text-white transition-colors hover:border-white/20"
+            >
+              Open Card Border Effects
+            </Link>
           </div>
 
           <div className="space-y-4">

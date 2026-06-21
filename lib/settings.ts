@@ -13,6 +13,10 @@ import type {
 } from "@/lib/types/settings";
 import { BRAND } from "@/lib/design/tokens";
 import { clampLinksIconSize } from "@/lib/links";
+import {
+  cardBorderEffectStripsDefaultBorder,
+  parseCardBorderTargets,
+} from "@/lib/card-border-effects/resolve";
 import { clampCursorImageSize } from "@/lib/profile/custom-cursor";
 
 export const DEFAULT_SETTINGS: Omit<
@@ -114,6 +118,14 @@ export const DEFAULT_SETTINGS: Omit<
   enter_gate_card_opacity: 20,
   layout_label: "",
   hide_card_border: false,
+  card_border_effect: "none",
+  card_border_thickness: 2,
+  card_border_speed: 100,
+  card_border_glow_intensity: 60,
+  card_border_color: "",
+  card_border_secondary_color: "",
+  card_border_apply_all: true,
+  card_border_targets: ["main", "discord", "roblox", "spotify", "links", "guestbook"],
   card_offset_x: 0,
   card_offset_y: 0,
   card_width: 100,
@@ -473,6 +485,19 @@ export function mergeSettings(
     enter_gate_card_opacity: row?.enter_gate_card_opacity ?? DEFAULT_SETTINGS.enter_gate_card_opacity,
     layout_label: row?.layout_label ?? DEFAULT_SETTINGS.layout_label,
     hide_card_border: row?.hide_card_border ?? DEFAULT_SETTINGS.hide_card_border,
+    card_border_effect:
+      (row?.card_border_effect ?? DEFAULT_SETTINGS.card_border_effect) as import("@/lib/types/settings").CardBorderEffectPreset,
+    card_border_thickness: row?.card_border_thickness ?? DEFAULT_SETTINGS.card_border_thickness,
+    card_border_speed: row?.card_border_speed ?? DEFAULT_SETTINGS.card_border_speed,
+    card_border_glow_intensity:
+      row?.card_border_glow_intensity ?? DEFAULT_SETTINGS.card_border_glow_intensity,
+    card_border_color: row?.card_border_color ?? DEFAULT_SETTINGS.card_border_color,
+    card_border_secondary_color:
+      row?.card_border_secondary_color ?? DEFAULT_SETTINGS.card_border_secondary_color,
+    card_border_apply_all: row?.card_border_apply_all ?? DEFAULT_SETTINGS.card_border_apply_all,
+    card_border_targets: parseCardBorderTargets(
+      row?.card_border_targets ?? DEFAULT_SETTINGS.card_border_targets,
+    ),
     card_offset_x: row?.card_offset_x ?? DEFAULT_SETTINGS.card_offset_x,
     card_offset_y: row?.card_offset_y ?? DEFAULT_SETTINGS.card_offset_y,
     card_width: row?.card_width ?? DEFAULT_SETTINGS.card_width,
@@ -507,11 +532,16 @@ export function getProfileAlignClass(alignment: ContentAlignment = "left") {
 export function buildCardStyle(settings: ProfileSettings): Record<string, string | number | undefined> {
   const opacity = settings.profile_opacity / 100;
   const blur = settings.profile_blur;
+  const borderHandledExternally = cardBorderEffectStripsDefaultBorder(settings, "main");
 
   const base: Record<string, string | number | undefined> = {
     borderRadius: settings.border_radius,
-    border: settings.hide_card_border ? "none" : "1px solid rgba(255,255,255,0.06)",
-    boxShadow: settings.hide_card_border ? "none" : "0 8px 32px rgba(0,0,0,0.4)",
+    border:
+      settings.hide_card_border || borderHandledExternally
+        ? "none"
+        : "1px solid rgba(255,255,255,0.06)",
+    boxShadow:
+      settings.hide_card_border || borderHandledExternally ? "none" : "0 8px 32px rgba(0,0,0,0.4)",
   };
 
   if (settings.glassmorphism) {
