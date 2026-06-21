@@ -12,8 +12,7 @@ import { FormFeedback } from "@/components/dashboard/form-fields";
 import type { GuestbookEntry, GuestbookFormState } from "@/lib/types/guestbook";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { CardBorderEffect } from "@/components/profile/card-border-effect";
-import { cardBorderEffectStripsDefaultBorder } from "@/lib/card-border-effects/resolve";
-import { buildCardStyle } from "@/lib/settings";
+import { resolveGuestbookAppearance } from "@/lib/guestbook/appearance";
 
 const initial: GuestbookFormState = {};
 const MAX_VISIBLE_ENTRIES = 6;
@@ -37,15 +36,16 @@ export function ProfileGuestbookSection({
   const canSign = !!currentUserId && !isOwner;
   const visibleEntries = entries.slice(0, MAX_VISIBLE_ENTRIES);
   const hiddenCount = entries.length - visibleEntries.length;
-  const guestbookStyle = buildCardStyle(settings);
-  if (cardBorderEffectStripsDefaultBorder(settings, "guestbook")) {
-    guestbookStyle.border = "none";
-    guestbookStyle.boxShadow = "none";
-  }
+  const { borderStyle, spacing, style: guestbookStyle } = resolveGuestbookAppearance(settings);
 
   return (
     <CardBorderEffect settings={settings} target="guestbook" borderRadius={settings.border_radius}>
-      <section className="bf-guestbook mt-10 px-4 py-5" style={guestbookStyle}>
+      <section
+        className="bf-guestbook mt-10 px-4"
+        style={guestbookStyle}
+        data-guestbook-border={borderStyle}
+        data-guestbook-spacing={spacing}
+      >
         <p className="bf-guestbook__label">guestbook</p>
 
       {visibleEntries.length > 0 ? (

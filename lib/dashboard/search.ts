@@ -267,7 +267,7 @@ const DASHBOARD_FEATURE_ENTRIES: FeatureEntry[] = [
     section: "Community",
     sectionId: "community",
     iconId: "guestbook",
-    keywords: ["guestbook", "guest book", "messages", "comments", "visitor messages", "sign"],
+    keywords: ["guestbook", "guest book", "messages", "comments", "visitor messages", "sign", "opacity", "appearance", "border", "spacing"],
     priority: 90,
   },
   {

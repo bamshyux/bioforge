@@ -131,6 +131,9 @@ export type StatusPreset =
 
 export type BioLetterSpacing = "normal" | "wide" | "wider";
 
+export type GuestbookBorderStyle = "none" | "accent-left" | "subtle-full";
+export type GuestbookSpacing = "compact" | "default" | "relaxed";
+
 export type SettingsSection =
   | "customize"
   | "background"
@@ -219,6 +222,19 @@ export type ProfileSettings = {
   music_player_color: string;
   guestbook_enabled: boolean;
   guestbook_approval_required: boolean;
+  guestbook_use_profile_card: boolean;
+  guestbook_opacity: number;
+  guestbook_blur: number;
+  guestbook_glassmorphism: boolean;
+  guestbook_show_background: boolean;
+  guestbook_background_color: string;
+  guestbook_message_opacity: number;
+  guestbook_author_opacity: number;
+  guestbook_label_opacity: number;
+  guestbook_text_color: string;
+  guestbook_border_style: GuestbookBorderStyle;
+  guestbook_spacing: GuestbookSpacing;
+  guestbook_padding_y: number;
   show_follow_counts: boolean;
   show_activity: boolean;
   friends_visibility: "public" | "friends" | "private";

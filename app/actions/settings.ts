@@ -54,6 +54,7 @@ async function revalidateProfile(userId: string) {
   revalidatePath("/dashboard/profile-presets");
   revalidatePath("/dashboard/links");
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/guestbook");
   if (profile?.username) {
     revalidatePath(`/${profile.username}`);
     revalidateProfileOg(profile.username);
@@ -358,6 +359,93 @@ function parseSectionUpdates(
           ? letterSpacing
           : existing.bio_letter_spacing) as import("@/lib/types/settings").BioLetterSpacing,
       };
+    }
+    case "guestbook": {
+      const updates: Partial<ProfileSettings> = {};
+
+      if (formData.has("guestbook_enabled")) {
+        updates.guestbook_enabled = parseBool(formData.get("guestbook_enabled"));
+      }
+      if (formData.has("guestbook_approval_required")) {
+        updates.guestbook_approval_required = parseBool(formData.get("guestbook_approval_required"));
+      }
+      if (formData.has("guestbook_use_profile_card")) {
+        updates.guestbook_use_profile_card = parseBool(formData.get("guestbook_use_profile_card"));
+      }
+      if (formData.has("guestbook_opacity")) {
+        updates.guestbook_opacity = clampEnterGate(
+          parseIntField(formData.get("guestbook_opacity"), existing.guestbook_opacity),
+          0,
+          100,
+          existing.guestbook_opacity,
+        );
+      }
+      if (formData.has("guestbook_blur")) {
+        updates.guestbook_blur = clampEnterGate(
+          parseIntField(formData.get("guestbook_blur"), existing.guestbook_blur),
+          0,
+          30,
+          existing.guestbook_blur,
+        );
+      }
+      if (formData.has("guestbook_glassmorphism")) {
+        updates.guestbook_glassmorphism = parseBool(formData.get("guestbook_glassmorphism"));
+      }
+      if (formData.has("guestbook_show_background")) {
+        updates.guestbook_show_background = parseBool(formData.get("guestbook_show_background"));
+      }
+      if (formData.has("guestbook_background_color")) {
+        updates.guestbook_background_color = String(formData.get("guestbook_background_color")).slice(0, 32);
+      }
+      if (formData.has("guestbook_message_opacity")) {
+        updates.guestbook_message_opacity = clampEnterGate(
+          parseIntField(formData.get("guestbook_message_opacity"), existing.guestbook_message_opacity),
+          10,
+          100,
+          existing.guestbook_message_opacity,
+        );
+      }
+      if (formData.has("guestbook_author_opacity")) {
+        updates.guestbook_author_opacity = clampEnterGate(
+          parseIntField(formData.get("guestbook_author_opacity"), existing.guestbook_author_opacity),
+          10,
+          100,
+          existing.guestbook_author_opacity,
+        );
+      }
+      if (formData.has("guestbook_label_opacity")) {
+        updates.guestbook_label_opacity = clampEnterGate(
+          parseIntField(formData.get("guestbook_label_opacity"), existing.guestbook_label_opacity),
+          10,
+          100,
+          existing.guestbook_label_opacity,
+        );
+      }
+      if (formData.has("guestbook_text_color")) {
+        updates.guestbook_text_color = String(formData.get("guestbook_text_color")).slice(0, 32);
+      }
+      if (formData.has("guestbook_border_style")) {
+        const borderStyle = String(formData.get("guestbook_border_style"));
+        updates.guestbook_border_style = (["none", "accent-left", "subtle-full"].includes(borderStyle)
+          ? borderStyle
+          : existing.guestbook_border_style) as import("@/lib/types/settings").GuestbookBorderStyle;
+      }
+      if (formData.has("guestbook_spacing")) {
+        const spacing = String(formData.get("guestbook_spacing"));
+        updates.guestbook_spacing = (["compact", "default", "relaxed"].includes(spacing)
+          ? spacing
+          : existing.guestbook_spacing) as import("@/lib/types/settings").GuestbookSpacing;
+      }
+      if (formData.has("guestbook_padding_y")) {
+        updates.guestbook_padding_y = clampEnterGate(
+          parseIntField(formData.get("guestbook_padding_y"), existing.guestbook_padding_y),
+          8,
+          48,
+          existing.guestbook_padding_y,
+        );
+      }
+
+      return updates;
     }
     default:
       return {};

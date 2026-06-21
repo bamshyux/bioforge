@@ -1,16 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { updateDiscordCardConfigAction } from "@/app/actions/discord";
 import { DiscordStatusCard } from "@/components/profile/public/discord-status-card";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
 import {
-  buttonPrimaryClassName,
-  buttonSecondaryClassName,
   labelClassName,
   ToggleField,
 } from "@/components/dashboard/form-fields";
+import {
+  DASHBOARD_RESET_EVENT,
+  useUnsavedChangesOptional,
+} from "@/components/dashboard/unsaved-changes";
 import {
   getDiscordAvatarShapeLabel,
   getDiscordAvatarSizeLabel,
@@ -149,6 +151,8 @@ export function DiscordCardCustomizer({
   disabled?: boolean;
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const unsaved = useUnsavedChangesOptional();
   const [savedConfig, setSavedConfig] = useState<DiscordCardConfig>(() =>
     configFromProfileSettings(settings),
   );
@@ -157,41 +161,70 @@ export function DiscordCardCustomizer({
   const [previewActivity, setPreviewActivity] = useState(true);
   const [isPending, startTransition] = useTransition();
 
+  const persistedConfigJson = useMemo(
+    () => JSON.stringify(configFromProfileSettings(settings)),
+    [settings],
+  );
+
   useEffect(() => {
     const next = configFromProfileSettings(settings);
     setSavedConfig(next);
     setConfig(next);
     setStatus("idle");
-  }, [settings]);
+    unsaved?.markClean();
+  }, [persistedConfigJson, unsaved]);
+
+  useEffect(() => {
+    const handleDashboardReset = () => {
+      setConfig(savedConfig);
+      setStatus("idle");
+    };
+    window.addEventListener(DASHBOARD_RESET_EVENT, handleDashboardReset);
+    return () => window.removeEventListener(DASHBOARD_RESET_EVENT, handleDashboardReset);
+  }, [savedConfig]);
 
   const isDirty = useMemo(() => !configsEqual(config, savedConfig), [config, savedConfig]);
   const controlsDisabled = disabled || isPending;
 
+  const markDirtyForm = () => {
+    unsaved?.markDirty();
+    if (formRef.current) unsaved?.setLastDirtyForm(formRef.current);
+  };
+
   const patch = (partial: Partial<DiscordCardConfig>) => {
     setConfig((current) => ({ ...current, ...partial }));
     setStatus("idle");
-  };
-
-  const handleReset = () => {
-    setConfig(savedConfig);
-    setStatus("idle");
+    markDirtyForm();
   };
 
   const handleSave = () => {
+    if (!isDirty || controlsDisabled) return;
+
+    unsaved?.markSaving();
     startTransition(async () => {
       const result = await updateDiscordCardConfigAction(config);
       if (result.error) {
         setStatus("error");
+        unsaved?.clearSaving();
         return;
       }
       setSavedConfig(config);
       setStatus("saved");
+      unsaved?.markClean();
       router.refresh();
     });
   };
 
   return (
-    <div className="space-y-6">
+    <form
+      ref={formRef}
+      data-dashboard-section-form="discord-card"
+      onSubmit={(event) => {
+        event.preventDefault();
+        handleSave();
+      }}
+      className="space-y-6"
+    >
       <div className="space-y-4">
         <SectionTitle>Card style</SectionTitle>
         <ChipGrid
@@ -495,53 +528,47 @@ export function DiscordCardCustomizer({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!isDirty || controlsDisabled}
-          className={buttonPrimaryClassName}
-        >
-          {isPending ? "Saving..." : "Save changes"}
-        </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          disabled={!isDirty || controlsDisabled}
-          className={buttonSecondaryClassName}
-        >
-          Reset
-        </button>
-        {isDirty && !isPending ? (
-          <p className="text-xs text-amber-400/90">Unsaved changes</p>
-        ) : null}
-        {status === "saved" && !isDirty ? (
-          <p className="text-xs text-emerald-400">Saved</p>
-        ) : null}
-        {status === "error" ? (
-          <p className="text-xs text-red-400">Could not save changes.</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
         <button
           type="button"
           disabled={controlsDisabled}
-          onClick={() => setConfig({ ...DEFAULT_DISCORD_CARD_CONFIG })}
+          onClick={() => {
+            setConfig({ ...DEFAULT_DISCORD_CARD_CONFIG });
+            setStatus("idle");
+            markDirtyForm();
+          }}
           className="text-xs text-neutral-500 hover:text-white disabled:opacity-50"
         >
           Reset to defaults
         </button>
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-neutral-400">
-          <input
-            type="checkbox"
-            checked={previewActivity}
-            onChange={(e) => setPreviewActivity(e.target.checked)}
-            className="h-4 w-4 rounded border-white/20 bg-[#090909] accent-[#5865F2]"
-          />
-          Preview sample activity
-        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          {status === "saved" && !isDirty ? (
+            <p className="text-xs text-emerald-400">Saved</p>
+          ) : null}
+          {status === "error" ? (
+            <p className="text-xs text-red-400">Could not save changes.</p>
+          ) : null}
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-neutral-400">
+            <input
+              type="checkbox"
+              checked={previewActivity}
+              onChange={(e) => setPreviewActivity(e.target.checked)}
+              className="h-4 w-4 rounded border-white/20 bg-[#090909] accent-[#5865F2]"
+            />
+            Preview sample activity
+          </label>
+        </div>
       </div>
+
+      <button
+        type="submit"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        disabled={!isDirty || controlsDisabled}
+      >
+        Save Discord card
+      </button>
 
       <div className="rounded-lg border border-white/[0.06] bg-[#0a0a0a] p-4">
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
@@ -555,6 +582,6 @@ export function DiscordCardCustomizer({
           previewActivity={previewActivity}
         />
       </div>
-    </div>
+    </form>
   );
 }
