@@ -137,18 +137,9 @@ export function parseDiscordCardConfig(raw: unknown): DiscordCardConfig {
 
 export function resolveDiscordHeaderLayout(
   layout: DiscordHeaderLayout,
-  resolvedTextAlign: Exclude<DiscordTextAlign, "inherit">,
 ): Exclude<DiscordHeaderLayout, "inherit"> {
   if (layout !== "inherit") return layout;
-
-  switch (resolvedTextAlign) {
-    case "center":
-      return "centered";
-    case "right":
-      return "stacked";
-    default:
-      return "row";
-  }
+  return "row";
 }
 
 export function resolveDiscordTextAlign(
@@ -183,7 +174,7 @@ export function resolveDiscordCardConfig(settings: ProfileSettings): ResolvedDis
     ...config,
     text_align,
     card_align,
-    header_layout: resolveDiscordHeaderLayout(config.header_layout, text_align),
+    header_layout: resolveDiscordHeaderLayout(config.header_layout),
   };
 }
 
@@ -239,7 +230,7 @@ export function getDiscordCardThemeLabel(theme: DiscordCardTheme): string {
 export function getDiscordHeaderLayoutLabel(layout: DiscordHeaderLayout): string {
   switch (layout) {
     case "inherit":
-      return "Follow profile";
+      return "Avatar left (default)";
     case "centered":
       return "Avatar on top";
     case "stacked":

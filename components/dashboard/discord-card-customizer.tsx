@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { updateDiscordCardConfigAction } from "@/app/actions/discord";
 import { DiscordStatusCard } from "@/components/profile/public/discord-status-card";
 import { ControlledSelect } from "@/components/dashboard/controlled-fields";
-import { labelClassName, ToggleField } from "@/components/dashboard/form-fields";
+import {
+  buttonPrimaryClassName,
+  buttonSecondaryClassName,
+  labelClassName,
+  ToggleField,
+} from "@/components/dashboard/form-fields";
 import {
   getDiscordAvatarShapeLabel,
   getDiscordAvatarSizeLabel,
@@ -12,6 +19,7 @@ import {
   getDiscordCardThemeLabel,
   getDiscordHeaderLayoutLabel,
   getDiscordTextAlignLabel,
+  configFromProfileSettings,
 } from "@/lib/discord/card-config";
 import { FONT_OPTIONS } from "@/lib/settings";
 import { DEFAULT_DISCORD_CARD_CONFIG } from "@/lib/types/discord-widget";
@@ -127,22 +135,60 @@ function SectionTitle({ children }: { children: string }) {
   );
 }
 
+function configsEqual(a: DiscordCardConfig, b: DiscordCardConfig) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function DiscordCardCustomizer({
   settings,
-  config,
   previewPresence,
   disabled,
-  onChange,
 }: {
   settings: ProfileSettings;
-  config: DiscordCardConfig;
   previewPresence: DiscordPresence;
   disabled?: boolean;
-  onChange: (config: DiscordCardConfig) => void;
 }) {
+  const router = useRouter();
+  const [savedConfig, setSavedConfig] = useState<DiscordCardConfig>(() =>
+    configFromProfileSettings(settings),
+  );
+  const [config, setConfig] = useState<DiscordCardConfig>(() => configFromProfileSettings(settings));
+  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [previewActivity, setPreviewActivity] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
-  const patch = (partial: Partial<DiscordCardConfig>) => onChange({ ...config, ...partial });
+  useEffect(() => {
+    const next = configFromProfileSettings(settings);
+    setSavedConfig(next);
+    setConfig(next);
+    setStatus("idle");
+  }, [settings]);
+
+  const isDirty = useMemo(() => !configsEqual(config, savedConfig), [config, savedConfig]);
+  const controlsDisabled = disabled || isPending;
+
+  const patch = (partial: Partial<DiscordCardConfig>) => {
+    setConfig((current) => ({ ...current, ...partial }));
+    setStatus("idle");
+  };
+
+  const handleReset = () => {
+    setConfig(savedConfig);
+    setStatus("idle");
+  };
+
+  const handleSave = () => {
+    startTransition(async () => {
+      const result = await updateDiscordCardConfigAction(config);
+      if (result.error) {
+        setStatus("error");
+        return;
+      }
+      setSavedConfig(config);
+      setStatus("saved");
+      router.refresh();
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -154,7 +200,7 @@ export function DiscordCardCustomizer({
           value={config.style}
           getLabel={getDiscordCardStyleLabel}
           onChange={(style) => patch({ style })}
-          disabled={disabled}
+          disabled={controlsDisabled}
         />
         <ChipGrid
           label="Theme"
@@ -162,7 +208,7 @@ export function DiscordCardCustomizer({
           value={config.theme}
           getLabel={getDiscordCardThemeLabel}
           onChange={(theme) => patch({ theme })}
-          disabled={disabled}
+          disabled={controlsDisabled}
         />
       </div>
 
@@ -174,7 +220,7 @@ export function DiscordCardCustomizer({
           value={config.header_layout}
           getLabel={getDiscordHeaderLayoutLabel}
           onChange={(header_layout) => patch({ header_layout })}
-          disabled={disabled}
+          disabled={controlsDisabled}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <ChipGrid
@@ -183,7 +229,7 @@ export function DiscordCardCustomizer({
             value={config.text_align}
             getLabel={getDiscordTextAlignLabel}
             onChange={(text_align) => patch({ text_align })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
           <ChipGrid
             label="Card position"
@@ -191,7 +237,7 @@ export function DiscordCardCustomizer({
             value={config.card_align}
             getLabel={getDiscordCardAlignLabel}
             onChange={(card_align) => patch({ card_align })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -203,7 +249,7 @@ export function DiscordCardCustomizer({
               max={32}
               value={config.header_gap}
               onChange={(e) => patch({ header_gap: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -215,7 +261,7 @@ export function DiscordCardCustomizer({
               max={32}
               value={config.padding_x}
               onChange={(e) => patch({ padding_x: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -230,7 +276,7 @@ export function DiscordCardCustomizer({
             max={32}
             value={config.padding_y}
             onChange={(e) => patch({ padding_y: Number(e.target.value) })}
-            disabled={disabled}
+            disabled={controlsDisabled}
             className="w-full accent-[#5865F2]"
           />
         </div>
@@ -245,7 +291,7 @@ export function DiscordCardCustomizer({
             value={config.avatar_size}
             getLabel={getDiscordAvatarSizeLabel}
             onChange={(avatar_size) => patch({ avatar_size })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
           <ChipGrid
             label="Avatar shape"
@@ -253,7 +299,7 @@ export function DiscordCardCustomizer({
             value={config.avatar_shape}
             getLabel={getDiscordAvatarShapeLabel}
             onChange={(avatar_shape) => patch({ avatar_shape })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
         </div>
       </div>
@@ -280,7 +326,7 @@ export function DiscordCardCustomizer({
               max={28}
               value={config.name_font_size}
               onChange={(e) => patch({ name_font_size: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -294,7 +340,7 @@ export function DiscordCardCustomizer({
               max={22}
               value={config.status_font_size}
               onChange={(e) => patch({ status_font_size: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -349,7 +395,7 @@ export function DiscordCardCustomizer({
               max={100}
               value={config.background_opacity}
               onChange={(e) => patch({ background_opacity: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -361,7 +407,7 @@ export function DiscordCardCustomizer({
               max={3}
               value={config.border_width}
               onChange={(e) => patch({ border_width: Number(e.target.value) })}
-              disabled={disabled}
+              disabled={controlsDisabled}
               className="w-full accent-[#5865F2]"
             />
           </div>
@@ -374,7 +420,7 @@ export function DiscordCardCustomizer({
             value={config.border_radius}
             getLabel={(r) => r.charAt(0).toUpperCase() + r.slice(1)}
             onChange={(border_radius) => patch({ border_radius })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
           <ChipGrid
             label="Card width"
@@ -382,7 +428,7 @@ export function DiscordCardCustomizer({
             value={config.card_width}
             getLabel={(w) => (w === "default" ? "Default" : w.charAt(0).toUpperCase() + w.slice(1))}
             onChange={(card_width) => patch({ card_width })}
-            disabled={disabled}
+            disabled={controlsDisabled}
           />
         </div>
       </div>
@@ -449,11 +495,39 @@ export function DiscordCardCustomizer({
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-4">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={!isDirty || controlsDisabled}
+          className={buttonPrimaryClassName}
+        >
+          {isPending ? "Saving..." : "Save changes"}
+        </button>
+        <button
+          type="button"
+          onClick={handleReset}
+          disabled={!isDirty || controlsDisabled}
+          className={buttonSecondaryClassName}
+        >
+          Reset
+        </button>
+        {isDirty && !isPending ? (
+          <p className="text-xs text-amber-400/90">Unsaved changes</p>
+        ) : null}
+        {status === "saved" && !isDirty ? (
+          <p className="text-xs text-emerald-400">Saved</p>
+        ) : null}
+        {status === "error" ? (
+          <p className="text-xs text-red-400">Could not save changes.</p>
+        ) : null}
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
-          disabled={disabled}
-          onClick={() => onChange({ ...DEFAULT_DISCORD_CARD_CONFIG })}
+          disabled={controlsDisabled}
+          onClick={() => setConfig({ ...DEFAULT_DISCORD_CARD_CONFIG })}
           className="text-xs text-neutral-500 hover:text-white disabled:opacity-50"
         >
           Reset to defaults

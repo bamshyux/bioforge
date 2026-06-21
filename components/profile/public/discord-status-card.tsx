@@ -221,19 +221,21 @@ export function DiscordStatusCard({
   };
 
   return (
-    <div className="bf-profile-block mb-5 w-full">
+    <div
+      className={`profile-discord-status-wrap bf-profile-block mb-5 w-full ${appearance.maxWidthClass} ${appearance.cardAlignClass}`}
+      data-discord-card-align={config.card_align}
+    >
       <CardBorderEffect
         settings={settings}
         target="discord"
         borderRadius={discordBorderRadius}
-        className={`${appearance.maxWidthClass} ${appearance.cardAlignClass} w-full`}
+        className="w-full"
       >
         <div
           className={`profile-discord-status w-full ${appearance.shellOverflowClass} ${appearance.shellClass}`}
           style={shellStyle}
           data-discord-header-layout={appearance.dataAttributes.headerLayout}
           data-discord-text-align={appearance.dataAttributes.textAlign}
-          data-discord-card-align={appearance.dataAttributes.cardAlign}
         >
       <div
         className={`profile-discord-status__header flex items-center ${appearance.headerClass}`}

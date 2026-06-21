@@ -7,7 +7,6 @@ import {
   disconnectDiscordAction,
   saveDiscordUserIdAction,
   toggleDiscordStatusAction,
-  updateDiscordCardConfigAction,
 } from "@/app/actions/discord";
 import { DiscordCardCustomizer } from "@/components/dashboard/discord-card-customizer";
 import {
@@ -20,12 +19,10 @@ import {
   ToggleField,
 } from "@/components/dashboard/form-fields";
 import { SiDiscord } from "react-icons/si";
-import { configFromProfileSettings } from "@/lib/discord/card-config";
 import { isDiscordConnected } from "@/lib/discord/connection";
 import { buildFallbackDiscordPresence } from "@/lib/discord/fallback-presence";
 import { getDiscordAvatarUrl } from "@/lib/discord/config";
 import { DISCORD_LANYARD_INVITE_URL, DISCORD_LANYARD_LIVE_STATUS_HINT } from "@/lib/discord/messages";
-import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
 const DISCORD_MESSAGES: Record<string, { type: "success" | "error"; text: string }> = {
@@ -55,9 +52,6 @@ export function WidgetsEditor({
   const searchParams = useSearchParams();
   const [feedback, setFeedback] = useState<{ error?: string; success?: string }>({});
   const [manualId, setManualId] = useState("");
-  const [cardConfig, setCardConfig] = useState<DiscordCardConfig>(() =>
-    configFromProfileSettings(settings),
-  );
   const [isPending, startTransition] = useTransition();
 
   const connected = isDiscordConnected(settings);
@@ -74,10 +68,6 @@ export function WidgetsEditor({
     }
     router.replace("/dashboard/widgets");
   }, [router, searchParams]);
-
-  useEffect(() => {
-    setCardConfig(configFromProfileSettings(settings));
-  }, [settings]);
 
   const handleToggle = (checked: boolean) => {
     startTransition(async () => {
@@ -103,19 +93,6 @@ export function WidgetsEditor({
         setManualId("");
         router.refresh();
       }
-    });
-  };
-
-  const saveCardConfig = (next: DiscordCardConfig) => {
-    setCardConfig(next);
-    startTransition(async () => {
-      const result = await updateDiscordCardConfigAction(next);
-      setFeedback(
-        result.error
-          ? { error: result.error }
-          : { success: "Discord card appearance updated." },
-      );
-      router.refresh();
     });
   };
 
@@ -244,10 +221,8 @@ export function WidgetsEditor({
               {previewPresence ? (
                 <DiscordCardCustomizer
                   settings={settings}
-                  config={cardConfig}
                   previewPresence={previewPresence}
                   disabled={isPending}
-                  onChange={saveCardConfig}
                 />
               ) : null}
             </div>

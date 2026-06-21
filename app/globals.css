@@ -996,20 +996,40 @@ body {
   align-items: flex-end;
 }
 
-.profile-discord-status[data-discord-header-layout="row"][data-discord-text-align="center"] .profile-discord-status__header {
-  justify-content: center;
-}
-
+/* Row layout: avatar stays left; text alignment applies to the text column only */
+.profile-discord-status[data-discord-header-layout="row"][data-discord-text-align="center"] .profile-discord-status__header,
 .profile-discord-status[data-discord-header-layout="row"][data-discord-text-align="right"] .profile-discord-status__header {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-.bf-profile-align--center .profile-discord-status[data-discord-card-align="inherit"] {
+.profile-discord-status[data-discord-header-layout="row"] .profile-discord-status__header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Card position on profile — overrides profile content alignment when set explicitly */
+.profile-discord-status-wrap[data-discord-card-align="left"] {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.profile-discord-status-wrap[data-discord-card-align="center"] {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.profile-discord-status-wrap[data-discord-card-align="right"] {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+.bf-profile-align--center .profile-discord-status-wrap[data-discord-card-align="inherit"],
+.bf-profile-align--right .profile-discord-status-wrap[data-discord-card-align="inherit"] {
   margin-left: auto;
   margin-right: auto;
 }
 
-.bf-profile-align--right .profile-discord-status[data-discord-card-align="inherit"] {
+.bf-profile-align--right .profile-discord-status-wrap[data-discord-card-align="inherit"] {
   margin-left: auto;
   margin-right: 0;
 }
