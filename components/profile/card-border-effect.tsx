@@ -26,12 +26,16 @@ export function CardBorderEffect({
     return <>{children}</>;
   }
 
+  const showGlow = resolved.effect !== "standard";
+
   return (
     <div
       className={`bf-cbe ${className ?? ""}`.trim() || undefined}
       style={{ ...resolved.style, ...style }}
       data-cbe-effect={resolved.effect}
     >
+      <div className="bf-cbe__border" aria-hidden="true" />
+      {showGlow ? <div className="bf-cbe__glow" aria-hidden="true" /> : null}
       <div className="bf-cbe__inner">{children}</div>
     </div>
   );

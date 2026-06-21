@@ -1,4 +1,4 @@
-/* Card border effects — animated gradient sits in the wrapper padding (true border ring) */
+/* Card border effects — masked ring overlay; never fills card content */
 
 @property --cbe-angle {
   syntax: "<angle>";
@@ -7,12 +7,9 @@
 }
 
 .bf-cbe {
-  --cbe-inner-radius: calc(var(--cbe-radius, 12px) - var(--cbe-thickness, 2px));
+  position: relative;
   display: block;
   width: 100%;
-  position: relative;
-  box-sizing: border-box;
-  padding: var(--cbe-thickness, 2px);
   border-radius: var(--cbe-radius, 12px);
   isolation: isolate;
 }
@@ -21,8 +18,35 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  border-radius: var(--cbe-inner-radius);
-  overflow: hidden;
+  border-radius: var(--cbe-radius, 12px);
+}
+
+/* Shared ring mask — only the padding band is visible (true border outline) */
+.bf-cbe__border,
+.bf-cbe__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--cbe-radius, 12px);
+  padding: var(--cbe-thickness, 2px);
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.bf-cbe__border {
+  z-index: 3;
+}
+
+.bf-cbe__glow {
+  z-index: 2;
+  opacity: calc(0.3 + var(--cbe-glow, 0.6) * 0.55);
+  filter: blur(calc(2px + var(--cbe-glow, 0.6) * 8px));
 }
 
 @keyframes bf-cbe-angle-spin {
@@ -31,57 +55,63 @@
   }
 }
 
-@keyframes bf-cbe-pulse {
+@keyframes bf-cbe-border-pulse {
   0%,
   100% {
-    background: color-mix(in srgb, var(--cbe-color) 40%, transparent);
+    background: color-mix(in srgb, var(--cbe-color) 35%, transparent);
   }
   50% {
     background: var(--cbe-color);
   }
 }
 
-@keyframes bf-cbe-flicker {
+@keyframes bf-cbe-drop-glow {
   0%,
   100% {
-    box-shadow: 0 0 calc(4px + var(--cbe-glow, 0.6) * 16px)
-      color-mix(in srgb, var(--cbe-color) 70%, transparent);
-  }
-  45% {
-    box-shadow: 0 0 calc(2px + var(--cbe-glow, 0.6) * 6px)
-      color-mix(in srgb, var(--cbe-color) 25%, transparent);
-  }
-  47% {
-    box-shadow: 0 0 calc(8px + var(--cbe-glow, 0.6) * 24px) #ffffffaa;
-  }
-}
-
-@keyframes bf-cbe-glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 calc(2px + var(--cbe-glow, 0.6) * 10px)
-      color-mix(in srgb, var(--cbe-color) 35%, transparent);
+    filter: drop-shadow(0 0 calc(2px + var(--cbe-glow, 0.6) * 6px)
+        color-mix(in srgb, var(--cbe-color) 35%, transparent))
+      blur(0);
   }
   50% {
-    box-shadow: 0 0 calc(6px + var(--cbe-glow, 0.6) * 22px)
-      color-mix(in srgb, var(--cbe-color) 70%, transparent);
+    filter: drop-shadow(0 0 calc(6px + var(--cbe-glow, 0.6) * 18px)
+        color-mix(in srgb, var(--cbe-color) 75%, transparent))
+      blur(0);
   }
 }
 
-/* Standard — static border fill in padding gap */
-.bf-cbe[data-cbe-effect="standard"] {
+@keyframes bf-cbe-flicker-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 calc(4px + var(--cbe-glow, 0.6) * 10px)
+      color-mix(in srgb, var(--cbe-color) 60%, transparent));
+  }
+  45% {
+    filter: drop-shadow(0 0 2px color-mix(in srgb, var(--cbe-color) 20%, transparent));
+  }
+  47% {
+    filter: drop-shadow(0 0 calc(8px + var(--cbe-glow, 0.6) * 20px) #ffffffaa);
+  }
+}
+
+/* Standard */
+.bf-cbe[data-cbe-effect="standard"] .bf-cbe__border {
   background: color-mix(in srgb, var(--cbe-color) 85%, white 15%);
 }
 
 /* Neon glow */
-.bf-cbe[data-cbe-effect="neon-glow"] {
+.bf-cbe[data-cbe-effect="neon-glow"] .bf-cbe__border {
   background: var(--cbe-color);
-  animation: bf-cbe-pulse var(--cbe-duration) ease-in-out infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
+  animation: bf-cbe-border-pulse var(--cbe-duration) ease-in-out infinite,
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
 }
 
-/* Snake — bright segment travels the perimeter via conic angle */
-.bf-cbe[data-cbe-effect="snake"] {
+.bf-cbe[data-cbe-effect="neon-glow"] .bf-cbe__glow {
+  background: var(--cbe-color);
+  animation: bf-cbe-border-pulse var(--cbe-duration) ease-in-out infinite;
+}
+
+/* Snake */
+.bf-cbe[data-cbe-effect="snake"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -90,11 +120,22 @@
     transparent 340deg 360deg
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.5) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.4) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="snake"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from var(--cbe-angle),
+    transparent 0deg 300deg,
+    color-mix(in srgb, var(--cbe-color) 55%, transparent) 300deg 340deg,
+    transparent 340deg 360deg
+  );
+  animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite;
 }
 
 /* Dual snake */
-.bf-cbe[data-cbe-effect="dual-snake"] {
+.bf-cbe[data-cbe-effect="dual-snake"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -104,35 +145,64 @@
     var(--cbe-color-2) 320deg 360deg
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.4) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.3) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="dual-snake"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from calc(var(--cbe-angle) + 180deg),
+    transparent 0deg 140deg,
+    color-mix(in srgb, var(--cbe-color-2) 50%, transparent) 140deg 180deg,
+    transparent 180deg 320deg,
+    color-mix(in srgb, var(--cbe-color) 50%, transparent) 320deg 360deg
+  );
+  animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite;
 }
 
 /* Energy flow */
-.bf-cbe[data-cbe-effect="energy-flow"] {
+.bf-cbe[data-cbe-effect="energy-flow"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
     var(--cbe-color),
     var(--cbe-color-2),
-    transparent 25%,
+    transparent 20%,
     var(--cbe-color),
     var(--cbe-color-2),
-    transparent 75%,
+    transparent 70%,
     var(--cbe-color)
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="energy-flow"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from var(--cbe-angle),
+    color-mix(in srgb, var(--cbe-color) 45%, transparent),
+    color-mix(in srgb, var(--cbe-color-2) 45%, transparent),
+    transparent 30%,
+    color-mix(in srgb, var(--cbe-color) 45%, transparent)
+  );
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.15) linear infinite;
 }
 
 /* Pulse */
-.bf-cbe[data-cbe-effect="pulse"] {
+.bf-cbe[data-cbe-effect="pulse"] .bf-cbe__border {
   background: var(--cbe-color);
-  animation: bf-cbe-pulse var(--cbe-duration) ease-in-out infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.3) ease-in-out infinite;
+  animation: bf-cbe-border-pulse var(--cbe-duration) ease-in-out infinite,
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.3) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="pulse"] .bf-cbe__glow {
+  background: var(--cbe-color);
+  animation: bf-cbe-border-pulse var(--cbe-duration) ease-in-out infinite;
 }
 
 /* Lightning */
-.bf-cbe[data-cbe-effect="lightning"] {
+.bf-cbe[data-cbe-effect="lightning"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -141,11 +211,21 @@
     var(--cbe-color) 344deg 360deg
   );
   animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 0.7) linear infinite,
-    bf-cbe-flicker calc(var(--cbe-duration) * 0.35) steps(2, end) infinite;
+    bf-cbe-flicker-glow calc(var(--cbe-duration) * 0.35) steps(2, end) infinite;
+}
+
+.bf-cbe[data-cbe-effect="lightning"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from var(--cbe-angle),
+    transparent 0deg 334deg,
+    color-mix(in srgb, var(--cbe-color) 50%, transparent) 334deg 360deg
+  );
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 0.7) linear infinite;
 }
 
 /* RGB flow */
-.bf-cbe[data-cbe-effect="rgb-flow"] {
+.bf-cbe[data-cbe-effect="rgb-flow"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -156,24 +236,41 @@
     #ff0080
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.6) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.5) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="rgb-flow"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(from var(--cbe-angle), #ff0080, #0070f3, #00dfd8, #ff0080);
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.2) linear infinite;
 }
 
 /* White aura */
-.bf-cbe[data-cbe-effect="white-aura"] {
+.bf-cbe[data-cbe-effect="white-aura"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.15),
     rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.2)
+    rgba(255, 255, 255, 0.15)
   );
   animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 2) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.8) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.8) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="white-aura"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from var(--cbe-angle),
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.1)
+  );
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 2) linear infinite;
 }
 
 /* Particle trail */
-.bf-cbe[data-cbe-effect="particle-trail"] {
+.bf-cbe[data-cbe-effect="particle-trail"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: repeating-conic-gradient(
     from var(--cbe-angle),
@@ -184,11 +281,22 @@
     transparent 24deg 36deg
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.3) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.3) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="particle-trail"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: repeating-conic-gradient(
+    from var(--cbe-angle),
+    transparent 0deg 10deg,
+    color-mix(in srgb, var(--cbe-color) 40%, transparent) 10deg 12deg,
+    transparent 12deg 24deg
+  );
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.2) linear infinite;
 }
 
 /* Liquid chrome */
-.bf-cbe[data-cbe-effect="liquid-chrome"] {
+.bf-cbe[data-cbe-effect="liquid-chrome"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -203,8 +311,14 @@
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite;
 }
 
+.bf-cbe[data-cbe-effect="liquid-chrome"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(from var(--cbe-angle), #a1a1aa, #ffffff, #71717a, #ffffff);
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.1) linear infinite;
+}
+
 /* Cyber scan */
-.bf-cbe[data-cbe-effect="cyber-scan"] {
+.bf-cbe[data-cbe-effect="cyber-scan"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -214,11 +328,21 @@
     transparent 354deg 360deg
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.1) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.1) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="cyber-scan"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(
+    from var(--cbe-angle),
+    transparent 0deg 342deg,
+    color-mix(in srgb, var(--cbe-color-2) 45%, transparent) 342deg 360deg
+  );
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.1) linear infinite;
 }
 
 /* Fire */
-.bf-cbe[data-cbe-effect="fire"] {
+.bf-cbe[data-cbe-effect="fire"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -230,11 +354,17 @@
     #7f1d1d
   );
   animation: bf-cbe-angle-spin var(--cbe-duration) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 0.9) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 0.9) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="fire"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(from var(--cbe-angle), #ef4444, #f97316, #ef4444);
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.05) linear infinite;
 }
 
 /* Ice */
-.bf-cbe[data-cbe-effect="ice"] {
+.bf-cbe[data-cbe-effect="ice"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -245,11 +375,17 @@
     #0c4a6e
   );
   animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.15) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.2) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="ice"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(from var(--cbe-angle), #38bdf8, #e0f2fe, #38bdf8);
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.1) linear infinite;
 }
 
 /* Void */
-.bf-cbe[data-cbe-effect="void"] {
+.bf-cbe[data-cbe-effect="void"] .bf-cbe__border {
   --cbe-angle: 0deg;
   background: conic-gradient(
     from var(--cbe-angle),
@@ -260,11 +396,20 @@
     #090909
   );
   animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.25) linear infinite,
-    bf-cbe-glow-pulse calc(var(--cbe-duration) * 1.4) ease-in-out infinite;
+    bf-cbe-drop-glow calc(var(--cbe-duration) * 1.4) ease-in-out infinite;
+}
+
+.bf-cbe[data-cbe-effect="void"] .bf-cbe__glow {
+  --cbe-angle: 0deg;
+  background: conic-gradient(from var(--cbe-angle), #581c87, #a855f7, #581c87);
+  animation: bf-cbe-angle-spin calc(var(--cbe-duration) * 1.2) linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bf-cbe[data-cbe-effect]:not([data-cbe-effect="none"]):not([data-cbe-effect="standard"]) {
+  .bf-cbe[data-cbe-effect]:not([data-cbe-effect="none"]):not([data-cbe-effect="standard"])
+    .bf-cbe__border,
+  .bf-cbe[data-cbe-effect]:not([data-cbe-effect="none"]):not([data-cbe-effect="standard"])
+    .bf-cbe__glow {
     animation: none !important;
   }
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import { formatLinkHostname, getLinksIconBoxSize } from "@/lib/links";
-import { getCardBorderInnerRadius } from "@/lib/card-border-effects/resolve";
 import { buildLinkAnimationProps, resolveLinkAnimation } from "@/lib/link-animation";
 import { buildLinkIconProps } from "@/lib/link-icon-effects";
 import type { ProfileLink } from "@/lib/types/link";
 import type { ProfileSettings } from "@/lib/types/settings";
 import { LinkIcon } from "@/components/icons/social-icons";
 import { CardBorderEffect } from "@/components/profile/card-border-effect";
+import { cardBorderEffectStripsDefaultBorder } from "@/lib/card-border-effects/resolve";
 import { trackLinkClick } from "./analytics-tracker";
 
 export function ProfileLinkButton({
@@ -23,8 +23,7 @@ export function ProfileLinkButton({
 }) {
   const { animClass, hoverClass, animStyle } = buildLinkAnimationProps(link, settings);
   const iconSize = settings.links_icon_size;
-
-  const linkRadius = getCardBorderInnerRadius(settings, "links");
+  const stripLinkBorder = cardBorderEffectStripsDefaultBorder(settings, "links");
 
   return (
     <CardBorderEffect settings={settings} target="links" borderRadius={settings.border_radius}>
@@ -33,14 +32,17 @@ export function ProfileLinkButton({
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackLinkClick(profileId, link.id)}
-        className={`profile-link group flex items-center justify-between border px-4 py-3 ${animClass} ${hoverClass} ${
+        className={`profile-link group flex items-center justify-between px-4 py-3 ${animClass} ${hoverClass} ${
+          stripLinkBorder ? "" : "border"
+        } ${
           featured ? "border-[var(--bf-accent,#fafafa)]/30 bg-[var(--bf-accent,#fafafa)]/[0.06]" : ""
         }`}
         style={{
           color: link.color ?? settings.text_color,
           backgroundColor: featured ? undefined : (link.background_color ?? "rgba(255,255,255,0.03)"),
-          borderColor: featured ? undefined : `${settings.accent_color}15`,
-          borderRadius: linkRadius,
+          borderColor: stripLinkBorder ? undefined : featured ? undefined : `${settings.accent_color}15`,
+          border: stripLinkBorder ? "none" : undefined,
+          borderRadius: settings.border_radius,
           ...animStyle,
         }}
       >

@@ -15,7 +15,6 @@ import { BRAND } from "@/lib/design/tokens";
 import { clampLinksIconSize } from "@/lib/links";
 import {
   cardBorderEffectStripsDefaultBorder,
-  getCardBorderInnerRadius,
   parseCardBorderTargets,
 } from "@/lib/card-border-effects/resolve";
 import { clampCursorImageSize } from "@/lib/profile/custom-cursor";
@@ -534,12 +533,9 @@ export function buildCardStyle(settings: ProfileSettings): Record<string, string
   const opacity = settings.profile_opacity / 100;
   const blur = settings.profile_blur;
   const borderHandledExternally = cardBorderEffectStripsDefaultBorder(settings, "main");
-  const cardRadius = borderHandledExternally
-    ? getCardBorderInnerRadius(settings, "main")
-    : settings.border_radius;
 
   const base: Record<string, string | number | undefined> = {
-    borderRadius: cardRadius,
+    borderRadius: settings.border_radius,
     border:
       settings.hide_card_border || borderHandledExternally
         ? "none"

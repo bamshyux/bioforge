@@ -12,9 +12,21 @@ import {
 import { getEmbedIframeSrc } from "@/lib/embeds/parse";
 import { isRobloxLinkEmbed, robloxEmbedLinkLabel } from "@/lib/embeds/roblox-profile";
 import { CardBorderEffect } from "@/components/profile/card-border-effect";
+import { cardBorderEffectStripsDefaultBorder } from "@/lib/card-border-effects/resolve";
+import type { CardBorderTarget } from "@/lib/card-border-effects/types";
 
 function isSpotifyEmbed(embedType: ProfileEmbed["embed_type"]) {
   return embedType === "spotify_track" || embedType === "spotify_playlist";
+}
+
+function embedStyleWithBorderEffect(
+  settings: ProfileSettings,
+  config: ProfileEmbed["config"],
+  target: CardBorderTarget,
+) {
+  const style = embedCardStyle(config, settings.accent_color);
+  if (!cardBorderEffectStripsDefaultBorder(settings, target)) return style;
+  return { ...style, border: "none", boxShadow: "none" };
 }
 
 function GenericLinkCard({
@@ -76,7 +88,7 @@ function RobloxCard({
 }) {
   const config = embed.config;
   const title = resolveEmbedTitle(embed);
-  const style = embedCardStyle(config, settings.accent_color);
+  const style = embedStyleWithBorderEffect(settings, config, "roblox");
   const isProfile = embed.embed_type === "roblox_profile";
   const imageUrl = isProfile ? config.avatar_url : config.thumbnail_url;
   const showImage = isProfile ? config.show_avatar : config.show_thumbnail;
@@ -139,7 +151,9 @@ function IframeEmbed({
   if (!src) return null;
 
   const title = resolveEmbedTitle(embed);
-  const style = embedCardStyle(config, settings.accent_color);
+  const style = isSpotifyEmbed(embed.embed_type)
+    ? embedStyleWithBorderEffect(settings, config, "spotify")
+    : embedCardStyle(config, settings.accent_color);
   const ratioClass = aspectRatioClass(config.aspect_ratio);
   const ratioStyle = aspectRatioStyle(config.aspect_ratio, config.compact_player);
 

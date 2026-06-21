@@ -96,7 +96,6 @@ export function resolveCardBorderEffect(
     style: {
       "--cbe-radius": `${radius}px`,
       "--cbe-thickness": `${thickness}px`,
-      "--cbe-inner-radius": `${Math.max(0, radius - thickness)}px`,
       "--cbe-duration": `${speedToDuration(config.speed)}s`,
       "--cbe-glow": String(glow),
       "--cbe-color": config.color,
