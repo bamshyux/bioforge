@@ -11,7 +11,8 @@
   display: block;
   width: 100%;
   border-radius: var(--cbe-radius, 12px);
-  isolation: isolate;
+  overflow: visible;
+  transform-style: preserve-3d;
 }
 
 .bf-cbe__inner {
@@ -19,6 +20,8 @@
   z-index: 1;
   width: 100%;
   border-radius: var(--cbe-radius, 12px);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Shared ring mask — only the padding band is visible (true border outline) */
@@ -41,10 +44,14 @@
 
 .bf-cbe__border {
   z-index: 3;
+  transform: translateZ(2px);
+  backface-visibility: hidden;
 }
 
 .bf-cbe__glow {
   z-index: 2;
+  transform: translateZ(1px);
+  backface-visibility: hidden;
   opacity: calc(0.3 + var(--cbe-glow, 0.6) * 0.55);
   filter: blur(calc(2px + var(--cbe-glow, 0.6) * 8px));
 }

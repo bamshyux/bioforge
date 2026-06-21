@@ -922,7 +922,7 @@ export function PublicProfileClient({
               settings.page_entrance ? "bf-page-entrance" : ""
             }`}
           >
-            <div className="mx-auto w-full max-w-2xl">
+            <div className="mx-auto w-full max-w-2xl overflow-visible">
               <ProfileCardLayoutEditor
                 settings={settings}
                 isOwner={isOwner}

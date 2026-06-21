@@ -36,8 +36,8 @@ export function ProfileParallaxCard({
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="transition-transform duration-300 ease-out will-change-transform"
-      style={{ transform }}
+      className="profile-parallax-card overflow-visible transition-transform duration-300 ease-out will-change-transform"
+      style={{ transform, transformStyle: "preserve-3d" }}
     >
       {children}
     </div>

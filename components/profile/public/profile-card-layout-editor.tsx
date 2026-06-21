@@ -282,6 +282,8 @@ export function ProfileCardLayoutEditor({
     [bindResizeListeners],
   );
 
+  const clipOverflow = layout.maxHeight > 0 && !parallaxEnabled;
+
   const wrapperStyle = {
     ...getCardLayoutStyle({
       ...settings,
@@ -290,22 +292,21 @@ export function ProfileCardLayoutEditor({
       card_width: layout.width,
       card_max_height: layout.maxHeight,
     }),
-    ...(layout.maxHeight > 0
-      ? { height: layout.maxHeight, overflow: "hidden" as const }
-      : undefined),
+    ...(clipOverflow ? { height: layout.maxHeight, overflow: "hidden" as const } : { overflow: "visible" as const }),
   };
 
   if (!isOwner) {
+    const viewClipOverflow = settings.card_max_height > 0 && !parallaxEnabled;
     const viewStyle = {
       ...getCardLayoutStyle(settings),
-      ...(settings.card_max_height > 0
+      ...(viewClipOverflow
         ? { height: settings.card_max_height, overflow: "hidden" as const }
-        : undefined),
+        : { overflow: "visible" as const }),
     };
 
     return (
-      <div className="mx-auto w-full" style={viewStyle}>
-        <ProfileCardHeightScaler maxHeight={settings.card_max_height}>
+      <div className="mx-auto w-full overflow-visible" style={viewStyle}>
+        <ProfileCardHeightScaler maxHeight={settings.card_max_height} parallaxEnabled={parallaxEnabled}>
           <ProfileParallaxCard enabled={!!parallaxEnabled}>{children}</ProfileParallaxCard>
         </ProfileCardHeightScaler>
       </div>
@@ -344,7 +345,7 @@ export function ProfileCardLayoutEditor({
       <div
         ref={containerRef}
         data-card-editor-root=""
-        className={`relative mx-auto w-full ${editMode ? "group/card-edit" : ""}`}
+        className={`relative mx-auto w-full overflow-visible ${editMode ? "group/card-edit" : ""}`}
         style={wrapperStyle}
       >
         {editMode && (
@@ -416,7 +417,7 @@ export function ProfileCardLayoutEditor({
             />
           </>
         )}
-        <ProfileCardHeightScaler maxHeight={layout.maxHeight}>
+        <ProfileCardHeightScaler maxHeight={layout.maxHeight} parallaxEnabled={parallaxEnabled}>
           <ProfileParallaxCard enabled={!!parallaxEnabled && !editMode}>{children}</ProfileParallaxCard>
         </ProfileCardHeightScaler>
       </div>

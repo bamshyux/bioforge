@@ -66,9 +66,11 @@ function measureNaturalContentHeight(content: HTMLElement) {
 
 export function ProfileCardHeightScaler({
   maxHeight,
+  parallaxEnabled = false,
   children,
 }: {
   maxHeight: number;
+  parallaxEnabled?: boolean;
   children: React.ReactNode;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -94,15 +96,16 @@ export function ProfileCardHeightScaler({
   }, [maxHeight, children]);
 
   const constrained = maxHeight > 0 && metrics.boxHeight !== undefined && metrics.scale < 1;
+  const clipOverflow = constrained && !parallaxEnabled;
 
   return (
     <div
-      className="profile-card-height-scaler"
+      className="profile-card-height-scaler overflow-visible"
       style={
         constrained
           ? {
               height: metrics.boxHeight,
-              overflow: "hidden",
+              overflow: clipOverflow ? "hidden" : "visible",
               position: "relative",
             }
           : undefined
