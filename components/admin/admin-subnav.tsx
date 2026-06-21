@@ -9,6 +9,7 @@ const ADMIN_LINKS = [
   { href: "/dashboard/admin/badges", label: "Badges" },
   { href: "/dashboard/admin/moderation", label: "Moderation" },
   { href: "/dashboard/admin/announcements", label: "Announcements" },
+  { href: "/dashboard/admin/updates", label: "Updates" },
   { href: "/dashboard/admin/notifications", label: "Notifications" },
   { href: "/dashboard/admin/security", label: "Security" },
   { href: "/dashboard/admin/premium", label: "Premium" },

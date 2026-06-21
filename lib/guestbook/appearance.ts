@@ -28,12 +28,11 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 
 function buildGuestbookCardStyle(settings: ProfileSettings): Record<string, string | number> {
   const borderRadius = settings.border_radius;
-  const borderHandledExternally = cardBorderEffectStripsDefaultBorder(settings, "guestbook");
 
   const base: Record<string, string | number> = {
     borderRadius,
-    border: borderHandledExternally ? "none" : "1px solid rgba(255,255,255,0.06)",
-    boxShadow: borderHandledExternally ? "none" : "0 8px 32px rgba(0,0,0,0.4)",
+    border: "none",
+    boxShadow: "none",
   };
 
   if (!settings.guestbook_show_background) {
@@ -93,6 +92,12 @@ export function resolveGuestbookAppearance(settings: ProfileSettings): {
     : buildGuestbookCardStyle(settings);
 
   if (cardBorderEffectStripsDefaultBorder(settings, "guestbook")) {
+    cardStyle.border = "none";
+    cardStyle.boxShadow = "none";
+  }
+
+  // Guestbook border style controls decorative borders via CSS — never the default card outline.
+  if (borderStyle === "none" || !settings.guestbook_use_profile_card) {
     cardStyle.border = "none";
     cardStyle.boxShadow = "none";
   }

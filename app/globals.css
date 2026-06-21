@@ -799,6 +799,193 @@ body {
   color: color-mix(in srgb, var(--bf-accent) 55%, rgba(255, 255, 255, 0.4));
 }
 
+/* Platform updates — upper-left widget */
+.bf-platform-updates {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+}
+
+.bf-platform-updates__trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  background: rgba(12, 12, 12, 0.72);
+  color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.bf-platform-updates__trigger:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(18, 18, 18, 0.88);
+  color: #fff;
+}
+
+.bf-platform-updates__badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0a0a0a;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-align: center;
+}
+
+.bf-platform-updates__badge--pulse {
+  animation: bf-platform-updates-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes bf-platform-updates-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+}
+
+.bf-platform-updates__panel {
+  position: absolute;
+  top: calc(100% + 0.625rem);
+  left: 0;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(28rem, calc(100vh - 6rem));
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  background: rgba(10, 10, 10, 0.94);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.bf-platform-updates__panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bf-platform-updates__panel-icon,
+.bf-platform-updates__item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.82);
+  flex-shrink: 0;
+}
+
+.bf-platform-updates__panel-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.bf-platform-updates__panel-subtitle {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.bf-platform-updates__list {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bf-platform-updates__item {
+  padding: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bf-platform-updates__item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.bf-platform-updates__item-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.bf-platform-updates__new {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.4375rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.bf-platform-updates__item-image-wrap {
+  margin-top: 0.75rem;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bf-platform-updates__item-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 10rem;
+  object-fit: cover;
+}
+
+.bf-platform-updates__item-body {
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: pre-wrap;
+}
+
+.bf-platform-updates__item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.34);
+}
+
 @keyframes bf-unsaved-notice-in {
   from {
     opacity: 0;

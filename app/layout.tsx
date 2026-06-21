@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { DiscordCommunityPromo } from "@/components/discord/discord-community-promo";
+import { PlatformUpdateShell } from "@/components/platform-updates/platform-update-shell";
 import { GlobalSiteBanner } from "@/components/admin/global-site-banner";
 import { AuthHashRecoveryRedirect } from "@/components/auth/auth-hash-recovery-redirect";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
@@ -40,6 +41,7 @@ export default async function RootLayout({
           <SchemaErrorBanner message={schema.message} missing={schema.missing} />
         )}
         <GlobalSiteBanner />
+        <PlatformUpdateShell />
         {children}
         <ScrollToTopButton />
         <CookieConsentBanner />
