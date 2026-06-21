@@ -242,7 +242,7 @@ export function DiscordStatusCard({
         style={appearance.headerStyle}
       >
         {config.show_avatar && presence.avatarUrl ? (
-          <div className="relative shrink-0">
+          <div className="profile-discord-status__avatar relative shrink-0">
             <img
               src={presence.avatarUrl}
               alt=""
