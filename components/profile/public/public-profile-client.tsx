@@ -937,6 +937,7 @@ export function PublicProfileClient({
                         settings={settings}
                         target="main"
                         borderRadius={settings.border_radius}
+                        className="w-full"
                       >
                         <Layout {...layoutProps} />
                       </CardBorderEffect>

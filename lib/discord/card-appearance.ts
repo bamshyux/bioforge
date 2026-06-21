@@ -57,6 +57,28 @@ function radiusClass(radius: DiscordCardRadius, pillWithActivity: boolean) {
   }
 }
 
+/** Pixel radius for card border effects — matches Tailwind classes on the Discord shell. */
+export function resolveDiscordCardBorderRadiusPx(
+  config: DiscordCardConfig,
+  options?: { hasActivity?: boolean },
+): number {
+  const hasActivity = options?.hasActivity === true;
+  const pillWithActivity = config.style === "pill" && hasActivity;
+  if (pillWithActivity) return 24;
+
+  const radius = config.style === "pill" ? "pill" : config.border_radius;
+  switch (radius) {
+    case "sharp":
+      return 0;
+    case "round":
+      return 16;
+    case "pill":
+      return 9999;
+    default:
+      return 8;
+  }
+}
+
 function widthClass(width: DiscordCardWidth) {
   switch (width) {
     case "narrow":

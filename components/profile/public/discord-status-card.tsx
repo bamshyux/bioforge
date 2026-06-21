@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { getActivityTypeLabel, pickActivityImageUrl } from "@/lib/discord/activity-images";
-import { resolveDiscordCardAppearance } from "@/lib/discord/card-appearance";
+import { resolveDiscordCardAppearance, resolveDiscordCardBorderRadiusPx } from "@/lib/discord/card-appearance";
 import { resolveDiscordCardConfig } from "@/lib/discord/card-config";
 import { getDiscordStatusColor, getDiscordStatusLabel } from "@/lib/discord/status-colors";
 import type { DiscordActivity, DiscordPresence } from "@/lib/discord/types";
@@ -8,6 +8,7 @@ import { resolveDiscordDisplayName } from "@/lib/discord/resolve-profile";
 import { DISCORD_LANYARD_INVITE_URL } from "@/lib/discord/messages";
 import { DiscordProfileBadges } from "@/components/profile/public/discord-profile-badges";
 import { CardBorderEffect } from "@/components/profile/card-border-effect";
+import { cardBorderEffectStripsDefaultBorder } from "@/lib/card-border-effects/resolve";
 import type { DiscordCardConfig } from "@/lib/types/discord-widget";
 import type { ProfileSettings } from "@/lib/types/settings";
 
@@ -202,16 +203,38 @@ export function DiscordStatusCard({
     previewActivity && !presence.spotify && !presence.activity
       ? { song: "Midnight City", artist: "M83", albumArtUrl: null as string | null }
       : null;
+  const stripCardBorder = cardBorderEffectStripsDefaultBorder(settings, "discord");
+  const discordBorderRadius = resolveDiscordCardBorderRadiusPx(config, {
+    hasActivity: hasActivityContent,
+  });
+  const shellStyle: CSSProperties = {
+    ...appearance.shellStyle,
+    ...appearance.cardFontStyle,
+    ...(stripCardBorder
+      ? {
+          borderWidth: 0,
+          borderStyle: undefined,
+          borderColor: undefined,
+          boxShadow: undefined,
+        }
+      : {}),
+  };
 
   return (
-    <CardBorderEffect settings={settings} target="discord" borderRadius={settings.border_radius}>
-      <div
-        className={`profile-discord-status bf-profile-block mb-5 w-full ${appearance.shellOverflowClass} ${appearance.maxWidthClass} ${appearance.cardAlignClass} ${appearance.shellClass}`}
-        style={{ ...appearance.shellStyle, ...appearance.cardFontStyle }}
-        data-discord-header-layout={appearance.dataAttributes.headerLayout}
-      data-discord-text-align={appearance.dataAttributes.textAlign}
-      data-discord-card-align={appearance.dataAttributes.cardAlign}
-    >
+    <div className="bf-profile-block mb-5 w-full">
+      <CardBorderEffect
+        settings={settings}
+        target="discord"
+        borderRadius={discordBorderRadius}
+        className={`${appearance.maxWidthClass} ${appearance.cardAlignClass} w-full`}
+      >
+        <div
+          className={`profile-discord-status w-full ${appearance.shellOverflowClass} ${appearance.shellClass}`}
+          style={shellStyle}
+          data-discord-header-layout={appearance.dataAttributes.headerLayout}
+          data-discord-text-align={appearance.dataAttributes.textAlign}
+          data-discord-card-align={appearance.dataAttributes.cardAlign}
+        >
       <div
         className={`profile-discord-status__header flex items-center ${appearance.headerClass}`}
         style={appearance.headerStyle}
@@ -329,7 +352,8 @@ export function DiscordStatusCard({
           accentColor={appearance.accentColor}
         />
       ) : null}
-      </div>
-    </CardBorderEffect>
+        </div>
+      </CardBorderEffect>
+    </div>
   );
 }
