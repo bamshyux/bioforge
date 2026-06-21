@@ -6,16 +6,19 @@ import type { PlatformUpdate } from "@/lib/types/platform-update";
 
 const SEEN_STORAGE_KEY = "bf_platform_updates_seen_at";
 
-function YieldUpdateIcon({ className }: { className?: string }) {
+function YieldUpdateIcon({
+  className,
+  filled = false,
+}: {
+  className?: string;
+  filled?: boolean;
+}) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
       <path
         d="M12 3.25 3.5 19.25h17L12 3.25Z"
+        fill={filled ? "currentColor" : "none"}
+        fillOpacity={filled ? 0.22 : undefined}
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinejoin="round"
@@ -23,10 +26,10 @@ function YieldUpdateIcon({ className }: { className?: string }) {
       <path
         d="M12 9.5v4.25"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="1.85"
         strokeLinecap="round"
       />
-      <circle cx="12" cy="16.75" r="0.9" fill="currentColor" />
+      <circle cx="12" cy="16.75" r="1" fill="currentColor" />
     </svg>
   );
 }
@@ -112,16 +115,19 @@ export function PlatformUpdateWidget({ updates }: { updates: PlatformUpdate[] })
   if (updates.length === 0) return null;
 
   return (
-    <div className="bf-platform-updates">
+    <div className={`bf-platform-updates${unreadCount > 0 ? " bf-platform-updates--unread" : ""}`}>
       <button
         ref={buttonRef}
         type="button"
         onClick={toggleOpen}
-        className="bf-platform-updates__trigger"
+        className={`bf-platform-updates__trigger${unreadCount > 0 ? " bf-platform-updates__trigger--unread" : ""}${open ? " bf-platform-updates__trigger--open" : ""}`}
         aria-label={`Platform updates${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
         aria-expanded={open}
       >
-        <YieldUpdateIcon className="h-4 w-4" />
+        <span className="bf-platform-updates__trigger-icon" aria-hidden>
+          <YieldUpdateIcon className="h-5 w-5" filled />
+        </span>
+        <span className="bf-platform-updates__trigger-label">Update</span>
         {unreadCount > 0 ? (
           <span className="bf-platform-updates__badge bf-platform-updates__badge--pulse" aria-hidden>
             {unreadCount > 9 ? "9+" : unreadCount}

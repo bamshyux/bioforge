@@ -9,6 +9,7 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EmailVerificationBanner } from "@/components/dashboard/email-verification-banner";
 import { ProfilePresetQuickSave } from "@/components/dashboard/profile-presets/profile-preset-quick-save";
 import { ViewLiveProfileButton } from "@/components/dashboard/view-live-profile-button";
+import { PlatformUpdateShell } from "@/components/platform-updates/platform-update-shell";
 import { getOnboardingState } from "@/lib/data/onboarding";
 import { getProfileByUserId } from "@/lib/data/profiles";
 import { resolveAppliedPresetId } from "@/lib/data/profile-presets";
@@ -69,6 +70,8 @@ export default async function DashboardLayout({
       {needsEmailVerification && userData.user?.email ? (
         <EmailVerificationBanner email={userData.user.email} />
       ) : null}
+
+      <PlatformUpdateShell />
 
       <DashboardShell
         needsSetupWizard={onboarding.needsSetupWizard}

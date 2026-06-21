@@ -19,6 +19,7 @@ import { HomeRoadmap } from "@/components/home/home-roadmap";
 import { HomeTestimonials } from "@/components/home/home-testimonials";
 import { HomeWhyChoose } from "@/components/home/home-why-choose";
 import { HumanVerificationGate } from "@/components/security/human-verification-gate";
+import { PlatformUpdateShell } from "@/components/platform-updates/platform-update-shell";
 import {
   getFeaturedProfiles,
   getFloatingProfileCards,
@@ -79,6 +80,7 @@ export default async function Home() {
       </header>
 
       <main className="relative z-10">
+        <PlatformUpdateShell />
         <section className="relative mx-auto max-w-6xl px-6 pb-16 pt-20 text-center sm:pt-28">
           <HomeFloatingCards profiles={floatingProfiles} />
 
