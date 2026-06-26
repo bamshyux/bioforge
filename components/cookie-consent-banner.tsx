@@ -1,17 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getCookieConsent, setCookieConsent } from "@/lib/analytics/consent";
+import { isPublicProfilePath } from "@/lib/profile";
 
 export function CookieConsentBanner() {
+  const pathname = usePathname();
+  const onPublicProfile = isPublicProfilePath(pathname);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (onPublicProfile) {
+      setVisible(false);
+      return;
+    }
     setVisible(getCookieConsent() === null);
-  }, []);
+  }, [pathname, onPublicProfile]);
 
-  if (!visible) return null;
+  if (onPublicProfile || !visible) return null;
 
   function accept(level: "all" | "essential") {
     setCookieConsent(level);
